@@ -1,0 +1,29 @@
+{
+    "hint": "Car Maker",
+    "values": [
+        "Alfa Romeo",
+        "Audi",
+        "BMW",
+        "Buick",
+        "Cadillac",
+        "Chevrolet",
+        "Chrysler",
+        "Dodge",
+        "Ford",
+        "Honda",
+        "Hyundai",
+        "Jaguar",
+        "Jeep",
+        "Kia",
+        "Lexus",
+        "Lincoln",
+        "Mazda",
+        "Mercedes Benz",
+        "Mini",
+        "Nissan",
+        "Porsche",
+        "Tesla",
+        "TOYOTA",
+        "Volkswagen"
+    ]
+}
