@@ -84,13 +84,13 @@ class GameState extends GameBlocState {
     revealed = BitArray(value.length);
     whiteSpace = BitArray(value.length);
 
-    Iterable<int>.generate(value.length).forEach((index) {
-      // symbols not in the symbolset are revealed and displayed as WS
+    for (var index in Iterable<int>.generate(value.length)) {
+      // symbols not in the symbolSet are revealed and displayed as WS
       if (!symbolSet.contains(value[index])) {
         revealed.setBit(index);
         whiteSpace.setBit(index);
       }
-    });
+    }
   }
 
   void reveal(String symbol) {
@@ -137,8 +137,8 @@ class GameState extends GameBlocState {
     }
 
     log("revealed: ${revealed.toBinaryString()}");
-    log("correct: ${correctCount}");
-    log("errors: ${errorCount}");
+    log("correct: $correctCount");
+    log("errors: $errorCount");
 
     return true;
   }

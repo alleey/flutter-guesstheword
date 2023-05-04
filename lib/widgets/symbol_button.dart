@@ -27,7 +27,7 @@ class SymbolButton extends StatelessWidget {
         color: backgroundColor,
       ),
       child: Padding(
-        padding: EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
@@ -35,7 +35,7 @@ class SymbolButton extends StatelessWidget {
             color: foregroundColor,
           ),
           child: Padding(
-            padding: EdgeInsets.all(4),
+            padding: const EdgeInsets.all(4),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: backgroundColor,
@@ -47,7 +47,7 @@ class SymbolButton extends StatelessWidget {
               },
               child: Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),

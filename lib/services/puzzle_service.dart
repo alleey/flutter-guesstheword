@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
@@ -11,7 +11,7 @@ import 'data_service.dart';
 
 class PuzzleService {
   final DataService dataService;
-  final _random = Math.Random();
+  final _random = math.Random();
 
   PuzzleService({required this.dataService});
 
@@ -45,11 +45,11 @@ class PuzzleService {
   Future<void> importPuzzles(String fileName) async {
 
     final appDataService = AppDataService(dataService: dataService);
-    final key = "${fileName}.imported";
+    final key = "$fileName.imported";
     final alreadyImported = appDataService.getFlag(key);
 
     if (alreadyImported ?? false) {
-      log("${fileName} already imported");
+      log("$fileName already imported");
       return;
     }
 

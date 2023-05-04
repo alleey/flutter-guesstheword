@@ -1,9 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:flutter/services.dart';
-
-import '../models/puzzle.dart';
 import 'data_service.dart';
 
 class AppDataService {
@@ -16,14 +10,15 @@ class AppDataService {
   }
 
   bool? getFlag(String key) {
-    final flags = dataService.appDataBox.get("flags", defaultValue: Map());
-    if (!flags!.containsKey(key))
+    final flags = dataService.appDataBox.get("flags", defaultValue: {});
+    if (!flags!.containsKey(key)) {
       return null;
-    return flags![key];
+    }
+    return flags[key];
   }
 
   Future putFlag(String key, bool value) async {
-    final flags = dataService.appDataBox.get("flags", defaultValue: Map());
+    final flags = dataService.appDataBox.get("flags", defaultValue: {});
     flags![key] = value;
     await dataService.appDataBox.put("flags", flags);
   }

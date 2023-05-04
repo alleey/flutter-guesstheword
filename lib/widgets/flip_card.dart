@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,11 +10,12 @@ class FlipCard extends StatelessWidget {
   final int durationMs;
 
   const FlipCard({
+    super.key,
     required this.showFront,
     required this.frontCard,
     required this.backCard,
     this.durationMs = 800,
-    this.transitionBuilder = null,
+    this.transitionBuilder,
   });
 
   @override

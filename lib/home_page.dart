@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,7 +19,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
         backgroundColor: Constants.colorBackground,
         appBar: AppBar(
-          title: Text("Guess The Word"),
+          title: const Text("Guess The Word"),
           actions: [
             IconButton(
               icon: const Icon(Icons.show_chart),
@@ -45,6 +43,6 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        body: PuzzlePage());
+        body: const PuzzlePage());
   }
 }

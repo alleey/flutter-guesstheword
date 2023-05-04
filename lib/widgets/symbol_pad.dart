@@ -1,6 +1,5 @@
 import 'package:bit_array/bit_array.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 import '../common/constants.dart';
 import 'flip_card.dart';
@@ -25,12 +24,8 @@ class SymbolPad extends StatefulWidget {
     required this.onSelect
   }) :  assert(frontSymbols.length == backSymbols.length) {
 
-    if (flipped == null) {
-      flipped = BitArray(frontSymbols.length);
-    }
-    if (whiteSpace == null) {
-      whiteSpace = BitArray(frontSymbols.length);
-    }
+    flipped = flipped ?? BitArray(frontSymbols.length);
+    whiteSpace = whiteSpace ?? BitArray(frontSymbols.length);
   }
 
   final String frontSymbols;
@@ -70,7 +65,7 @@ class _SymbolPadState extends State<SymbolPad> {
         children: Iterable<int>.generate(symbolList.length)
           .map((index) {
             if (widget.whiteSpace![index]) {
-              return SizedBox(width: 20,);
+              return const SizedBox(width: 20,);
             }
             return _buildCard(context, index);
           })

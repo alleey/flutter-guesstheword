@@ -18,22 +18,22 @@ class AlertsService {
       desc: desc,
       buttons: [
         DialogButton(
-          child: Text(
-            "Yes",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
           onPressed: () {
             callback?.call();
             Navigator.pop(context);
           },
-          color: Color.fromRGBO(0, 179, 134, 1.0),
+          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          child: const Text(
+            "Yes",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
         ),
         DialogButton(
-            child: Text(
+          onPressed: () => Navigator.pop(context),
+            child: const Text(
               "No",
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
-            onPressed: () => Navigator.pop(context)
         )
       ],
     );
@@ -52,15 +52,15 @@ class AlertsService {
       desc: desc,
       buttons: [
         DialogButton(
-          child: Text(
-            "Continue",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
           onPressed: () {
             callback?.call();
             Navigator.pop(context);
           },
-          color: Color.fromRGBO(0, 179, 134, 1.0),
+          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          child: const Text(
+            "Continue",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
         )
       ],
     );
@@ -94,14 +94,14 @@ class AlertsService {
       ),
       buttons: [
         DialogButton(
-          child: Text(
-            "Close",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
           onPressed: () {
             Navigator.pop(context);
           },
-          color: Color.fromRGBO(0, 179, 134, 1.0),
+          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          child: const Text(
+            "Close",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
         ),
       ],
     );

@@ -69,7 +69,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           if (state is GameState) {
             return _buildLayout(context, state);
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         });
   }
 
@@ -117,40 +117,39 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                state.isWin ? "\u{2713} Correct" : "Incorrect",
-                style: TextStyle(
-                  fontSize: 64,
-                  color: state.isWin ? Colors.yellow : Colors.redAccent,
-                ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              state.isWin ? "\u{2713} Correct" : "Incorrect",
+              style: TextStyle(
+                fontSize: 64,
+                color: state.isWin ? Colors.yellow : Colors.redAccent,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      side: BorderSide(width: 5, color: Colors.white70),
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      padding: EdgeInsets.all(20)
-                    ),
-                    onPressed: () {
-                      startPuzzle();
-                    },
-                    child: Text(
-                      "Go Next",
-                      style: TextStyle(fontSize: 24)
-                    )
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    side: const BorderSide(width: 5, color: Colors.white70),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.all(20)
+                  ),
+                  onPressed: () {
+                    startPuzzle();
+                  },
+                  child: const Text(
+                    "Go Next",
+                    style: TextStyle(fontSize: 24)
                   )
-                ],
-              )
-            ],
-        )),
+                )
+              ],
+            )
+          ],
+        ),
       ],
     );
   }
@@ -159,18 +158,17 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: Iterable<int>.generate(Constants.maxErrors)
-              .map((e) => FlipCard(
-                showFront: (e > (state.errorCount - 1)),
-                backCard: Icon(Icons.heart_broken, size: 64, color: Colors.grey),
-                frontCard: Icon(Icons.favorite, size: 64, color: Colors.red),
-                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-              ))
-              .toList(),
-        )),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: Iterable<int>.generate(Constants.maxErrors)
+            .map((e) => FlipCard(
+              showFront: (e > (state.errorCount - 1)),
+              backCard: const Icon(Icons.heart_broken, size: 64, color: Colors.grey),
+              frontCard: const Icon(Icons.favorite, size: 64, color: Colors.red),
+              transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+            ))
+            .toList(),
+        ),
       ],
     );
   }
@@ -181,15 +179,15 @@ class _PuzzlePageState extends State<PuzzlePage> {
       children: [
         Text(
           "SCORE: ${state.score.value}",
-          style: TextStyle(fontSize: 36, color: Constants.colorForeground),
+          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
         ),
         Text(
           "WON: ${state.score.wins}",
-          style: TextStyle(fontSize: 36, color: Constants.colorForeground),
+          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
         ),
         Text(
           "LOST: ${state.score.losses}",
-          style: TextStyle(fontSize: 36, color: Constants.colorForeground),
+          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
         ),
       ],
     );
@@ -202,13 +200,13 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Text(
           "${state.hint} ?",
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 32,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 2,
         ),
         Padding(
@@ -239,7 +237,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       padding: const EdgeInsets.all(4.0),
       child: Column(
         children: [
-          Text(
+          const Text(
             "Pick you letters wisely \u{2193}",
             textAlign: TextAlign.center,
             style: TextStyle(
