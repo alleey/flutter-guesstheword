@@ -45,7 +45,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
             case ResetState:
               startPuzzle(); break;
             case PuzzleStartState:
-              audioService.play("audio/start.mp3"); break;
+              audioService.play("audio/start.mp3");
+              if (Constants.enableInitialReveal) {
+                bloc.add(RequestHintEvent());
+              }
+              break;
             case InputMatchState:
               audioService.play("audio/match.mp3"); break;
             case InputMismatchState:

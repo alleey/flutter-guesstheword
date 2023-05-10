@@ -31,13 +31,24 @@ class HomePage extends StatelessWidget {
               icon: const Icon(Icons.refresh),
               onPressed: () {
                 AlertsService().askYesNo(
-                  context,
-                  title: "RESET GAME",
-                  desc: dataLossWarning,
-                  callback: () {
-                    final bloc = BlocProvider.of<GameBloc>(context);
-                    bloc.add(ResetGameEvent());
-                  }
+                    context,
+                    title: "RESET GAME",
+                    desc: dataLossWarning,
+                    callback: () {
+                      final bloc = BlocProvider.of<GameBloc>(context);
+                      bloc.add(ResetGameEvent());
+                    }
+                ).show();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.help_center_outlined),
+              onPressed: () {
+                AlertsService().show(
+                    context,
+                    title: "Guess The Word",
+                    desc: "Version: ${Constants.appVersion}",
+                    callback: () {}
                 ).show();
               },
             ),

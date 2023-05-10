@@ -1,8 +1,11 @@
 
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:bit_array/bit_array.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guess_the_word/models/puzzle.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
@@ -17,6 +20,7 @@ abstract class GameBlocEvent {}
 
 class ResetGameEvent extends GameBlocEvent {}
 class StartPuzzleEvent extends GameBlocEvent {}
+class RequestHintEvent extends GameBlocEvent {}
 class UserInputEvent extends GameBlocEvent {
   final String symbol;
   UserInputEvent(this.symbol);
@@ -73,7 +77,7 @@ class GameState extends GameBlocState {
   late bool lastInputError;
   late Score score;
 
-  bool get isWin => correctCount >= value.length;
+  bool get isWin => correctCount >= (value.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
 
@@ -86,11 +90,40 @@ class GameState extends GameBlocState {
 
     for (var index in Iterable<int>.generate(value.length)) {
       // symbols not in the symbolSet are revealed and displayed as WS
-      if (!symbolSet.contains(value[index])) {
+      var symbol = value[index];
+      if (!symbolSet.contains(symbol)) {
         revealed.setBit(index);
         whiteSpace.setBit(index);
       }
     }
+  }
+
+  List<String> randomReveal() {
+
+    final histogram = <String,int>{};
+    for (var index in Iterable<int>.generate(value.length)) {
+      var symbol = value[index];
+      if (symbolSet.contains(symbol) && !revealed[index]) {
+        if (!histogram.containsKey(symbol))
+          histogram[symbol] = 0;
+        histogram[symbol] = histogram[symbol]! + 1;
+      }
+    }
+
+    return leastUsedSymbols(histogram);
+  }
+
+  List<String> leastUsedSymbols(Map<String, int> leastUsed) {
+    final en = leastUsed.entries.toList();
+    en.sort((a,b)  {
+      return a.value.compareTo(b.value);
+    });
+    final least = en
+        .where((e) => e.value == en[0].value)
+        .map((e) => e.key)
+        .toList();
+    least.shuffle();
+    return least;
   }
 
   void reveal(String symbol) {
@@ -165,7 +198,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
     on<StartPuzzleEvent>((event, emit) async {
       
-      final p = await puzzleService.popOne();
+      //final p = await puzzleService.popOne();
+      final p = Puzzle(hint: "A character", value: "Minnie Mouse");
       if (p == null) {
         emit(NoMorePuzzleState());
         return;
@@ -192,6 +226,18 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         emit(gameState.lastInputError ? InputMismatchState() : InputMatchState());
         emit(GameState.clone(gameState));
       }
+    });
+
+
+    on<RequestHintEvent>((event, emit) async {
+
+      final leastUsed = gameState.randomReveal();
+      for(var i =0; i < math.min(Constants.maxInitialReveal, leastUsed.length); i++) {
+        gameState.reveal(leastUsed[i]);
+      }
+
+      emit(InputMatchState());
+      emit(GameState.clone(gameState));
     });
   }
 }

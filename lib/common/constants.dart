@@ -14,4 +14,7 @@ class Constants
 
   static const String symbolSet = "abcdefghijklmnopqrstuvwxyz&";
 
+  static const bool enableInitialReveal = true;
+  static const int maxInitialReveal = 1;
+
 }
