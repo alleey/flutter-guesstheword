@@ -197,9 +197,9 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
     });
 
     on<StartPuzzleEvent>((event, emit) async {
-      
-      //final p = await puzzleService.popOne();
-      final p = Puzzle(hint: "A character", value: "Minnie Mouse");
+
+      final p = await puzzleService.popOne();
+      //final p = Puzzle(hint: "A character", value: "Minnie Mouse");
       if (p == null) {
         emit(NoMorePuzzleState());
         return;
@@ -218,11 +218,11 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
     on<UserInputEvent>((event, emit) async {
 
       if (gameState.update(event.symbol.toLowerCase())) {
-        
+
         if (gameState.isGameOver) {
           await scoreService.put(gameState.score);
         }
-        
+
         emit(gameState.lastInputError ? InputMismatchState() : InputMatchState());
         emit(GameState.clone(gameState));
       }
