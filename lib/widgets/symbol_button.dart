@@ -20,39 +20,19 @@ class SymbolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.circular(8),
-        color: backgroundColor,
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(8),
-            color: foregroundColor,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: backgroundColor,
-                foregroundColor: foregroundColor,
-              ),
-              onPressed: () {
-                onSelect.call(text);
-                //FlipCardRequest().dispatch(context);
-              },
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
+      onPressed: () {
+        onSelect.call(text);
+        //FlipCardRequest().dispatch(context);
+      },
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
@@ -79,127 +80,140 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Column _buildLayout(BuildContext context, GameState state) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          flex: 1,
-          child: _buildTopPanel(state),
+          flex: 2,
+          child: Container(
+            //color: Colors.blue,
+            child: _buildTopPanel(context, state)
+          ),
         ),
         Expanded(
-          flex: 1,
-          child: _buildPuzzlePanel(state),
+          flex: 3,
+          child: Container(
+            color: Colors.red,
+            child: _buildPuzzlePanel(state)
+          ),
         ),
         Expanded(
-          flex: 1,
-          child: _buildInputPanel(state),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTopPanel(GameState state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
-          child: _buildScorePanel(state),
-        ),
-        Expanded(
-          child: FlipCard(
-            showFront: !state.isGameOver,
-            frontCard: _buildStatusPanel(state),
-            backCard: _buildGameOverPanel(state),
+          flex: 4,
+          child: Container(
+            //color: Colors.green,
+            child: _buildInputPanel(state)
           ),
         ),
       ],
     );
   }
 
-  Widget _buildGameOverPanel(GameState state) {
-    return Stack(
-      fit: StackFit.expand,
+  Widget _buildTopPanel(BuildContext context, GameState state) {
+    return Column(
       children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              state.isWin ? "\u{2713} Correct" : "Incorrect",
-              style: TextStyle(
-                fontSize: 64,
-                color: state.isWin ? Colors.yellow : Colors.redAccent,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    side: const BorderSide(width: 5, color: Colors.white70),
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    padding: const EdgeInsets.all(20)
-                  ),
-                  onPressed: () {
-                    startPuzzle();
-                  },
-                  child: const Text(
-                    "Go Next",
-                    style: TextStyle(fontSize: 24)
-                  )
-                )
-              ],
-            )
-          ],
+        Expanded(
+          flex: 1,
+          child: _buildScorePanel(state)
         ),
-      ],
-    );
-  }
-
-  Widget _buildStatusPanel(GameState state) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: Iterable<int>.generate(Constants.maxErrors)
-            .map((e) => FlipCard(
-              showFront: (e > (state.errorCount - 1)),
-              backCard: const Icon(Icons.heart_broken, size: 64, color: Colors.grey),
-              frontCard: const Icon(Icons.favorite, size: 64, color: Colors.red),
-              transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-            ))
-            .toList(),
+        Expanded(
+          flex: 3,
+          child: Center(
+            child: FlipCard(
+              showFront: !state.isGameOver,
+              frontCard: _buildStatusPanel(context, state),
+              backCard: _buildGameOverPanel(context, state),
+            ),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildScorePanel(GameState state) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+      child: FittedBox(
+        fit: BoxFit.fitWidth,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "SCORE: ${state.score.value}",
+              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
+            ),
+            const SizedBox(width: 50,),
+            Text(
+              "WON: ${state.score.wins}",
+              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
+            ),
+            const SizedBox(width: 50,),
+            Text(
+              "LOST: ${state.score.losses}",
+              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusPanel(BuildContext context, GameState state) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "SCORE: ${state.score.value}",
-          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-        ),
-        Text(
-          "WON: ${state.score.wins}",
-          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-        ),
-        Text(
-          "LOST: ${state.score.losses}",
-          style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-        ),
-      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: Iterable<int>.generate(Constants.maxErrors)
+        .map((e) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: FlipCard(
+            showFront: (e > (state.errorCount - 1)),
+            backCard: const Icon(Icons.heart_broken, size: 48, color: Colors.yellow),
+            frontCard: const Icon(Icons.favorite, size: 48, color: Colors.red),
+            transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+          ),
+        ))
+        .toList(),
+    );
+  }
+
+  Widget _buildGameOverPanel(BuildContext context, GameState state) {
+    var theme = Theme.of(context).textTheme;
+    return FittedBox(
+      fit: BoxFit.fitWidth,
+      child: Row(
+        children: [
+          Text(
+            !state.isWin ? "\u{2713} Correct" : "Incorrect",
+            style: TextStyle(
+              fontSize: theme.headlineLarge?.fontSize ?? 24,
+              color: state.isWin ? Colors.yellow : Colors.redAccent,
+            ),
+          ),
+          const SizedBox(width: 10,),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              side: const BorderSide(width: 3, color: Colors.white70),
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.all(20)
+            ),
+            onPressed: () {
+              startPuzzle();
+            },
+            child: Text(
+              "Go Next",
+              style: TextStyle(color: Colors.white, fontSize: theme.titleLarge?.fontSize ?? 24)
+            )
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildPuzzlePanel(GameState state) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           "${state.hint} ?",
@@ -207,7 +221,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 32,
+            fontSize: 24,
           ),
         ),
         const SizedBox(
@@ -237,33 +251,31 @@ class _PuzzlePageState extends State<PuzzlePage> {
         .map((e) => state.value.contains(e) ? '\u{2713}' : '\u{274C}')
         .join();
 
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Column(
-        children: [
-          const Text(
-            "Pick you letters wisely \u{2193}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 32,
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Pick you letters wisely \u{2193}",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 24,
           ),
-          SymbolPad(
-            frontSymbols: state.symbolSet.toUpperCase(),
-            backSymbols: tried,
-            flipped: state.used,
-            foregroundColor: Constants.colorBackground,
-            backgroundColor: Constants.colorForeground,
-            spacing: 2,
-            runSpacing: 2,
-            onSelect: (c, f) {
-              if (!f) bloc.add(UserInputEvent(c));
-            },
-          ),
-        ],
-      ),
+        ),
+        SymbolPad(
+          frontSymbols: state.symbolSet.toUpperCase(),
+          backSymbols: tried,
+          flipped: state.used,
+          foregroundColor: Constants.colorBackground,
+          backgroundColor: Constants.colorForeground,
+          spacing: 2,
+          runSpacing: 2,
+          onSelect: (c, f) {
+            if (!f) bloc.add(UserInputEvent(c));
+          },
+        ),
+      ],
     );
   }
 }
