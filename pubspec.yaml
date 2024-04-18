@@ -20,6 +20,7 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=2.19.6 <3.0.0'
+  flutter: 3.19.5
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -38,6 +39,7 @@ dependencies:
   hive_flutter: any
   audioplayers: any
   rflutter_alert: any
+  device_frame: ^1.1.0
 
 dev_dependencies:
   flutter_test:

@@ -27,8 +27,8 @@ class FlipCard extends StatelessWidget {
       switchInCurve: Curves.ease,
       switchOutCurve: Curves.ease.flipped,
       child: showFront
-        ? SizedBox(key: const ValueKey('front'), child: frontCard)
-        : SizedBox(key: const ValueKey('back'), child: backCard),
+        ? Container(key: const ValueKey('front'), child: frontCard)
+        : Container(key: const ValueKey('back'), child: backCard),
     );
   }
 

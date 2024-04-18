@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
+import 'device_frame.dart';
 import 'home_page.dart';
 import 'services/data_service.dart';
 import 'services/puzzle_service.dart';
@@ -13,6 +14,8 @@ Future<void> main() async {
   await globalDataService.initialize();
   //await globalDataService.resetData();
   await PuzzleService(dataService: globalDataService).importAll();
+
+  //runApp(const DeviceFrameWrapper(child: MyApp()));
   runApp(const MyApp());
 }
 
