@@ -29,7 +29,7 @@ class AlertsService {
           ),
         ),
         DialogButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
             child: const Text(
               "No",
               style: TextStyle(color: Colors.white, fontSize: 20),
@@ -54,7 +54,7 @@ class AlertsService {
         DialogButton(
           onPressed: () {
             callback?.call();
-            Navigator.pop(context);
+            Navigator.of(context, rootNavigator: true).pop();
           },
           color: const Color.fromRGBO(0, 179, 134, 1.0),
           child: const Text(
@@ -95,7 +95,7 @@ class AlertsService {
       buttons: [
         DialogButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context, rootNavigator: true).pop();
           },
           color: const Color.fromRGBO(0, 179, 134, 1.0),
           child: const Text(

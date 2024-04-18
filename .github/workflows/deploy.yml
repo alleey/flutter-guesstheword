@@ -21,13 +21,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
+
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      id: vars
+
+    - name: Build
+      uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+        flutter-version-file: pubspec.yaml
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/
 
-    - name: Deploy 🚀
+    - name: Deploy Web
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: build/web

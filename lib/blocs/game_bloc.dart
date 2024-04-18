@@ -3,13 +3,12 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:bit_array/bit_array.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guess_the_word/models/puzzle.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
 import '../main.dart';
+import '../models/puzzle.dart';
 import '../models/score.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
@@ -104,8 +103,9 @@ class GameState extends GameBlocState {
     for (var index in Iterable<int>.generate(value.length)) {
       var symbol = value[index];
       if (symbolSet.contains(symbol) && !revealed[index]) {
-        if (!histogram.containsKey(symbol))
+        if (!histogram.containsKey(symbol)) {
           histogram[symbol] = 0;
+        }
         histogram[symbol] = histogram[symbol]! + 1;
       }
     }
@@ -199,7 +199,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
     on<StartPuzzleEvent>((event, emit) async {
 
       final p = await puzzleService.popOne();
-      //final p = Puzzle(hint: "A character", value: "Minnie Mouse");
+      //final p = Puzzle(hint: "Famous Cartoon Character", value: "United Arab Emirates");
       if (p == null) {
         emit(NoMorePuzzleState());
         return;

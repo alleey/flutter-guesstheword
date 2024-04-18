@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class Constants
 {
-  static const int appVersion = 1;
+  static const int appVersion = 2;
   static const int maxErrors = 5;
   static const int maxScoreHistory = 5;
 
