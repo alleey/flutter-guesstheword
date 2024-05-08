@@ -39,6 +39,7 @@ class PuzzleService {
     await importPuzzles("assets/puzzles/countries.json");
     await importPuzzles("assets/puzzles/famous-cartoon-chars.json");
     await importPuzzles("assets/puzzles/fruits.json");
+    await importPuzzles("assets/puzzles/olympics.json");
     log("total number of puzzles: ${dataService.puzzleBox.length}");
   }
 

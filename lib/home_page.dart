@@ -5,6 +5,7 @@ import 'blocs/game_bloc.dart';
 import 'common/constants.dart';
 import 'game.dart';
 import 'services/alerts_service.dart';
+import 'widgets/symbol_button.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -17,7 +18,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Constants.colorBackground,
+        backgroundColor: SymbolButton.defaultColorBackground,
         appBar: AppBar(
           title: const Text("Guess The Word"),
           actions: [
