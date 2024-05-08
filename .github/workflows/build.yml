@@ -3,11 +3,14 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Deploy-Pages
+name: Build
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches:
+      - '**'
+      - "!main"
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -29,15 +32,23 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       id: vars
 
-    - name: Build
+    - name: Build Web and Android
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
         flutter-version-file: pubspec.yaml
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/
+    - run: flutter build apk --release
 
-    - name: Deploy Web
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: Upload Website
+      uses: actions/upload-artifact@v3
       with:
-        folder: build/web
+        name: Web-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        path: build/web
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: APK-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        path: build/app/outputs/flutter-apk/app-release.apk

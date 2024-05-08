@@ -36,6 +36,7 @@ class _DeviceFrameWrapperState extends State<DeviceFrameWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    var deviceList = Devices.android.all;
     return DeviceFrameTheme(
       style: DeviceFrameStyle.dark(),
       child: MaterialApp(
@@ -46,7 +47,7 @@ class _DeviceFrameWrapperState extends State<DeviceFrameWrapper> {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: DefaultTabController(
-          length: Devices.all.length,
+          length: deviceList.length,
           child: Scaffold(
             backgroundColor: isDark ? Colors.white : Colors.black,
             appBar: AppBar(
@@ -102,7 +103,7 @@ class _DeviceFrameWrapperState extends State<DeviceFrameWrapper> {
               bottom: TabBar(
                 isScrollable: true,
                 tabs: [
-                  ...Devices.android.all.map(
+                  ...deviceList.map(
                     (x) => Tab(
                       text: '${x.identifier.type} ${x.name}',
                     ),
@@ -119,7 +120,7 @@ class _DeviceFrameWrapperState extends State<DeviceFrameWrapper> {
                       : AnimatedBuilder(
                           animation: DefaultTabController.of(context)!,
                           builder: (context, _) => _frame(
-                            Devices.all[DefaultTabController.of(context)!.index],
+                            deviceList[DefaultTabController.of(context)!.index],
                           ),
                         ),
                 ),
