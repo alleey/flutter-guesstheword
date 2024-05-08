@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
@@ -11,12 +12,17 @@ import 'services/puzzle_service.dart';
 final globalDataService = DataService();
 
 Future<void> main() async {
+
   await globalDataService.initialize();
   //await globalDataService.resetData();
   await PuzzleService(dataService: globalDataService).importAll();
 
-  //runApp(const DeviceFrameWrapper(child: MyApp()));
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_)
+  {
+    //runApp(const DeviceFrameWrapper(child: MyApp()));
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {

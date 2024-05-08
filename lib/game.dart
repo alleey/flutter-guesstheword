@@ -9,6 +9,7 @@ import 'common/constants.dart';
 import 'services/alerts_service.dart';
 import 'services/audio_service.dart';
 import 'widgets/flip_card.dart';
+import 'widgets/symbol_button.dart';
 import 'widgets/symbol_pad.dart';
 
 class PuzzlePage extends StatefulWidget {
@@ -83,6 +84,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: 10,),
         Expanded(
           flex: 2,
           child: Container(
@@ -91,18 +93,18 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ),
         ),
         Expanded(
-          flex: 3,
+          flex: 4,
           child: Container(
-            color: Colors.red,
+            decoration: BoxDecoration(
+              color: Colors.red.shade600,
+              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+            ),
             child: _buildPuzzlePanel(state)
           ),
         ),
         Expanded(
-          flex: 4,
-          child: Container(
-            //color: Colors.green,
-            child: _buildInputPanel(state)
-          ),
+          flex: 5,
+          child: _buildInputPanel(state),
         ),
       ],
     );
@@ -130,29 +132,26 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildScorePanel(GameState state) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-      child: FittedBox(
-        fit: BoxFit.fitWidth,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "SCORE: ${state.score.value}",
-              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-            ),
-            const SizedBox(width: 50,),
-            Text(
-              "WON: ${state.score.wins}",
-              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-            ),
-            const SizedBox(width: 50,),
-            Text(
-              "LOST: ${state.score.losses}",
-              style: const TextStyle(fontSize: 36, color: Constants.colorForeground),
-            ),
-          ],
-        ),
+    return FittedBox(
+      fit: BoxFit.fitWidth,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Score: ${state.score.value}",
+            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+          ),
+          const SizedBox(width: 50,),
+          Text(
+            "Won: ${state.score.wins}",
+            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+          ),
+          const SizedBox(width: 50,),
+          Text(
+            "Lost: ${state.score.losses}",
+            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+          ),
+        ],
       ),
     );
   }
@@ -166,8 +165,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
           padding: const EdgeInsets.symmetric(horizontal: 2),
           child: FlipCard(
             showFront: (e > (state.errorCount - 1)),
-            backCard: const Icon(Icons.heart_broken, size: 48, color: Colors.yellow),
-            frontCard: const Icon(Icons.favorite, size: 48, color: Colors.red),
+            backCard: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow),
+            frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
             transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
           ),
         ))
@@ -182,27 +181,27 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: Row(
         children: [
           Text(
-            !state.isWin ? "\u{2713} Correct" : "Incorrect",
+            state.isWin ? "\u{2713}" : '\u{274C}',
             style: TextStyle(
               fontSize: theme.headlineLarge?.fontSize ?? 24,
-              color: state.isWin ? Colors.yellow : Colors.redAccent,
+              fontWeight: FontWeight.bold,
+              color: state.isWin ? Colors.green : Colors.redAccent,
             ),
           ),
           const SizedBox(width: 10,),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              side: const BorderSide(width: 3, color: Colors.white70),
+              side: const BorderSide(width: 2, color: Colors.white70),
               elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.all(20)
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             ),
             onPressed: () {
               startPuzzle();
             },
-            child: Text(
+            child: const Text(
               "Go Next",
-              style: TextStyle(color: Colors.white, fontSize: theme.titleLarge?.fontSize ?? 24)
+              style: TextStyle(color: Colors.white)
             )
           )
         ],
@@ -216,16 +215,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "${state.hint} ?",
+          "${state.hint}!",
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 24,
           ),
-        ),
-        const SizedBox(
-          height: 2,
         ),
         Padding(
           padding: const EdgeInsets.all(4.0),
@@ -234,8 +229,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
             backSymbols: state.value.toUpperCase(),
             flipped: state.revealed,
             whiteSpace: state.whiteSpace,
-            foregroundColorFlipped: Constants.colorBackground,
-            backgroundColorFlipped: Constants.colorForeground,
+            foregroundColorFlipped: SymbolButton.defaultColorBackground,
+            backgroundColorFlipped: SymbolButton.defaultColorForeground,
             spacing: 2,
             runSpacing: 2,
             onSelect: (c, f) {},
@@ -260,17 +255,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 24,
           ),
         ),
         SymbolPad(
           frontSymbols: state.symbolSet.toUpperCase(),
           backSymbols: tried,
           flipped: state.used,
-          foregroundColor: Constants.colorBackground,
-          backgroundColor: Constants.colorForeground,
-          spacing: 2,
-          runSpacing: 2,
+          foregroundColor: SymbolButton.defaultColorBackground,
+          backgroundColor: SymbolButton.defaultColorForeground,
+          spacing: 3,
+          runSpacing: 3,
           onSelect: (c, f) {
             if (!f) bloc.add(UserInputEvent(c));
           },

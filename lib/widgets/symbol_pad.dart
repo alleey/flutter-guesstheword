@@ -1,13 +1,18 @@
 import 'package:bit_array/bit_array.dart';
 import 'package:flutter/material.dart';
 
-import '../common/constants.dart';
 import 'flip_card.dart';
 import 'symbol_button.dart';
 
 typedef SymbolSelectCallback = void Function(String, bool flipped);
 
-class SymbolPad extends StatefulWidget {
+class SymbolPad extends StatelessWidget {
+
+  static const double defaultWhiteSpaceWidth = 20;
+  static const double defaultButtonWidth = 25;
+  static const double defaultButtonHeight = 25;
+  static const Color defaultColorBackground = Color.fromARGB(0xff, 0x00, 0x20, 0x3F);
+  static const Color defaultColorForeground = Color.fromARGB(0xff, 0xAD, 0xEF, 0xD1);
 
   SymbolPad({
     super.key,
@@ -15,10 +20,12 @@ class SymbolPad extends StatefulWidget {
     required this.backSymbols,
     this.flipped,
     this.whiteSpace,
-    this.foregroundColor = Constants.colorForeground,
-    this.backgroundColor = Constants.colorBackground,
-    this.foregroundColorFlipped = Constants.colorForeground,
-    this.backgroundColorFlipped = Constants.colorBackground,
+    this.buttonSize,
+    this.whiteSpaceWidth = defaultWhiteSpaceWidth,
+    this.foregroundColor = defaultColorForeground,
+    this.backgroundColor = defaultColorBackground,
+    this.foregroundColorFlipped = defaultColorForeground,
+    this.backgroundColorFlipped = defaultColorBackground,
     this.spacing = 0.0,
     this.runSpacing = 0.0,
     required this.onSelect
@@ -30,8 +37,8 @@ class SymbolPad extends StatefulWidget {
 
   final String frontSymbols;
   final String backSymbols;
-  late BitArray? flipped;
-  late BitArray? whiteSpace;
+  final Size? buttonSize;
+  final double? whiteSpaceWidth;
   final Color foregroundColor;
   final Color backgroundColor;
   final Color foregroundColorFlipped;
@@ -39,12 +46,8 @@ class SymbolPad extends StatefulWidget {
   final SymbolSelectCallback onSelect;
   final double spacing;
   final double runSpacing;
-
-  @override
-  State<SymbolPad> createState() => _SymbolPadState();
-}
-
-class _SymbolPadState extends State<SymbolPad> {
+  late BitArray? flipped;
+  late BitArray? whiteSpace;
 
   @override
   Widget build(BuildContext context) {
@@ -53,19 +56,19 @@ class _SymbolPadState extends State<SymbolPad> {
 
   Widget _buildPanel(BuildContext context) {
 
-    final symbolList = widget.frontSymbols.split('').asMap();
+    final symbolList = frontSymbols.split('').asMap();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Wrap(
-        spacing: widget.spacing,
-        runSpacing: widget.runSpacing,
+        spacing: spacing,
+        runSpacing: runSpacing,
         alignment: WrapAlignment.center,
         children: Iterable<int>.generate(symbolList.length)
           .map((index) {
-            if (widget.whiteSpace![index]) {
-              return const SizedBox(width: 20,);
+            if (whiteSpace![index]) {
+              return SizedBox(width: whiteSpaceWidth,);
             }
             return _buildCard(context, index);
           })
@@ -78,20 +81,22 @@ class _SymbolPadState extends State<SymbolPad> {
   Widget _buildCard(BuildContext c, int index) {
 
     return FlipCard(
-      showFront: !widget.flipped![index],
+      showFront: !flipped![index],
       frontCard: SymbolButton(
-          text: widget.frontSymbols[index],
-          foregroundColor: widget.foregroundColor,
-          backgroundColor: widget.backgroundColor,
+          text: frontSymbols[index],
+          foregroundColor: foregroundColor,
+          backgroundColor: backgroundColor,
+          buttonSize: buttonSize,
           onSelect: (ch) {
-            widget.onSelect.call(ch, false);
+            onSelect.call(ch, false);
           }),
       backCard: SymbolButton(
-          text: widget.backSymbols[index],
-          foregroundColor: widget.foregroundColorFlipped,
-          backgroundColor: widget.backgroundColorFlipped,
+          text: backSymbols[index],
+          foregroundColor: foregroundColorFlipped,
+          backgroundColor: backgroundColorFlipped,
+          buttonSize: buttonSize,
           onSelect: (ch) {
-            widget.onSelect.call(ch, true);
+            onSelect.call(ch, true);
           }
       ),
     );
