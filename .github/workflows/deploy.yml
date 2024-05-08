@@ -3,11 +3,12 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Deploy-Pages
+name: Build-Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "**"
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
