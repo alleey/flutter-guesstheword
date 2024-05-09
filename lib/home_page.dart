@@ -9,7 +9,7 @@ import 'widgets/symbol_button.dart';
 
 class HomePage extends StatelessWidget {
 
-  static const dataLossWarning = "Resetting the game will reset all data. High scores will be preserved.\n Are you sure you'd like to reset?";
+  static const dataLossWarning = "Resetting the game will reset all puzzles already finished. High scores will be preserved.\n Continue?";
 
   const HomePage({
     super.key,

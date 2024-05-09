@@ -1,7 +1,7 @@
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
@@ -40,43 +40,44 @@ class _PuzzlePageState extends State<PuzzlePage> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, GameBlocState>(
-        listener: (context, state) {
+      listener: (context, state) {
 
-          log("listener: $state");
-          switch (state.runtimeType) {
-            case ResetState:
-              startPuzzle(); break;
-            case PuzzleStartState:
-              audioService.play("audio/start.mp3");
-              if (Constants.enableInitialReveal) {
-                bloc.add(RequestHintEvent());
+        log("listener: $state");
+        switch (state.runtimeType) {
+          case ResetState:
+            startPuzzle(); break;
+          case PuzzleStartState:
+            audioService.play("audio/start.mp3");
+            if (Constants.enableInitialReveal) {
+              bloc.add(RequestHintEvent());
+            }
+            break;
+          case InputMatchState:
+            audioService.play("audio/match.mp3"); break;
+          case InputMismatchState:
+            audioService.play("audio/mismatch.mp3"); break;
+          case NoMorePuzzleState:
+            AlertsService().show(
+              context,
+              title: "Congratulations!",
+              desc: resetGameQuestion,
+              callback: () {
+                final bloc = BlocProvider.of<GameBloc>(context);
+                bloc.add(ResetGameEvent());
               }
-              break;
-            case InputMatchState:
-              audioService.play("audio/match.mp3"); break;
-            case InputMismatchState:
-              audioService.play("audio/mismatch.mp3"); break;
-            case NoMorePuzzleState:
-              AlertsService().show(
-                context,
-                title: "Congratulations!",
-                desc: resetGameQuestion,
-                callback: () {
-                  final bloc = BlocProvider.of<GameBloc>(context);
-                  bloc.add(ResetGameEvent());
-                }
-              ).show();
-              break;
-          }
-        },
-        builder: (context, state) {
+            ).show();
+            break;
+        }
+      },
+      builder: (context, state) {
 
-          log("builder: $state");
-          if (state is GameState) {
-            return _buildLayout(context, state);
-          }
-          return const Center(child: CircularProgressIndicator());
-        });
+        log("builder: $state");
+        if (state is GameState) {
+          return _buildLayout(context, state);
+        }
+        return const Center(child: CircularProgressIndicator());
+      }
+    );
   }
 
   Column _buildLayout(BuildContext context, GameState state) {
@@ -84,11 +85,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 10,),
         Expanded(
           flex: 2,
           child: Container(
-            //color: Colors.blue,
+            //color: Colors.blue,\
+            padding: const EdgeInsets.symmetric(vertical: 2),
             child: _buildTopPanel(context, state)
           ),
         ),
@@ -159,14 +160,18 @@ class _PuzzlePageState extends State<PuzzlePage> {
   Widget _buildStatusPanel(BuildContext context, GameState state) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: Iterable<int>.generate(Constants.maxErrors)
         .map((e) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2),
           child: FlipCard(
             showFront: (e > (state.errorCount - 1)),
-            backCard: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow),
             frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
+            backCard: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationX(math.pi),
+              child: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow)
+              ),
             transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
           ),
         ))
@@ -176,25 +181,27 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
     var theme = Theme.of(context).textTheme;
-    return FittedBox(
-      fit: BoxFit.fitWidth,
-      child: Row(
-        children: [
-          Text(
-            state.isWin ? "\u{2713}" : '\u{274C}',
-            style: TextStyle(
-              fontSize: theme.headlineLarge?.fontSize ?? 24,
-              fontWeight: FontWeight.bold,
-              color: state.isWin ? Colors.green : Colors.redAccent,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
+          style: TextStyle(
+            fontSize: theme.headlineLarge?.fontSize ?? 24,
+            fontWeight: FontWeight.bold,
+            color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
           ),
-          const SizedBox(width: 10,),
-          ElevatedButton(
+        ),
+        const SizedBox(width: 10,),
+        SizedBox(
+          height: 50,
+          child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              side: const BorderSide(width: 2, color: Colors.white70),
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              backgroundColor: Colors.red.shade600,
+              side: const BorderSide(width: 4, color: Colors.white70),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              alignment: Alignment.center,
             ),
             onPressed: () {
               startPuzzle();
@@ -203,9 +210,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
               "Go Next",
               style: TextStyle(color: Colors.white)
             )
-          )
-        ],
-      ),
+          ),
+        )
+      ],
     );
   }
 
@@ -215,7 +222,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "${state.hint}!",
+          state.hint,
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
@@ -265,8 +272,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
           backgroundColor: SymbolButton.defaultColorForeground,
           spacing: 3,
           runSpacing: 3,
-          onSelect: (c, f) {
-            if (!f) bloc.add(UserInputEvent(c));
+          onSelect: (c, flipped) {
+            if (!flipped) bloc.add(UserInputEvent(c));
           },
         ),
       ],
