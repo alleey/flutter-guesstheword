@@ -39,6 +39,7 @@ class InputMismatchState extends GameBlocState {}
 class GameState extends GameBlocState {
 
   GameState({
+    required this.puzzleId,
     required this.hint,
     required this.value,
   }) {
@@ -48,6 +49,7 @@ class GameState extends GameBlocState {
 
   factory GameState.clone(GameState other) {
     final p = GameState(
+      puzzleId: other.puzzleId,
       hint: other.hint,
       value: other.value,
     );
@@ -62,6 +64,7 @@ class GameState extends GameBlocState {
     return p;
   }
 
+  final int puzzleId;
   final String hint;
   final String value;
   // All possible symbols
@@ -113,7 +116,6 @@ class GameState extends GameBlocState {
         histogram[symbol] = histogram[symbol]! + 1;
       }
     }
-
     return leastUsedSymbols(histogram);
   }
 
@@ -131,6 +133,7 @@ class GameState extends GameBlocState {
   }
 
   void reveal(String symbol) {
+
     int index = -1;
     do {
       index = value.indexOf(symbol, index + 1);
@@ -149,7 +152,14 @@ class GameState extends GameBlocState {
   }
 
   bool update(String symbol) {
+
     if (isGameOver) {
+      return false;
+    }
+
+    // if symbol already handled, return
+    final symId = symbolSet.indexOf(symbol);
+    if (used[symId]) {
       return false;
     }
 
@@ -199,6 +209,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       await appDataService.resetData();
       await puzzleService.resetData();
       await scoreService.resetData();
+      canGoNext = true;
+
       emit(ResetState());
     });
 
@@ -210,7 +222,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       }
       canGoNext = false;
 
-      final p = await puzzleService.popOne();
+      final p = await puzzleService.randomPuzzle();
       //final p = Puzzle(hint: "Famous Cartoon Character", value: "United Arab Emirates");
       if (p == null) {
         emit(NoMorePuzzleState());
@@ -218,8 +230,9 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       }
 
       gameState = GameState(
-        hint: p.hint,
-        value: p.value.toLowerCase(),
+        puzzleId: p.$1,
+        hint: p.$2.hint,
+        value: p.$2.value.toLowerCase(),
       );
       gameState.score = scoreService.get();
 
@@ -233,6 +246,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
         if (gameState.isGameOver) {
           await scoreService.put(gameState.score);
+          await puzzleService.delete(gameState.puzzleId);
           canGoNext = true;
         }
 

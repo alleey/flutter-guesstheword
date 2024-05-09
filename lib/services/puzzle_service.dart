@@ -20,7 +20,7 @@ class PuzzleService {
     await importAll();
   }
 
-  Future<Puzzle?> popOne() async {
+  Future<(int, Puzzle)?> randomPuzzle() async {
     if (dataService.puzzleBox.isEmpty) {
       return null;
     }
@@ -30,7 +30,17 @@ class PuzzleService {
 
     await dataService.puzzleBox.deleteAt(index);
     await dataService.puzzleBox.flush();
-    return puzzle;
+    return (index, puzzle);
+  }
+
+  Future delete(int index) async {
+    if (dataService.puzzleBox.isEmpty || index >= dataService.puzzleBox.length)
+    {
+      return;
+    }
+    await dataService.puzzleBox.deleteAt(index);
+    await dataService.puzzleBox.flush();
+    log("deleted puzzle#: $index");
   }
 
   Future importAll() async {
