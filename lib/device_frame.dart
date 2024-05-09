@@ -118,9 +118,9 @@ class _DeviceFrameWrapperState extends State<DeviceFrameWrapper> {
                   builder: (context) => !isEnabled
                       ? widget.child
                       : AnimatedBuilder(
-                          animation: DefaultTabController.of(context)!,
+                          animation: DefaultTabController.of(context),
                           builder: (context, _) => _frame(
-                            deviceList[DefaultTabController.of(context)!.index],
+                            deviceList[DefaultTabController.of(context).index],
                           ),
                         ),
                 ),

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
-import 'device_frame.dart';
+//import 'device_frame.dart';
 import 'home_page.dart';
 import 'services/data_service.dart';
 import 'services/puzzle_service.dart';

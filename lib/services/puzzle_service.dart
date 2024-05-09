@@ -35,11 +35,15 @@ class PuzzleService {
 
   Future importAll() async {
     await importPuzzles("assets/puzzles/animals.json");
-    await importPuzzles("assets/puzzles/car-makers.json");
+    await importPuzzles("assets/puzzles/cars.json");
     await importPuzzles("assets/puzzles/countries.json");
+    await importPuzzles("assets/puzzles/emotions.json");
     await importPuzzles("assets/puzzles/famous-cartoon-chars.json");
+    await importPuzzles("assets/puzzles/flowers.json");
     await importPuzzles("assets/puzzles/fruits.json");
     await importPuzzles("assets/puzzles/olympics.json");
+    await importPuzzles("assets/puzzles/sea-creatures.json");
+    await importPuzzles("assets/puzzles/vegetables.json");
     log("total number of puzzles: ${dataService.puzzleBox.length}");
   }
 
@@ -53,6 +57,7 @@ class PuzzleService {
       log("$fileName already imported");
       return;
     }
+    log("$fileName imported");
 
     final data = jsonDecode(await rootBundle.loadString(fileName));
     final String hint = data["hint"];

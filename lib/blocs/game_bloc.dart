@@ -8,7 +8,6 @@ import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
 import '../main.dart';
-import '../models/puzzle.dart';
 import '../models/score.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
@@ -58,6 +57,8 @@ class GameState extends GameBlocState {
     p.errorCount = other.errorCount;
     p.symbolSet = other.symbolSet;
     p.score = other.score;
+    p.winBonus = other.winBonus;
+    p.lastInputError = other.lastInputError;
     return p;
   }
 
@@ -73,6 +74,7 @@ class GameState extends GameBlocState {
   // symbols unmatched
   late int correctCount;
   late int errorCount;
+  late int winBonus;
   late bool lastInputError;
   late Score score;
 
@@ -83,6 +85,8 @@ class GameState extends GameBlocState {
   void reset() {
     correctCount = 0;
     errorCount = 0;
+    winBonus = 0;
+    lastInputError = false;
     used = BitArray(symbolSet.length);
     revealed = BitArray(value.length);
     whiteSpace = BitArray(value.length);
@@ -150,6 +154,7 @@ class GameState extends GameBlocState {
     }
 
     lastInputError = !value.contains(symbol);
+    winBonus = 0;
 
     if (!lastInputError) {
 
@@ -157,8 +162,8 @@ class GameState extends GameBlocState {
       if (isWin) {
         // Calculate score based on length of puzzle and number of error
         // longer puzzles and fewer errors get more score
-        int val = value.length * (Constants.maxErrors - errorCount);
-        score = score.solved(val);
+        winBonus = value.length * (Constants.maxErrors - errorCount);
+        score = score.solved(winBonus);
       }
     } else {
 
