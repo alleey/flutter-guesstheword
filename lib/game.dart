@@ -43,20 +43,28 @@ class _PuzzlePageState extends State<PuzzlePage> {
       listener: (context, state) {
 
         log("listener: $state");
-        switch (state.runtimeType) {
-          case ResetState:
-            startPuzzle(); break;
-          case PuzzleStartState:
+        switch (state) {
+
+          case ResetState _:
+            startPuzzle();
+            break;
+
+          case PuzzleStartState _:
             audioService.play("audio/start.mp3");
             if (Constants.enableInitialReveal) {
               bloc.add(RequestHintEvent());
             }
             break;
-          case InputMatchState:
-            audioService.play("audio/match.mp3"); break;
-          case InputMismatchState:
-            audioService.play("audio/mismatch.mp3"); break;
-          case NoMorePuzzleState:
+
+          case InputMatchState _:
+            audioService.play("audio/match.mp3");
+            break;
+
+          case InputMismatchState _:
+            audioService.play("audio/mismatch.mp3");
+            break;
+
+          case NoMorePuzzleState _:
             AlertsService().show(
               context,
               title: "Congratulations!",
@@ -75,6 +83,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         if (state is GameState) {
           return _buildLayout(context, state);
         }
+
         return const Center(child: CircularProgressIndicator());
       }
     );
