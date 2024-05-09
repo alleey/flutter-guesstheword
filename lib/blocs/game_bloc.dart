@@ -190,6 +190,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
   final puzzleService = PuzzleService(dataService: globalDataService);
   final scoreService = ScoreService(dataService: globalDataService);
   late GameState gameState;
+  late bool canGoNext = true;
 
   GameBloc() : super(InitialGameState())
   {
@@ -202,6 +203,12 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
     });
 
     on<StartPuzzleEvent>((event, emit) async {
+
+      if (!canGoNext) {
+        // Prevent against double clicks on GoNext
+        return;
+      }
+      canGoNext = false;
 
       final p = await puzzleService.popOne();
       //final p = Puzzle(hint: "Famous Cartoon Character", value: "United Arab Emirates");
@@ -226,6 +233,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
         if (gameState.isGameOver) {
           await scoreService.put(gameState.score);
+          canGoNext = true;
         }
 
         emit(gameState.lastInputError ? InputMismatchState() : InputMatchState());
