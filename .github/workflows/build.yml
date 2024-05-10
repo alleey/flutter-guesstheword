@@ -19,11 +19,10 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-web-android:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set Environment Variables
       shell: bash
@@ -37,18 +36,103 @@ jobs:
       with:
         channel: 'stable'
         flutter-version-file: pubspec.yaml
+        architecture: x64
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/
     - run: flutter build apk --release
 
-    - name: Upload Website
+    - name: Attach Website
       uses: actions/upload-artifact@v3
       with:
         name: Web-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
         path: build/web
 
-    - name: Upload APK
+    - name: Attach APK
       uses: actions/upload-artifact@v3
       with:
         name: APK-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
         path: build/app/outputs/flutter-apk/app-release.apk
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      id: vars
+
+    - name: Build Linux
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        architecture: x64
+    - run: flutter pub get
+    - run: flutter config --enable-linux-desktop
+    - run: flutter build linux --release
+
+    - name: Attach Linux Bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: Linux-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        path: build/linux/x64/release/bundle
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      id: vars
+
+    - name: Build Windows
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        architecture: x64
+    - run: flutter pub get
+    - run: flutter config --enable-windows-desktop
+    - run: flutter build windows --release
+
+    - name: Attach Windows Bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: Win-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        path: build/windows/runner/Release
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      id: vars
+
+    - name: Build Windows
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        architecture: x64
+    - run: flutter pub get
+    - run: flutter config --enable-macos-desktop
+    - run: flutter build macos --release
+
+    - name: Attach Windows Bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: Mac-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        path: build/macos/Build/Products/Release
