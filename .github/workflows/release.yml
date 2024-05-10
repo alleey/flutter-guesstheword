@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - '**'
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -31,7 +32,55 @@ jobs:
           draft: false
           prerelease: false
 
-  build-web-android-linux:
+  build-web-android:
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        architecture: x64
+    - run: flutter pub get
+    - run: flutter build web --base-href /flutter-guesstheword/
+    - run: flutter build apk --release
+
+    - name: Deploy Web
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: build/web
+
+    - name: Archive Web Release
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: guesstheword-v${{ github.run_number }}-web.zip
+        directory: build/web
+
+    - name: Attach Web Bundle
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.release.outputs.upload_url }}
+        asset_path: guesstheword-v${{ github.run_number }}-web.zip
+        asset_name: guesstheword-v${{ github.run_number }}-web.zip
+        asset_content_type: application/zip
+
+    - name: Attach APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-release.apk
+        asset_name: guesstheword-v${{ github.run_number }}.apk
+        asset_content_type: application/zip
+
+  build-linux:
     runs-on: ubuntu-latest
     needs: [release]
     steps:
@@ -50,8 +99,6 @@ jobs:
         flutter-version-file: pubspec.yaml
         architecture: x64
     - run: flutter pub get
-    - run: flutter build web --base-href /flutter-guesstheword/
-    - run: flutter build apk --release
     - run: flutter config --enable-linux-desktop
     - run: flutter build linux --release
 
@@ -61,21 +108,6 @@ jobs:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-linux.zip
         directory: build/linux/x64/release/bundle
-
-    - name: Deploy Web
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: build/web
-
-    - name: Attach APK
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.release.outputs.upload_url }}
-        asset_path: build/app/outputs/flutter-apk/app-release.apk
-        asset_name: guesstheword-v${{ github.run_number }}.apk
-        asset_content_type: application/zip
 
     - name: Attach Linux Bundle
       uses: actions/upload-release-asset@v1
