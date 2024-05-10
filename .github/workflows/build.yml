@@ -37,13 +37,13 @@ jobs:
   #   - name: Attach Website
   #     uses: actions/upload-artifact@v3
   #     with:
-  #       name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}
   #       path: build/web
 
   #   - name: Attach APK
   #     uses: actions/upload-artifact@v3
   #     with:
-  #       name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}
   #       path: build/app/outputs/flutter-apk/app-release.apk
 
   build-linux:
@@ -70,7 +70,7 @@ jobs:
     - name: Attach Linux Bundle
       uses: actions/upload-artifact@v3
       with:
-        name: Linux-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+        name: Linux-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/linux/x64/release/bundle
 
   build-windows:
@@ -81,7 +81,7 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version-file: pubspec.yaml
+        flutter-version: '3.13.8'
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-windows-desktop
@@ -90,7 +90,7 @@ jobs:
     - name: Attach Windows Bundle
       uses: actions/upload-artifact@v3
       with:
-        name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+        name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/windows/runner/Release
 
   # build-macos:
@@ -111,5 +111,5 @@ jobs:
   #   - name: Attach Windows Bundle
   #     uses: actions/upload-artifact@v3
   #     with:
-  #       name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}
   #       path: build/macos/Build/Products/Release
