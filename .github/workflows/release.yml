@@ -58,7 +58,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-web.zip
-        directory: build/web
+        path: build/web
 
     - name: Attach Web Bundle
       uses: actions/upload-release-asset@v1
@@ -107,7 +107,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-linux.zip
-        directory: build/linux/x64/release/bundle
+        path: build/linux/x64/release/bundle
 
     - name: Attach Linux Bundle
       uses: actions/upload-release-asset@v1
@@ -140,7 +140,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-windows.zip
-        directory: build/windows/runner/Release
+        path: build/windows/x64/runner/Release
 
     - name: Attach Windows Bundle
       uses: actions/upload-release-asset@v1
@@ -173,7 +173,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-macos.zip
-        directory: build/macos/Build/Products/Release
+        path: build/macos/Build/Products/Release
 
     - name: Attach Macos Bundle
       uses: actions/upload-release-asset@v1
