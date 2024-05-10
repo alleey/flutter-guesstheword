@@ -24,13 +24,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set Environment Variables
-      shell: bash
-      run: |
-        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      id: vars
-
     - name: Build Web and Android
       uses: subosito/flutter-action@v2
       with:
@@ -44,26 +37,20 @@ jobs:
     - name: Attach Website
       uses: actions/upload-artifact@v3
       with:
-        name: Web-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/web
 
     - name: Attach APK
       uses: actions/upload-artifact@v3
       with:
-        name: APK-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/app/outputs/flutter-apk/app-release.apk
 
   build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set Environment Variables
-      shell: bash
-      run: |
-        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      id: vars
+    - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Build Linux
       uses: subosito/flutter-action@v2
@@ -78,20 +65,14 @@ jobs:
     - name: Attach Linux Bundle
       uses: actions/upload-artifact@v3
       with:
-        name: Linux-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        name: Linux-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/linux/x64/release/bundle
 
   build-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set Environment Variables
-      shell: bash
-      run: |
-        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      id: vars
+    - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Build Windows
       uses: subosito/flutter-action@v2
@@ -106,22 +87,16 @@ jobs:
     - name: Attach Windows Bundle
       uses: actions/upload-artifact@v3
       with:
-        name: Win-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/windows/runner/Release
 
   build-macos:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: seanmiddleditch/gha-setup-ninja@master
 
-    - name: Set Environment Variables
-      shell: bash
-      run: |
-        echo "::set-output name=branch::$(echo ${GITHUB_REF////-} | sed s/refs-heads-//)"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      id: vars
-
-    - name: Build Windows
+    - name: Build Macos
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
@@ -134,5 +109,5 @@ jobs:
     - name: Attach Windows Bundle
       uses: actions/upload-artifact@v3
       with:
-        name: Mac-guesstheword-${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.sha_short }}.zip
+        name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/macos/Build/Products/Release
