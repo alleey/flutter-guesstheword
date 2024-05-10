@@ -96,10 +96,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
       children: [
         Expanded(
           flex: 2,
-          child: Container(
-            //color: Colors.blue,\
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: _buildTopPanel(context, state)
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0,4,0,8),
+            child: _buildTopPanel(context, state),
           ),
         ),
         Expanded(
@@ -121,107 +120,121 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildTopPanel(BuildContext context, GameState state) {
-    return Column(
-      children: [
-        Expanded(
-          flex: 1,
-          child: _buildScorePanel(state)
-        ),
-        Expanded(
-          flex: 3,
-          child: Center(
-            child: FlipCard(
-              showFront: !state.isGameOver,
-              frontCard: _buildStatusPanel(context, state),
-              backCard: _buildGameOverPanel(context, state),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildScorePanel(GameState state) {
-    return FittedBox(
-      fit: BoxFit.fitWidth,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            "Score: ${state.score.value}",
-            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+          Expanded(
+            child: _buildScorePanel(state)
           ),
-          const SizedBox(width: 50,),
-          Text(
-            "Won: ${state.score.wins}",
-            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
-          ),
-          const SizedBox(width: 50,),
-          Text(
-            "Lost: ${state.score.losses}",
-            style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+          Expanded(
+            child: Center(
+              child: FlipCard(
+                showFront: state.isGameOver,
+                frontCard: _buildStatusPanel(context, state),
+                backCard: _buildGameOverPanel(context, state),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildScorePanel(GameState state) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 2,
+      child: FittedBox(
+        fit: BoxFit.fitWidth,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Score: ${state.score.value}",
+              style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+            ),
+            const SizedBox(width: 50,),
+            Text(
+              "Won: ${state.score.wins}",
+              style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+            ),
+            const SizedBox(width: 50,),
+            Text(
+              "Lost: ${state.score.losses}",
+              style: const TextStyle(fontSize: 36, color: SymbolButton.defaultColorForeground),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatusPanel(BuildContext context, GameState state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: Iterable<int>.generate(Constants.maxErrors)
-        .map((e) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: FlipCard(
-            showFront: (e > (state.errorCount - 1)),
-            frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
-            backCard: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.rotationX(math.pi),
-              child: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow)
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: Iterable<int>.generate(Constants.maxErrors)
+          .map((e) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Center(
+              child: FlipCard(
+                showFront: (e > (state.errorCount - 1)),
+                frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
+                backCard: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationX(math.pi),
+                  child: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow)
+                  ),
+                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
               ),
-            transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-          ),
-        ))
-        .toList(),
+            ),
+          ))
+          .toList(),
+      ),
     );
   }
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
-    var theme = Theme.of(context).textTheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
-          style: TextStyle(
-            fontSize: theme.headlineLarge?.fontSize ?? 24,
-            fontWeight: FontWeight.bold,
-            color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
-          ),
-        ),
-        const SizedBox(width: 10,),
-        SizedBox(
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
-              side: const BorderSide(width: 4, color: Colors.white70),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              alignment: Alignment.center,
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Text(
+              state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
+              ),
             ),
-            onPressed: () {
-              startPuzzle();
-            },
-            child: const Text(
-              "Go Next",
-              style: TextStyle(color: Colors.white)
-            )
           ),
-        )
-      ],
+          const SizedBox(width: 10,),
+          Center(
+            child: SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  side: const BorderSide(width: 4, color: Colors.white70),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  alignment: Alignment.center,
+                ),
+                onPressed: () {
+                  startPuzzle();
+                },
+                child: const Text(
+                  "Go Next",
+                  style: TextStyle(color: Colors.white)
+                )
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -230,12 +243,18 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          state.hint,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        SizedBox(
+          width: MediaQuery.of(context).size.width / 4,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: Text(
+              state.hint,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
         Padding(
@@ -264,13 +283,20 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      //crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          "Pick you letters wisely \u{2193}",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        SizedBox(
+          width: MediaQuery.of(context).size.width / 3,
+          child: const FittedBox(
+            fit: BoxFit.contain,
+            child: Text(
+              "Pick you letters wisely \u{2193}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
         SymbolPad(
