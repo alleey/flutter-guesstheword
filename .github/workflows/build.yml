@@ -19,32 +19,32 @@ permissions:
   contents: write
 
 jobs:
-  build-web-android:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+  # build-web-android:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: Build Web and Android
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-        flutter-version-file: pubspec.yaml
-        architecture: x64
-    - run: flutter pub get
-    - run: flutter build web --base-href /flutter-guesstheword/
-    - run: flutter build apk --release
+  #   - name: Build Web and Android
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       channel: 'stable'
+  #       flutter-version-file: pubspec.yaml
+  #       architecture: x64
+  #   - run: flutter pub get
+  #   - run: flutter build web --base-href /flutter-guesstheword/
+  #   - run: flutter build apk --release
 
-    - name: Attach Website
-      uses: actions/upload-artifact@v3
-      with:
-        name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
-        path: build/web
+  #   - name: Attach Website
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       path: build/web
 
-    - name: Attach APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
-        path: build/app/outputs/flutter-apk/app-release.apk
+  #   - name: Attach APK
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       path: build/app/outputs/flutter-apk/app-release.apk
 
   build-linux:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-0 libgtk-3-dev libblkid1 liblzma5
 
     - name: Install app dependencies
-      run: sudo apt-get install -y -f libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
+      run: sudo apt-get install -y -f libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
 
     - name: Build Linux
       uses: subosito/flutter-action@v2
@@ -93,23 +93,23 @@ jobs:
         name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
         path: build/windows/runner/Release
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v4
+  # build-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: Build Macos
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-        flutter-version-file: pubspec.yaml
-        architecture: x64
-    - run: flutter pub get
-    - run: flutter config --enable-macos-desktop
-    - run: flutter build macos --release
+  #   - name: Build Macos
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       channel: 'stable'
+  #       flutter-version-file: pubspec.yaml
+  #       architecture: x64
+  #   - run: flutter pub get
+  #   - run: flutter config --enable-macos-desktop
+  #   - run: flutter build macos --release
 
-    - name: Attach Windows Bundle
-      uses: actions/upload-artifact@v3
-      with:
-        name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
-        path: build/macos/Build/Products/Release
+  #   - name: Attach Windows Bundle
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}.zip
+  #       path: build/macos/Build/Products/Release
