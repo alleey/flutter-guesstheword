@@ -27,15 +27,13 @@ class SymbolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: buttonSize?.width ?? defaultWidth,
-      height: buttonSize?.height ?? defaultHeight,
+    return _wrapInSized(
+      size: buttonSize,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
-          alignment: Alignment.bottomCenter,
-          minimumSize: Size.zero,
+          alignment: Alignment.center,
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -53,5 +51,16 @@ class SymbolButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _wrapInSized({ required Widget child, Size? size }) {
+    if (size != null) {
+      return SizedBox(
+        width: size.width,
+        height: size.height,
+        child: child,
+      );
+    }
+    return child;
   }
 }
