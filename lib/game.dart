@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
@@ -95,11 +96,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0,4,0,8),
-            child: _buildTopPanel(context, state),
-          ),
+          flex: 3,
+          child: _buildTopPanel(context, state),
         ),
         Expanded(
           flex: 4,
@@ -120,33 +118,31 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildTopPanel(BuildContext context, GameState state) {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: _buildScorePanel(state)
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 2,),
+        Expanded(
+          child: _buildScorePanel(state)
+        ),
+        Expanded(
+          child: FlipCard(
+            showFront: !state.isGameOver,
+            frontCard: _buildStatusPanel(context, state),
+            backCard: _buildGameOverPanel(context, state),
           ),
-          Expanded(
-            child: Center(
-              child: FlipCard(
-                showFront: state.isGameOver,
-                frontCard: _buildStatusPanel(context, state),
-                backCard: _buildGameOverPanel(context, state),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10,),
+      ],
     );
   }
 
   Widget _buildScorePanel(GameState state) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width / 2,
+      width: MediaQuery.of(context).size.width - 50,
       child: FittedBox(
-        fit: BoxFit.fitWidth,
+        fit: BoxFit.contain,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -172,69 +168,59 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildStatusPanel(BuildContext context, GameState state) {
-    return IntrinsicHeight(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: Iterable<int>.generate(Constants.maxErrors)
-          .map((e) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Center(
-              child: FlipCard(
-                showFront: (e > (state.errorCount - 1)),
-                frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
-                backCard: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationX(math.pi),
-                  child: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow)
-                  ),
-                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: Iterable<int>.generate(Constants.maxErrors)
+        .map((e) => FlipCard(
+          showFront: (e > (state.errorCount - 1)),
+          frontCard: const Icon(Icons.favorite, size: 32, color: Colors.red),
+          backCard: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationX(math.pi),
+            child: const Icon(Icons.heart_broken, size: 32, color: Colors.yellow)
             ),
-          ))
-          .toList(),
-      ),
+          transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+        ))
+        .toList(),
     );
   }
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
-    return IntrinsicHeight(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Text(
-              state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FittedBox(
+          fit: BoxFit.contain,
+          child: Text(
+            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
             ),
           ),
-          const SizedBox(width: 10,),
-          Center(
-            child: SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade600,
-                  side: const BorderSide(width: 4, color: Colors.white70),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  alignment: Alignment.center,
-                ),
-                onPressed: () {
-                  startPuzzle();
-                },
-                child: const Text(
-                  "Go Next",
-                  style: TextStyle(color: Colors.white)
-                )
-              ),
+        ),
+        const SizedBox(width: 20,),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              side: const BorderSide(width: 4, color: Colors.white70),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              alignment: Alignment.center,
             ),
-          )
-        ],
-      ),
+            onPressed: () {
+              startPuzzle();
+            },
+            child: const Text(
+              "Go Next",
+              style: TextStyle(color: Colors.white)
+            )
+          ),
+        )
+      ],
     );
   }
 
@@ -244,7 +230,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width / 4,
+          width: MediaQuery.of(context).size.width / 3,
           child: FittedBox(
             fit: BoxFit.contain,
             child: Text(
@@ -268,6 +254,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             backgroundColorFlipped: SymbolButton.defaultColorForeground,
             spacing: 2,
             runSpacing: 2,
+            buttonSize: const Size(55, 30),
             onSelect: (c, f) {},
           ),
         )
@@ -283,14 +270,14 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      //crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width / 3,
+          width: MediaQuery.of(context).size.width / 2,
           child: const FittedBox(
             fit: BoxFit.contain,
             child: Text(
-              "Pick you letters wisely \u{2193}",
+              "Pick your letters wisely \u{2193}",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -307,6 +294,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           backgroundColor: SymbolButton.defaultColorForeground,
           spacing: 3,
           runSpacing: 3,
+          buttonSize: const Size(55, 30),
           onSelect: (c, flipped) {
             if (!flipped) bloc.add(UserInputEvent(c));
           },

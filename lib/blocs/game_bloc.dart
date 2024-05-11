@@ -17,8 +17,14 @@ import '../services/score_service.dart';
 abstract class GameBlocEvent {}
 
 class ResetGameEvent extends GameBlocEvent {}
-class StartPuzzleEvent extends GameBlocEvent {}
+
+class StartPuzzleEvent extends GameBlocEvent {
+  final bool forceNext;
+  StartPuzzleEvent({this.forceNext = false});
+}
+
 class RequestHintEvent extends GameBlocEvent {}
+
 class UserInputEvent extends GameBlocEvent {
   final String symbol;
   UserInputEvent(this.symbol);
@@ -35,6 +41,12 @@ class PuzzleStartState extends GameBlocState {}
 
 class InputMatchState extends GameBlocState {}
 class InputMismatchState extends GameBlocState {}
+
+enum Difficulty {
+  easy,
+  medium,
+  hard
+}
 
 class GameState extends GameBlocState {
 
@@ -67,6 +79,7 @@ class GameState extends GameBlocState {
   final int puzzleId;
   final String hint;
   final String value;
+
   // All possible symbols
   late String symbolSet;
   // symbols tried so far
@@ -74,7 +87,7 @@ class GameState extends GameBlocState {
   // symbols correctly matched so far
   late BitArray revealed;
   late BitArray whiteSpace;
-  // symbols unmatched
+
   late int correctCount;
   late int errorCount;
   late int winBonus;
@@ -84,6 +97,13 @@ class GameState extends GameBlocState {
   bool get isWin => correctCount >= (value.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
+
+  // Determine puzzle difficulty based on the number of non-whitespace characters
+  Difficulty get difficulty => switch(value.length - whiteSpace.cardinality) {
+    > Constants.difficultyMediumLen => Difficulty.hard,
+    > Constants.difficultyEasyLen => Difficulty.medium,
+    _ => Difficulty.easy,
+  };
 
   void reset() {
     correctCount = 0;
@@ -216,7 +236,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
     on<StartPuzzleEvent>((event, emit) async {
 
-      if (!canGoNext) {
+      if (!canGoNext && !event.forceNext) {
         // Prevent against double clicks on GoNext
         return;
       }
@@ -258,8 +278,14 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
     on<RequestHintEvent>((event, emit) async {
 
+      var reveal = switch(gameState.difficulty) {
+        Difficulty.easy => Constants.revealEasy,
+        Difficulty.medium => Constants.revealMedium,
+        Difficulty.hard => Constants.revealHard,
+      };
+
       final leastUsed = gameState.randomReveal();
-      for(var i =0; i < math.min(Constants.maxInitialReveal, leastUsed.length); i++) {
+      for(var i =0; i < math.min(reveal, leastUsed.length); i++) {
         gameState.reveal(leastUsed[i]);
       }
 
