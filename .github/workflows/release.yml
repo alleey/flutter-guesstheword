@@ -28,7 +28,7 @@ jobs:
           release_name: Release v${{ github.run_number }}
           body: |
             Web version deployed at https://alleey.github.io/flutter-guesstheword/#/
-          draft: false
+          draft: true
           prerelease: false
 
   build-web-android:
@@ -57,7 +57,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-web.zip
-        path: build/web
+        directory: build/web
 
     - name: Attach Web Bundle
       uses: actions/upload-release-asset@v1
@@ -65,7 +65,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.release.outputs.upload_url }}
-        asset_path: guesstheword-v${{ github.run_number }}-web.zip
+        asset_path: build/web/guesstheword-v${{ github.run_number }}-web.zip
         asset_name: guesstheword-v${{ github.run_number }}-web.zip
         asset_content_type: application/zip
 
@@ -106,7 +106,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-linux.zip
-        path: build/linux/x64/release/bundle
+        directory: build/linux/x64/release/bundle
 
     - name: Attach Linux Bundle
       uses: actions/upload-release-asset@v1
@@ -114,7 +114,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.release.outputs.upload_url }}
-        asset_path: guesstheword-v${{ github.run_number }}-linux.zip
+        asset_path: build/linux/x64/release/bundle/guesstheword-v${{ github.run_number }}-linux.zip
         asset_name: guesstheword-v${{ github.run_number }}-linux.zip
         asset_content_type: application/zip
 
@@ -139,7 +139,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-windows.zip
-        path: build/windows/x64/runner/Release
+        directory: build/windows/x64/runner/Release
 
     - name: Attach Windows Bundle
       uses: actions/upload-release-asset@v1
@@ -147,7 +147,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.release.outputs.upload_url }}
-        asset_path: guesstheword-v${{ github.run_number }}-windows.zip
+        asset_path: build/windows/x64/runner/Release/guesstheword-v${{ github.run_number }}-windows.zip
         asset_name: guesstheword-v${{ github.run_number }}-windows.zip
         asset_content_type: application/zip
 
@@ -172,7 +172,7 @@ jobs:
       with:
         type: 'zip'
         filename: guesstheword-v${{ github.run_number }}-macos.zip
-        path: build/macos/Build/Products/Release
+        directory: build/macos/Build/Products/Release
 
     - name: Attach Macos Bundle
       uses: actions/upload-release-asset@v1
@@ -180,6 +180,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.release.outputs.upload_url }}
-        asset_path: guesstheword-v${{ github.run_number }}-macos.zip
+        asset_path: build/macos/Build/Products/Release/guesstheword-v${{ github.run_number }}-macos.zip
         asset_name: guesstheword-v${{ github.run_number }}-macos.zip
         asset_content_type: application/zip
