@@ -8,5 +8,12 @@ class Constants
   static const String symbolSet = "abcdefghijklmnopqrstuvwxyz&";
 
   static const bool enableInitialReveal = true;
-  static const int maxInitialReveal = 1;
+
+  static const int difficultyEasyLen = 10;
+  static const int difficultyMediumLen = 15;
+
+  static const int revealEasy = 1;
+  static const int revealMedium = 2;
+  static const int revealHard = 3;
+
 }
