@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
 import 'common/constants.dart';
@@ -99,9 +100,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Expanded(
           flex: 3,
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.green.shade700,
-              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+            decoration: const BoxDecoration(
+              color: SymbolPad.defaultColorBackground,
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
             ),
             child: _buildTopPanel(context, state)
           ),
@@ -215,8 +216,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
-              side: const BorderSide(width: 4, color: Colors.white70),
+              backgroundColor: Colors.green.shade700,
+              side: const BorderSide(width: 2, color: Colors.white70),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               alignment: Alignment.center,
             ),
@@ -281,31 +282,66 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            "Pick your letters wisely \u{2193}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+        if (!state.isGameOver)
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              "Pick your letters wisely \u{2193}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                ),
+              ),
+          ),
+        if (!state.isGameOver)
+          SymbolPad(
+            frontSymbols: state.symbolSet.toUpperCase(),
+            backSymbols: tried,
+            flipped: state.used,
+            foregroundColor: SymbolButton.defaultColorBackground,
+            backgroundColor: SymbolButton.defaultColorForeground,
+            spacing: 3,
+            runSpacing: 3,
+            buttonSize: const Size(45, 30),
+            onSelect: (c, flipped) {
+              if (!flipped) bloc.add(UserInputEvent(c));
+            },
+          ),
+        if (state.isGameOver)
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              maxLines: 3,
+              'Find more about\n${state.value} \u{2193}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Colors.white,
+                ),
+              ),
+          ),
+        if (state.isGameOver)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              side: const BorderSide(width: 2, color: Colors.white70),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              alignment: Alignment.bottomCenter,
+            ),
+            onPressed: () async {
+              final url = "https://www.google.com/search?q=${state.value}";
+              await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+            },
+            child: Text(
+              'Google',
+              style: TextStyle(
+                fontSize: fontSize,
+                color: Colors.white,
               ),
             ),
-        ),
-        SymbolPad(
-          frontSymbols: state.symbolSet.toUpperCase(),
-          backSymbols: tried,
-          flipped: state.used,
-          foregroundColor: SymbolButton.defaultColorBackground,
-          backgroundColor: SymbolButton.defaultColorForeground,
-          spacing: 3,
-          runSpacing: 3,
-          buttonSize: const Size(45, 30),
-          onSelect: (c, flipped) {
-            if (!flipped) bloc.add(UserInputEvent(c));
-          },
-        ),
+          ),
       ],
     );
   }
