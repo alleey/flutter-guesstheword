@@ -34,7 +34,10 @@ class PuzzleService {
   }
 
   Future delete(int index) async {
-    if (dataService.puzzleBox.isEmpty || index >= dataService.puzzleBox.length)
+
+    if (dataService.puzzleBox.isEmpty ||
+        index < 0 ||
+        index >= dataService.puzzleBox.length)
     {
       return;
     }
