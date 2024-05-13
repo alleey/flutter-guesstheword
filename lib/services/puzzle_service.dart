@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
+import '../common/constants.dart';
 import '../models/puzzle.dart';
 import 'data_service.dart';
 
@@ -47,16 +48,9 @@ class PuzzleService {
   }
 
   Future importAll() async {
-    await importPuzzles("assets/puzzles/animals.json");
-    await importPuzzles("assets/puzzles/cars.json");
-    await importPuzzles("assets/puzzles/countries.json");
-    await importPuzzles("assets/puzzles/emotions.json");
-    await importPuzzles("assets/puzzles/famous-cartoon-chars.json");
-    await importPuzzles("assets/puzzles/flowers.json");
-    await importPuzzles("assets/puzzles/fruits.json");
-    await importPuzzles("assets/puzzles/olympics.json");
-    await importPuzzles("assets/puzzles/sea-creatures.json");
-    await importPuzzles("assets/puzzles/vegetables.json");
+    for(final puzzleset in Constants.puzzleSets) {
+      await importPuzzles("assets/puzzles/$puzzleset.json");
+    }
     log("total number of puzzles: ${dataService.puzzleBox.length}");
   }
 

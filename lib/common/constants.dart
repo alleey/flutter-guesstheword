@@ -18,4 +18,9 @@ class Constants
   static const int revealMedium = 2;
   static const int revealHard = 3;
 
+  static const puzzleSets = [
+    "animals", "cars", "cartoons", "capitals", "countries",
+    "elements", "emotions", "flowers", "fruits",
+    "olympics", "sea-creatures", "vegetables",
+  ];
 }
