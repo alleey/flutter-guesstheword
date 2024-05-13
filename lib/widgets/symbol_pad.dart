@@ -28,6 +28,7 @@ class SymbolPad extends StatelessWidget {
     this.backgroundColorFlipped = defaultColorBackground,
     this.spacing = 0.0,
     this.runSpacing = 0.0,
+    this.alignment = WrapAlignment.center,
     required this.onSelect
   }) :  assert(frontSymbols.length == backSymbols.length) {
 
@@ -46,6 +47,7 @@ class SymbolPad extends StatelessWidget {
   final SymbolSelectCallback onSelect;
   final double spacing;
   final double runSpacing;
+  final WrapAlignment alignment;
   late BitArray? flipped;
   late BitArray? whiteSpace;
 
@@ -59,12 +61,12 @@ class SymbolPad extends StatelessWidget {
     final symbolList = frontSymbols.split('').asMap();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Wrap(
         spacing: spacing,
         runSpacing: runSpacing,
-        alignment: WrapAlignment.center,
+        alignment: alignment,
         children: Iterable<int>.generate(symbolList.length)
           .map((index) {
             if (whiteSpace![index]) {

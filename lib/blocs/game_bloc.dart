@@ -103,6 +103,8 @@ class GameState extends GameBlocState {
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
   bool get isHelpAvailable => score.hintTokens > 0;
+  bool get hasErrors => errorCount > 0;
+  bool get hasCorrect => correctCount > 0;
 
   // Determine puzzle difficulty based on the number of non-whitespace characters
   Difficulty get difficulty => switch(value.length - whiteSpace.cardinality) {

@@ -99,39 +99,21 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Expanded(
           flex: 3,
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.green.shade600,
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
+            color: Colors.green.shade700,
             child: _buildTopPanel(context, state)
           ),
         ),
         Expanded(
           flex: 4,
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.red.shade600,
-              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-            ),
-            child: Stack(
-              children:
-              [
-                _buildPuzzlePanel(context, state),
-                if (!state.isGameOver && state.isHelpAvailable)
-                  Positioned(
-                    top: 0, right: 0, child: _buildHintsOption(context, state)
-                  )
-              ],
-            )
+            color: Colors.red.shade600,
+            child: _buildPuzzlePanel(context, state)
           ),
         ),
         Expanded(
           flex: 5,
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.blue.shade600,
-              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-            ),
+            color: Colors.blue.shade600,
             child: _buildInputPanel(context, state)
           ),
         ),
@@ -140,22 +122,38 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildTopPanel(BuildContext context, GameState state) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        const SizedBox(height: 2,),
-        Expanded(
-          child: _buildScorePanel(context, state)
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 2,),
+            Expanded(
+              child: _buildScorePanel(context, state)
+            ),
+            Expanded(
+              child: FlipCard(
+                showFront: !state.isGameOver,
+                frontCard: _buildStatusPanel(context, state),
+                backCard: _buildGameOverPanel(context, state),
+              ),
+            ),
+            const SizedBox(height: 10,),
+          ],
         ),
-        Expanded(
-          child: FlipCard(
-            showFront: !state.isGameOver,
-            frontCard: _buildStatusPanel(context, state),
-            backCard: _buildGameOverPanel(context, state),
+        if (!state.isGameOver && state.isHelpAvailable && state.hasErrors)
+          Positioned(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: 35,
+                child: _buildHintsOption(context, state)
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 10,),
       ],
     );
   }
@@ -226,7 +224,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
+              backgroundColor: Colors.green.shade900,
               side: const BorderSide(width: 2, color: Colors.white70),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               alignment: Alignment.center,
@@ -249,28 +247,22 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: ElevatedButton (
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          alignment: Alignment.bottomCenter,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap
         ),
         onPressed: () {
           AlertsService().askYesNo(
               context,
-              desc: "You have a total of ${state.score.hintTokens} available reveal tokens. Would you like to consume a token and get a hint?",
+              desc: "You have a total of ${state.score.hintTokens} available hint tokens.\n\nUse a token to reveal one character?",
               type: null,
               callback: () {
                 bloc.add(RequestHintEvent(userInitiated: true));
               }
           ).show();
         },
-        child: const Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            //Icon(Icons.hotel_class_outlined, size: 36, color: Colors.green),
-            Text(
-              "Help?",
-              style: TextStyle(color: Colors.green, fontSize: 20),
-            ),
-          ],
+        child: Text(
+          "Need a Hint?",
+          style: TextStyle(color: Colors.green.shade900, fontSize: 12),
         ),
       )
     );
@@ -305,6 +297,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             backgroundColorFlipped: Colors.white,
             spacing: 3,
             runSpacing: 3,
+            alignment: WrapAlignment.start,
             buttonSize: const Size(45, 30),
             onSelect: (c, f) {},
           ),
@@ -354,15 +347,26 @@ class _PuzzlePageState extends State<PuzzlePage> {
         if (state.isGameOver)
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
-              maxLines: 3,
-              'Find more about\n${state.value} \u{2193}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: fontSize,
-                color: Colors.white,
+            child: Text.rich(
+              TextSpan(
+                style: TextStyle(
+                  fontSize: fontSize,
+                  color: Colors.white,
                 ),
+                children: [
+                  const TextSpan(text: 'Find more about\n',),
+                  TextSpan(
+                    text: state.value,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const TextSpan(text: ' \u{2193}',),
+                ],
               ),
+              textAlign: TextAlign.center,
+            )
           ),
         if (state.isGameOver)
           ElevatedButton(

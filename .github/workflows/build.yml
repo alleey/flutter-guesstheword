@@ -110,7 +110,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}
-        path: build/windows/runner/Release
+        path: build/windows/x64/runner/Release
 
   build-macos:
     runs-on: macos-latest
