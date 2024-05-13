@@ -8,6 +8,7 @@ import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
 import '../main.dart';
+import '../models/puzzle.dart';
 import '../models/score.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
@@ -154,6 +155,8 @@ class GameState extends GameBlocState {
 
   void reveal(String symbol) {
 
+    used.setBit(symbolSet.indexOf(symbol));
+
     int index = -1;
     do {
       index = value.indexOf(symbol, index + 1);
@@ -163,7 +166,6 @@ class GameState extends GameBlocState {
       }
     }
     while(index > -1);
-    used.setBit(symbolSet.indexOf(symbol));
   }
 
   void error(String symbol) {
@@ -243,7 +245,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       canGoNext = false;
 
       final p = await puzzleService.randomPuzzle();
-      //final p = Puzzle(hint: "Famous Cartoon Character", value: "United Arab Emirates");
+      //final p = (-1, Puzzle(hint: "Famous Cartoon Character", value: "United Arab Emirates"));
       if (p == null) {
         emit(NoMorePuzzleState());
         return;
