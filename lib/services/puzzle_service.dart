@@ -12,7 +12,7 @@ import 'data_service.dart';
 
 class PuzzleService {
   final DataService dataService;
-  final _random = math.Random();
+  final random = math.Random();
 
   PuzzleService({required this.dataService});
 
@@ -26,7 +26,7 @@ class PuzzleService {
       return null;
     }
 
-    final index = _random.nextInt(dataService.puzzleBox.length);
+    final index = random.nextInt(dataService.puzzleBox.length);
     final puzzle = dataService.puzzleBox.getAt(index)!;
 
     await dataService.puzzleBox.deleteAt(index);

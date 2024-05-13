@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guess_the_word/main.dart';
 
 import 'blocs/game_bloc.dart';
 import 'common/constants.dart';
@@ -29,7 +30,7 @@ class HomePage extends StatelessWidget {
                   AlertsService().show(
                       context,
                       title: "Guess The Word",
-                      desc: "Version: ${Constants.appVersion}",
+                      desc: "Version: ${globalDataService.version}",
                       callback: () {}
                   ).show();
                 },

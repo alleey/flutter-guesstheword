@@ -1,9 +1,10 @@
 
 class Constants
 {
-  static const int appVersion = 3;
+  static const int appVersion = 4;
   static const int maxErrors = 6;
   static const int maxScoreHistory = 5;
+  static const int scoreBumpForHintBonus = 50;
 
   static const double defaultFontSize = 18;
 

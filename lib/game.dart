@@ -1,9 +1,7 @@
 import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +9,7 @@ import 'blocs/game_bloc.dart';
 import 'common/constants.dart';
 import 'services/alerts_service.dart';
 import 'services/audio_service.dart';
+import 'widgets/blink_effect.dart';
 import 'widgets/flip_card.dart';
 import 'widgets/symbol_button.dart';
 import 'widgets/symbol_pad.dart';
@@ -100,8 +99,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Expanded(
           flex: 3,
           child: Container(
-            decoration: const BoxDecoration(
-              color: SymbolPad.defaultColorBackground,
+            decoration: BoxDecoration(
+              color: Colors.green.shade600,
               borderRadius: BorderRadius.all(Radius.circular(5.0)),
             ),
             child: _buildTopPanel(context, state)
@@ -114,7 +113,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
               color: Colors.red.shade600,
               borderRadius: const BorderRadius.all(Radius.circular(5.0)),
             ),
-            child: _buildPuzzlePanel(context, state)
+            child: Stack(
+              children:
+              [
+                _buildPuzzlePanel(context, state),
+                if (!state.isGameOver && state.isHelpAvailable)
+                  Positioned(
+                    top: 0, right: 0, child: _buildHintsOption(context, state)
+                  )
+              ],
+            )
           ),
         ),
         Expanded(
@@ -181,18 +189,20 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: Iterable<int>.generate(Constants.maxErrors)
-        .map((e) => FlipCard(
-          showFront: (e > (state.errorCount - 1)),
-          frontCard: const Icon(Icons.favorite, size: 36, color: Colors.yellow),
-          backCard: Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.rotationX(math.pi),
-            child: const Icon(Icons.heart_broken, size: 36, color: Colors.black)
-            ),
-          transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-        ))
-        .toList(),
+      children:
+      [
+        ...Iterable<int>.generate(Constants.maxErrors).map((e)
+          => FlipCard(
+              showFront: (e > (state.errorCount - 1)),
+              frontCard: const Icon(Icons.favorite, size: 36, color: Colors.yellow),
+              backCard: Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.rotationX(math.pi),
+                child: const Icon(Icons.heart_broken, size: 36, color: Colors.black)
+              ),
+              transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+            )),
+      ],
     );
   }
 
@@ -231,6 +241,38 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ),
         )
       ],
+    );
+  }
+
+  Widget _buildHintsOption(BuildContext context, GameState state) {
+    return BlinkEffect (
+      child: ElevatedButton (
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          alignment: Alignment.bottomCenter,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+        ),
+        onPressed: () {
+          AlertsService().askYesNo(
+              context,
+              desc: "You have a total of ${state.score.hintTokens} available reveal tokens. Would you like to consume a token and get a hint?",
+              type: null,
+              callback: () {
+                bloc.add(RequestHintEvent(userInitiated: true));
+              }
+          ).show();
+        },
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            //Icon(Icons.hotel_class_outlined, size: 36, color: Colors.green),
+            Text(
+              "Help?",
+              style: TextStyle(color: Colors.green, fontSize: 20),
+            ),
+          ],
+        ),
+      )
     );
   }
 
@@ -331,7 +373,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               alignment: Alignment.bottomCenter,
             ),
             onPressed: () async {
-              final url = "https://www.google.com/search?q=${state.value}";
+              final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.value}");
               await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
             },
             child: Text(

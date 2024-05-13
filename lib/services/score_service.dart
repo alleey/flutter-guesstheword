@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:guess_the_word/common/constants.dart';
 
 import '../models/score.dart';
@@ -25,6 +27,8 @@ class ScoreService {
   }
 
   Future put(Score value) async {
+
+    log("save score: $value");
 
     await dataService.scoreBox.put("current", value);
 

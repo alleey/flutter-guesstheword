@@ -9,11 +9,14 @@ class AlertsService {
   Alert askYesNo(BuildContext context, {
     String? title,
     String? desc,
+    AlertType? type = AlertType.warning,
+    String yesLabel = "Yes",
+    String noLabel = "No",
     VoidCallback? callback
   }) {
     return Alert(
       context: context,
-      type: AlertType.warning,
+      type: type,
       title: title,
       desc: desc,
       style: const AlertStyle(
@@ -26,26 +29,26 @@ class AlertsService {
             Navigator.pop(context);
           },
           color: Colors.red,
-          child: const Text(
-            "Yes",
-            style: TextStyle(color: Colors.white),
+          child: Text(
+            yesLabel,
+            style: const TextStyle(color: Colors.white),
           ),
         ),
         DialogButton(
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-            child: const Text(
-              "No",
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              noLabel,
+              style: const TextStyle(color: Colors.white),
             ),
         )
       ],
     );
   }
 
-
   Alert show(BuildContext context, {
     String? title,
     String? desc,
+    String okLabel = "Continue",
     VoidCallback? callback
   }) {
     return Alert(
@@ -63,9 +66,9 @@ class AlertsService {
             Navigator.of(context, rootNavigator: true).pop();
           },
           color: const Color.fromRGBO(0, 179, 134, 1.0),
-          child: const Text(
-            "Continue",
-            style: TextStyle(color: Colors.white),
+          child: Text(
+            okLabel,
+            style: const TextStyle(color: Colors.white),
           ),
         )
       ],
