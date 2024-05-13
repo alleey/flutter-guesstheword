@@ -41,7 +41,7 @@ jobs:
       env:
         Version: ${{ github.ref_name }}
       run: |
-        echo "{\"version\": \"$Version\"}" > /assets/version.json
+        echo "{\"version\": \"$Version\"}" > assets/version.json
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -101,7 +101,7 @@ jobs:
       env:
         Version: ${{ github.ref_name }}-${{ github.sha }}
       run: |
-        echo "{\"version\": \"$Version\"}" > /assets/version.json
+        echo "{\"version\": \"$Version\"}" > assets/version.json
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -140,7 +140,7 @@ jobs:
       env:
         Version: ${{ github.ref_name }}-${{ github.sha }}
       run: |
-        echo "{\"version\": \"$Version\"}" > /assets/version.json
+        echo "{\"version\": \"$Version\"}" > assets/version.json
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -179,7 +179,7 @@ jobs:
       env:
         Version: ${{ github.ref_name }}-${{ github.sha }}
       run: |
-        echo "{\"version\": \"$Version\"}" > /assets/version.json
+        echo "{\"version\": \"$Version\"}" > assets/version.json
 
     - name: Build
       uses: subosito/flutter-action@v2
