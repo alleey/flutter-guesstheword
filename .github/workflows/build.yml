@@ -63,6 +63,9 @@ jobs:
       run: |
         echo "{\"version\": \"$Version\"}" > assets/version.json
 
+    - name: Upgrade
+      run: sudo apt update & sudo apt upgrade
+
     - name: Install flutter dependencies
       run: sudo apt-get install -y -f clang cmake ninja-build libgtk-3-dev
 
