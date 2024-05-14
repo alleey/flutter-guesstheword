@@ -1,5 +1,9 @@
 
+import 'dart:math' as math;
+
 import 'package:hive/hive.dart';
+
+import '../common/constants.dart';
 
 part 'score.g.dart';
 
@@ -14,19 +18,26 @@ class Score implements Comparable<Score> {
   final int wins;
   @HiveField(3)
   final int losses;
+  @HiveField(4)
+  final int hintTokens;
 
   Score({
     required this.instance,
     this.value = 0,
     this.wins = 0,
     this.losses = 0,
+    this.hintTokens = 0,
   });
 
-  Score solved(int v) {
+  Score solved(int bump) {
+
+    final progress = (value % Constants.scoreBumpForHintBonus) + bump;
+    final hintBonus = (progress / Constants.scoreBumpForHintBonus).floor();
     return Score(
       instance: instance,
-      value: value + v,
+      value: value + bump,
       wins: wins + 1,
+      hintTokens: hintTokens + hintBonus,
       losses: losses
     );
   }
@@ -36,7 +47,18 @@ class Score implements Comparable<Score> {
       instance: instance,
       value: value,
       wins: wins,
+      hintTokens: hintTokens,
       losses: losses + 1
+    );
+  }
+
+  Score consumeToken() {
+    return Score(
+      instance: instance,
+      value: value,
+      wins: wins,
+      hintTokens: math.max(0, hintTokens - 1),
+      losses: losses
     );
   }
 
@@ -46,6 +68,7 @@ class Score implements Comparable<Score> {
       value: int.parse(json["value"]),
       wins: int.parse(json["wins"]),
       losses: int.parse(json["losses"]),
+      hintTokens: int.parse(json["hintTokens"]),
     );
   }
 
@@ -61,5 +84,9 @@ class Score implements Comparable<Score> {
       }
     }
     return v;
+  }
+
+  @override String toString() {
+    return "Score[$instance, $value, $wins, $losses, $hintTokens]";
   }
 }

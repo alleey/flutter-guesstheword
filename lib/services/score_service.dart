@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:guess_the_word/common/constants.dart';
 
 import '../models/score.dart';
@@ -9,7 +11,8 @@ class ScoreService {
   ScoreService({required this.dataService});
 
   Future resetData() async {
-    await put(Score(instance: _randomId));
+    final current = get();
+    await put(Score(instance: _randomId, hintTokens: current.hintTokens));
   }
 
   int get _randomId => DateTime.now().microsecondsSinceEpoch;
@@ -25,6 +28,8 @@ class ScoreService {
   }
 
   Future put(Score value) async {
+
+    log("save score: $value");
 
     await dataService.scoreBox.put("current", value);
 

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../common/constants.dart';
@@ -9,6 +12,7 @@ class DataService {
   late Box<Score> scoreBox;
   late Box<Puzzle> puzzleBox;
   late Box<Map> appDataBox;
+  late String version;
 
   Future initialize() async {
 
@@ -19,5 +23,13 @@ class DataService {
     scoreBox = await Hive.openBox<Score>("score-v${Constants.appVersion}");
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appVersion}");
     appDataBox = await Hive.openBox<Map>('appData-v${Constants.appVersion}');
+
+    version = await getVersion();
+  }
+
+  Future<String> getVersion() async {
+    final jsonString = await rootBundle.loadString('assets/version.json');
+    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    return jsonMap['version'];
   }
 }

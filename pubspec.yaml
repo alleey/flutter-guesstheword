@@ -60,6 +60,7 @@ flutter:
   assets:
     - assets/audio/
     - assets/puzzles/
+    - assets/version.json
   fonts:
     - family: BraahOne
       fonts:

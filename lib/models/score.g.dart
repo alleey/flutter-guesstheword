@@ -21,13 +21,14 @@ class ScoreAdapter extends TypeAdapter<Score> {
       value: fields[1] as int,
       wins: fields[2] as int,
       losses: fields[3] as int,
+      hintTokens: fields[4] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Score obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.instance)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class ScoreAdapter extends TypeAdapter<Score> {
       ..writeByte(2)
       ..write(obj.wins)
       ..writeByte(3)
-      ..write(obj.losses);
+      ..write(obj.losses)
+      ..writeByte(4)
+      ..write(obj.hintTokens);
   }
 
   @override

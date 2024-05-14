@@ -24,11 +24,15 @@ class StartPuzzleEvent extends GameBlocEvent {
   StartPuzzleEvent({this.forceNext = false});
 }
 
-class RequestHintEvent extends GameBlocEvent {}
+class RequestHintEvent extends GameBlocEvent {
+  final bool userInitiated;
+  RequestHintEvent({this.userInitiated = false});
+}
 
 class UserInputEvent extends GameBlocEvent {
   final String symbol;
-  UserInputEvent(this.symbol);
+  final bool hintRequest;
+  UserInputEvent(this.symbol, { this.hintRequest = false });
 }
 
 ////////////////////////////////////////////
@@ -98,6 +102,9 @@ class GameState extends GameBlocState {
   bool get isWin => correctCount >= (value.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
+  bool get isHelpAvailable => score.hintTokens > 0;
+  bool get hasErrors => errorCount > 0;
+  bool get hasCorrect => correctCount > 0;
 
   // Determine puzzle difficulty based on the number of non-whitespace characters
   Difficulty get difficulty => switch(value.length - whiteSpace.cardinality) {
@@ -115,9 +122,10 @@ class GameState extends GameBlocState {
     revealed = BitArray(value.length);
     whiteSpace = BitArray(value.length);
 
-    for (var index in Iterable<int>.generate(value.length)) {
+    final valueLower = value.toLowerCase();
+    for (var index in Iterable<int>.generate(valueLower.length)) {
       // symbols not in the symbolSet are revealed and displayed as WS
-      var symbol = value[index];
+      var symbol = valueLower[index];
       if (!symbolSet.contains(symbol)) {
         revealed.setBit(index);
         whiteSpace.setBit(index);
@@ -128,8 +136,10 @@ class GameState extends GameBlocState {
   List<String> randomReveal() {
 
     final histogram = <String,int>{};
-    for (var index in Iterable<int>.generate(value.length)) {
-      var symbol = value[index];
+    final valueLower = value.toLowerCase();
+
+    for (var index in Iterable<int>.generate(valueLower.length)) {
+      var symbol = valueLower[index];
       if (symbolSet.contains(symbol) && !revealed[index]) {
         if (!histogram.containsKey(symbol)) {
           histogram[symbol] = 0;
@@ -137,11 +147,12 @@ class GameState extends GameBlocState {
         histogram[symbol] = histogram[symbol]! + 1;
       }
     }
+
     return leastUsedSymbols(histogram);
   }
 
-  List<String> leastUsedSymbols(Map<String, int> leastUsed) {
-    final en = leastUsed.entries.toList();
+  List<String> leastUsedSymbols(Map<String, int> histogram) {
+    final en = histogram.entries.toList();
     en.sort((a,b)  {
       return a.value.compareTo(b.value);
     });
@@ -158,8 +169,9 @@ class GameState extends GameBlocState {
     used.setBit(symbolSet.indexOf(symbol));
 
     int index = -1;
+    final valueLower = value.toLowerCase();
     do {
-      index = value.indexOf(symbol, index + 1);
+      index = valueLower.indexOf(symbol, index + 1);
       if (index >= 0) {
         revealed.setBit(index);
         correctCount ++;
@@ -173,7 +185,7 @@ class GameState extends GameBlocState {
     errorCount += 1;
   }
 
-  bool update(String symbol) {
+  bool update(String symbol, bool hintRequest) {
 
     if (isGameOver) {
       return false;
@@ -185,16 +197,23 @@ class GameState extends GameBlocState {
       return false;
     }
 
-    lastInputError = !value.contains(symbol);
+    final valueLower = value.toLowerCase();
+    lastInputError = !valueLower.contains(symbol);
     winBonus = 0;
 
     if (!lastInputError) {
 
       reveal(symbol);
+
+      if (hintRequest) {
+        score = score.consumeToken();
+        log("consumed a hint token: ${score.hintTokens} remaining");
+      }
+
       if (isWin) {
         // Calculate score based on length of puzzle and number of error
         // longer puzzles and fewer errors get more score
-        winBonus = value.length * (Constants.maxErrors - errorCount);
+        winBonus = valueLower.length * (Constants.maxErrors - errorCount);
         score = score.solved(winBonus);
       }
     } else {
@@ -209,6 +228,7 @@ class GameState extends GameBlocState {
     log("revealed: ${revealed.toBinaryString()}");
     log("correct: $correctCount");
     log("errors: $errorCount");
+    log("score: $score");
 
     return true;
   }
@@ -221,6 +241,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
   final appDataService = AppDataService(dataService: globalDataService);
   final puzzleService = PuzzleService(dataService: globalDataService);
   final scoreService = ScoreService(dataService: globalDataService);
+  final random = math.Random();
+
   late GameState gameState;
   late bool canGoNext = true;
 
@@ -254,24 +276,27 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       gameState = GameState(
         puzzleId: p.$1,
         hint: p.$2.hint,
-        value: p.$2.value.toLowerCase(),
+        value: p.$2.value,
       );
       gameState.score = scoreService.get();
+      //gameState.score = gameState.score.solved(500);
 
+      log("score: ${gameState.score}");
       emit(PuzzleStartState());
       emit(GameState.clone(gameState));
     });
 
     on<UserInputEvent>((event, emit) async {
 
-      if (gameState.update(event.symbol.toLowerCase())) {
+      if (gameState.update(event.symbol.toLowerCase(), event.hintRequest)) {
 
+        await scoreService.put(gameState.score);
         if (gameState.isGameOver) {
-          await scoreService.put(gameState.score);
           await puzzleService.delete(gameState.puzzleId);
           canGoNext = true;
         }
 
+        log("score: ${gameState.score}");
         emit(gameState.lastInputError ? InputMismatchState() : InputMatchState());
         emit(GameState.clone(gameState));
       }
@@ -280,17 +305,33 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
     on<RequestHintEvent>((event, emit) async {
 
-      var reveal = switch(gameState.difficulty) {
-        Difficulty.easy => Constants.revealEasy,
-        Difficulty.medium => Constants.revealMedium,
-        Difficulty.hard => Constants.revealHard,
-      };
-
       final leastUsed = gameState.randomReveal();
+      if (leastUsed.isEmpty) {
+        return;
+      }
+
+      // This request hint was generated by a user action (helpline). In this case we fake a
+      // user input to make sure the rest of the logic is triggered
+      //
+      if (event.userInitiated) {
+        add(UserInputEvent(
+          leastUsed[random.nextInt(leastUsed.length)],
+          hintRequest: true
+        ));
+        return;
+      }
+
+      var reveal = switch(gameState.difficulty) {
+          Difficulty.easy => Constants.revealEasy,
+          Difficulty.medium => Constants.revealMedium,
+          Difficulty.hard => Constants.revealHard,
+        };
+
       for(var i =0; i < math.min(reveal, leastUsed.length); i++) {
         gameState.reveal(leastUsed[i]);
       }
 
+      log("score: ${gameState.score}");
       emit(InputMatchState());
       emit(GameState.clone(gameState));
     });
