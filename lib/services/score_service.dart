@@ -11,7 +11,8 @@ class ScoreService {
   ScoreService({required this.dataService});
 
   Future resetData() async {
-    await put(Score(instance: _randomId));
+    final current = get();
+    await put(Score(instance: _randomId, hintTokens: current.hintTokens));
   }
 
   int get _randomId => DateTime.now().microsecondsSinceEpoch;

@@ -67,7 +67,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             break;
 
           case NoMorePuzzleState _:
-            AlertsService().show(
+            AlertsService().okDialog(
               context,
               title: "Congratulations!",
               desc: resetGameQuestion,
@@ -143,13 +143,15 @@ class _PuzzlePageState extends State<PuzzlePage> {
             const SizedBox(height: 10,),
           ],
         ),
+
         if (!state.isGameOver && state.isHelpAvailable && state.hasErrors)
+          // Wait for the first error before offering hints
           Positioned(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
-                height: 35,
+                height: 30,
                 child: _buildHintsOption(context, state)
               ),
             ),
@@ -159,26 +161,39 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildScorePanel(BuildContext context, GameState state) {
-    final fontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? Constants.defaultFontSize;
+    final fontSize = Theme.of(context).textTheme.titleLarge?.fontSize ?? Constants.defaultFontSize;
     return FittedBox(
       fit: BoxFit.scaleDown,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            " Score: ${state.score.value}  ",
-            style: TextStyle(fontSize: fontSize, color: Colors.white),
+      child: Text.rich(
+        textAlign: TextAlign.center,
+        TextSpan(
+          style: TextStyle(
+            fontSize: fontSize,
+            color: Colors.white,
           ),
-          Text(
-            "Won: ${state.score.wins}  ",
-            style: TextStyle(fontSize: fontSize, color: Colors.white),
-          ),
-          Text(
-            "Lost: ${state.score.losses} ",
-            style: TextStyle(fontSize: fontSize, color: Colors.white),
-          ),
-        ],
+          children: [
+            const TextSpan(
+              text: '\u{273D}',
+              style: TextStyle(
+                color: Colors.yellow,
+                fontWeight: FontWeight.bold,
+              )
+            ),
+            TextSpan(
+              text: "${state.score.value}-${state.score.wins}-${state.score.losses}      ",
+            ),
+            const TextSpan(
+              text: '\u{2726}',
+              style: TextStyle(
+                color: Colors.yellow,
+                fontWeight: FontWeight.bold,
+              )
+            ),
+            TextSpan(
+              text: " ${state.score.hintTokens}",
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -212,7 +227,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         FittedBox(
           fit: BoxFit.contain,
           child: Text(
-            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{274C}',
+            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: state.isWin ? const Color.fromARGB(255, 8, 254, 16) : Colors.redAccent,
@@ -251,17 +266,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap
         ),
         onPressed: () {
-          AlertsService().askYesNo(
-              context,
-              desc: "You have a total of ${state.score.hintTokens} available hint tokens.\n\nUse a token to reveal one character?",
-              type: null,
-              callback: () {
-                bloc.add(RequestHintEvent(userInitiated: true));
-              }
-          ).show();
+          bloc.add(RequestHintEvent(userInitiated: true));
         },
         child: Text(
-          "Need a Hint?",
+          "Use a Hint!",
           style: TextStyle(color: Colors.green.shade900, fontSize: 12),
         ),
       )
@@ -310,7 +318,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final fontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? Constants.defaultFontSize;
     final tried = state.symbolSet
         .split('')
-        .map((e) => state.value.contains(e) ? '\u{2713}' : '\u{274C}')
+        .map((e) => state.value.toLowerCase().contains(e) ? '\u{2713}' : '\u{2717}')
         .join();
 
     return Column(
@@ -348,6 +356,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text.rich(
+              textAlign: TextAlign.center,
               TextSpan(
                 style: TextStyle(
                   fontSize: fontSize,
@@ -365,7 +374,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   const TextSpan(text: ' \u{2193}',),
                 ],
               ),
-              textAlign: TextAlign.center,
             )
           ),
         if (state.isGameOver)
