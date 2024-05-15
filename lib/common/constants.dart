@@ -12,8 +12,8 @@ class Constants
 
   static const bool enableInitialReveal = true;
 
-  static const int difficultyEasyLen = 10;
-  static const int difficultyMediumLen = 15;
+  static const int difficultyEasyLen = 8;
+  static const int difficultyMediumLen = 12;
 
   static const int revealEasy = 1;
   static const int revealMedium = 2;
