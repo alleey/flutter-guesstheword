@@ -59,24 +59,16 @@ class SymbolPad extends StatelessWidget {
   Widget _buildPanel(BuildContext context) {
 
     final symbolList = frontSymbols.split('').asMap();
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Wrap(
-        spacing: spacing,
-        runSpacing: runSpacing,
-        alignment: alignment,
-        children: Iterable<int>.generate(symbolList.length)
-          .map((index) {
-            if (whiteSpace![index]) {
-              return SizedBox(width: whiteSpaceWidth,);
-            }
-            return _buildCard(context, index);
-          })
-          .toList(),
-        ),
-      ],
+    return Wrap(
+      spacing: spacing,
+      runSpacing: runSpacing,
+      alignment: alignment,
+      children: Iterable<int>.generate(symbolList.length).map((index) {
+        if (whiteSpace![index]) {
+          return SizedBox(width: whiteSpaceWidth,);
+        }
+        return _buildCard(context, index);
+      }).toList(),
     );
   }
 

@@ -7,6 +7,9 @@ import '../common/constants.dart';
 import '../models/puzzle.dart';
 import '../models/score.dart';
 
+// The only global we have to tolerate
+final globalDataService = DataService();
+
 class DataService {
 
   late Box<Score> scoreBox;

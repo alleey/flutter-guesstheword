@@ -4,12 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
 //import 'device_frame.dart';
+import 'blocs/settings_bloc.dart';
 import 'home_page.dart';
 import 'services/data_service.dart';
 import 'services/puzzle_service.dart';
-
-// The only global we have to tolerate
-final globalDataService = DataService();
 
 Future<void> main() async {
 
@@ -34,7 +32,10 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<GameBloc>(
             create: (BuildContext context) => GameBloc(),
-          )
+          ),
+          BlocProvider<SettingsBloc>(
+            create: (BuildContext context) => SettingsBloc(),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

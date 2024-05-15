@@ -8,9 +8,8 @@ import 'package:guess_the_word/common/histogram.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
-import '../main.dart';
-import '../models/puzzle.dart';
 import '../models/score.dart';
+import '../services/data_service.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
 
@@ -265,7 +264,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      //gameState.score = gameState.score.bump(500);
+      gameState.score = gameState.score.bump(500);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
