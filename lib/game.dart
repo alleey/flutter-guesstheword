@@ -144,13 +144,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ],
         ),
 
-        if (!state.isGameOver && state.isHelpAvailable && state.hasErrors)
-          // Wait for the first error before offering hints
+        if (!state.isGameOver && state.isHelpAvailable)
           Positioned(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
+                width: MediaQuery.of(context).size.width * 0.5,
                 height: 30,
                 child: _buildHintsOption(context, state)
               ),
@@ -190,7 +189,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               )
             ),
             TextSpan(
-              text: " ${state.score.hintTokens}",
+              text: "${state.score.hintTokens}",
             ),
           ],
         ),
@@ -266,11 +265,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap
         ),
         onPressed: () {
-          bloc.add(RequestHintEvent(userInitiated: true));
+          bloc.add(UseHintTokenEvent());
         },
         child: Text(
-          "Use a Hint!",
-          style: TextStyle(color: Colors.green.shade900, fontSize: 12),
+          "Use a Hint",
+          style: TextStyle(color: Colors.green.shade900),
         ),
       )
     );
@@ -297,8 +296,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Padding(
           padding: const EdgeInsets.all(2.0),
           child: SymbolPad(
-            frontSymbols: '?' * state.value.length,
-            backSymbols: state.value.toUpperCase(),
+            frontSymbols: '?' * state.puzzle.length,
+            backSymbols: state.puzzle.toUpperCase(),
             flipped: state.revealed,
             whiteSpace: state.whiteSpace,
             foregroundColorFlipped: SymbolButton.defaultColorBackground,
@@ -318,7 +317,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final fontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? Constants.defaultFontSize;
     final tried = state.symbolSet
         .split('')
-        .map((e) => state.value.toLowerCase().contains(e) ? '\u{2713}' : '\u{2717}')
+        .map((e) => state.puzzle.toLowerCase().contains(e) ? '\u{2713}' : '\u{2717}')
         .join();
 
     return Column(
@@ -365,7 +364,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 children: [
                   const TextSpan(text: 'Find more about\n',),
                   TextSpan(
-                    text: state.value,
+                    text: state.puzzle,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -385,7 +384,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               alignment: Alignment.bottomCenter,
             ),
             onPressed: () async {
-              final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.value}");
+              final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
               await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
             },
             child: Text(

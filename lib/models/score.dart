@@ -29,7 +29,7 @@ class Score implements Comparable<Score> {
     this.hintTokens = 0,
   });
 
-  Score solved(int bump) {
+  Score bump(int bump) {
 
     final progress = (value % Constants.scoreBumpForHintBonus) + bump;
     final hintBonus = (progress / Constants.scoreBumpForHintBonus).floor();

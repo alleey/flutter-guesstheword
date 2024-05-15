@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:bit_array/bit_array.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guess_the_word/common/histogram.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
@@ -25,8 +26,11 @@ class StartPuzzleEvent extends GameBlocEvent {
 }
 
 class RequestHintEvent extends GameBlocEvent {
-  final bool userInitiated;
-  RequestHintEvent({this.userInitiated = false});
+  RequestHintEvent();
+}
+
+class UseHintTokenEvent extends GameBlocEvent {
+  UseHintTokenEvent();
 }
 
 class UserInputEvent extends GameBlocEvent {
@@ -58,7 +62,7 @@ class GameState extends GameBlocState {
   GameState({
     required this.puzzleId,
     required this.hint,
-    required this.value,
+    required this.puzzle,
   }) {
     symbolSet = Constants.symbolSet.toLowerCase();
     reset();
@@ -68,7 +72,7 @@ class GameState extends GameBlocState {
     final p = GameState(
       puzzleId: other.puzzleId,
       hint: other.hint,
-      value: other.value,
+      puzzle: other.puzzle,
     );
     p.used = other.used;
     p.revealed = other.revealed;
@@ -83,7 +87,7 @@ class GameState extends GameBlocState {
 
   final int puzzleId;
   final String hint;
-  final String value;
+  final String puzzle;
 
   // All possible symbols
   late String symbolSet;
@@ -99,7 +103,7 @@ class GameState extends GameBlocState {
   late bool lastInputError;
   late Score score;
 
-  bool get isWin => correctCount >= (value.length - whiteSpace.cardinality);
+  bool get isWin => correctCount >= (puzzle.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
   bool get isHelpAvailable => score.hintTokens > 0;
@@ -107,7 +111,7 @@ class GameState extends GameBlocState {
   bool get hasCorrect => correctCount > 0;
 
   // Determine puzzle difficulty based on the number of non-whitespace characters
-  Difficulty get difficulty => switch(value.length - whiteSpace.cardinality) {
+  Difficulty get difficulty => switch(puzzle.length - whiteSpace.cardinality) {
     > Constants.difficultyMediumLen => Difficulty.hard,
     > Constants.difficultyEasyLen => Difficulty.medium,
     _ => Difficulty.easy,
@@ -119,10 +123,10 @@ class GameState extends GameBlocState {
     winBonus = 0;
     lastInputError = false;
     used = BitArray(symbolSet.length);
-    revealed = BitArray(value.length);
-    whiteSpace = BitArray(value.length);
+    revealed = BitArray(puzzle.length);
+    whiteSpace = BitArray(puzzle.length);
 
-    final valueLower = value.toLowerCase();
+    final valueLower = puzzle.toLowerCase();
     for (var index in Iterable<int>.generate(valueLower.length)) {
       // symbols not in the symbolSet are revealed and displayed as WS
       var symbol = valueLower[index];
@@ -133,35 +137,17 @@ class GameState extends GameBlocState {
     }
   }
 
-  List<String> randomReveal() {
+  Histogram histogramOfUnrevealed() {
 
-    final histogram = <String,int>{};
-    final valueLower = value.toLowerCase();
+    final histogram = Histogram();
+    final valueLower = puzzle.toLowerCase();
 
-    for (var index in Iterable<int>.generate(valueLower.length)) {
-      var symbol = valueLower[index];
-      if (symbolSet.contains(symbol) && !revealed[index]) {
-        if (!histogram.containsKey(symbol)) {
-          histogram[symbol] = 0;
-        }
-        histogram[symbol] = histogram[symbol]! + 1;
-      }
-    }
+    Iterable<int>.generate(valueLower.length)
+      .where((index) => symbolSet.contains(valueLower[index]) && !revealed[index])
+      .map((index) => valueLower[index])
+      .forEach((symbol) => histogram.add(symbol));
 
-    return leastUsedSymbols(histogram);
-  }
-
-  List<String> leastUsedSymbols(Map<String, int> histogram) {
-    final en = histogram.entries.toList();
-    en.sort((a,b)  {
-      return a.value.compareTo(b.value);
-    });
-    final least = en
-        .where((e) => e.value == en[0].value)
-        .map((e) => e.key)
-        .toList();
-    least.shuffle();
-    return least;
+    return histogram;
   }
 
   void reveal(String symbol) {
@@ -169,7 +155,7 @@ class GameState extends GameBlocState {
     used.setBit(symbolSet.indexOf(symbol));
 
     int index = -1;
-    final valueLower = value.toLowerCase();
+    final valueLower = puzzle.toLowerCase();
     do {
       index = valueLower.indexOf(symbol, index + 1);
       if (index >= 0) {
@@ -197,7 +183,7 @@ class GameState extends GameBlocState {
       return false;
     }
 
-    final valueLower = value.toLowerCase();
+    final valueLower = puzzle.toLowerCase();
     lastInputError = !valueLower.contains(symbol);
     winBonus = 0;
 
@@ -214,7 +200,7 @@ class GameState extends GameBlocState {
         // Calculate score based on length of puzzle and number of error
         // longer puzzles and fewer errors get more score
         winBonus = valueLower.length * (Constants.maxErrors - errorCount);
-        score = score.solved(winBonus);
+        score = score.bump(winBonus);
       }
     } else {
 
@@ -276,10 +262,10 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       gameState = GameState(
         puzzleId: p.$1,
         hint: p.$2.hint,
-        value: p.$2.value,
+        puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      //gameState.score = gameState.score.solved(500);
+      //gameState.score = gameState.score.bump(500);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
@@ -302,38 +288,44 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       }
     });
 
-
     on<RequestHintEvent>((event, emit) async {
 
-      final leastUsed = gameState.randomReveal();
-      if (leastUsed.isEmpty) {
+      final histogram = gameState.histogramOfUnrevealed();
+      if (histogram.isEmpty) {
+        return;
+      }
+
+      var reveal = switch(gameState.difficulty) {
+        Difficulty.easy => Constants.revealEasy,
+        Difficulty.medium => Constants.revealMedium,
+        Difficulty.hard => Constants.revealHard,
+      };
+
+      final leastOccuring = histogram.keysLeastOrder();
+      for(var i =0; i < math.min(reveal, leastOccuring.length); i++) {
+        gameState.reveal(leastOccuring[i]);
+      }
+
+      log("score: ${gameState.score}");
+      emit(InputMatchState());
+      emit(GameState.clone(gameState));
+    });
+
+
+    on<UseHintTokenEvent>((event, emit) async {
+
+      final histogram = gameState.histogramOfUnrevealed();
+      if (histogram.isEmpty) {
         return;
       }
 
       // This request hint was generated by a user action (helpline). In this case we fake a
       // user input to make sure the rest of the logic is triggered
       //
-      if (event.userInitiated) {
-        add(UserInputEvent(
-          leastUsed[random.nextInt(leastUsed.length)],
-          hintRequest: true
-        ));
-        return;
-      }
-
-      var reveal = switch(gameState.difficulty) {
-          Difficulty.easy => Constants.revealEasy,
-          Difficulty.medium => Constants.revealMedium,
-          Difficulty.hard => Constants.revealHard,
-        };
-
-      for(var i =0; i < math.min(reveal, leastUsed.length); i++) {
-        gameState.reveal(leastUsed[i]);
-      }
-
-      log("score: ${gameState.score}");
-      emit(InputMatchState());
-      emit(GameState.clone(gameState));
+      add(UserInputEvent(
+        histogram.keys.toList()[random.nextInt(histogram.length)],
+        hintRequest: true
+      ));
     });
   }
 }
