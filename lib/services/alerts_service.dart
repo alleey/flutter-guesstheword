@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../blocs/settings_bloc.dart';
 import '../common/constants.dart';
-import '../main.dart';
+import '../widgets/color_scheme_picker.dart';
+import 'data_service.dart';
 import 'score_service.dart';
 
 class AlertsService {
@@ -78,12 +80,12 @@ class AlertsService {
   }
 
   Alert helpDialog(BuildContext context) {
-
     return Alert(
       context: context,
       title: "Guess The Word",
+      padding: const EdgeInsets.all(10),
       content: DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 16),
+        style: const TextStyle(fontSize: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -179,6 +181,30 @@ class AlertsService {
           color: const Color.fromRGBO(0, 179, 134, 1.0),
           child: const Text(
             "Close",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Alert themePicker(BuildContext context, {
+    required String selectedTheme,
+    required ColorSchemeSelectionCallback callback
+  }) {
+
+    return Alert(
+      context: context,
+      title: "Pick a Theme",
+      content: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: callback,),
+      buttons: [
+        DialogButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          child: const Text(
+            "Apply",
             style: TextStyle(color: Colors.white),
           ),
         ),

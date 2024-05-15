@@ -8,9 +8,8 @@ import 'package:guess_the_word/common/histogram.dart';
 import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../common/constants.dart';
-import '../main.dart';
-import '../models/puzzle.dart';
 import '../models/score.dart';
+import '../services/data_service.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
 

@@ -15,8 +15,8 @@ class BlinkEffect extends StatefulWidget {
 class _BlinkEffectState extends State<BlinkEffect> with SingleTickerProviderStateMixin {
 
   late final AnimationController controller = AnimationController(
-    duration: const Duration(milliseconds: 1200),
-    lowerBound: 0.7,
+    duration: const Duration(milliseconds: 2000),
+    lowerBound: 0.6,
     vsync: this,
   )..repeat(reverse: true);
 
