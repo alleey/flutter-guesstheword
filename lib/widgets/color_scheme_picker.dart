@@ -35,8 +35,8 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
   Widget build(BuildContext context) {
     return Wrap(
       alignment: WrapAlignment.center,
-        runSpacing: 15,
-        spacing: 15,
+        runSpacing: 3,
+        spacing: 3,
         children: GameColorSchemes.all.mapIndexed((index, e) =>
           InkWell(
             onTap: () {
@@ -52,16 +52,19 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
               width: 75,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: (e.key == selectedTheme) ? const Color.fromARGB(255, 8, 254, 16) : Colors.transparent,
-                  width: 8
+                  color: (e.key == selectedTheme) ? Colors.black : Colors.transparent,
+                  width: 3
                 )
               ),
-              child: Column(
-                children: [
-                  Expanded(child: Container(color: e.value.backgroundTopPanel, child: const SizedBox(height: 100, width: 100,),)),
-                  Expanded(child: Container(color: e.value.backgroundPuzzlePanel, child: const SizedBox(height: 100, width: 100,),)),
-                  Expanded(child: Container(color: e.value.backgroundInputPanel, child: const SizedBox(height: 100, width: 100,),)),
-                ]
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: Column(
+                  children: [
+                    Expanded(child: Container(color: e.value.backgroundTopPanel, child: const SizedBox(height: 100, width: 100,),)),
+                    Expanded(child: Container(color: e.value.backgroundPuzzlePanel, child: const SizedBox(height: 100, width: 100,),)),
+                    Expanded(child: Container(color: e.value.backgroundInputPanel, child: const SizedBox(height: 100, width: 100,),)),
+                  ]
+                ),
               ),
             ),
           )

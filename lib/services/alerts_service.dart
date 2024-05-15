@@ -83,8 +83,9 @@ class AlertsService {
     return Alert(
       context: context,
       title: "Guess The Word",
+      padding: const EdgeInsets.all(10),
       content: DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 16),
+        style: const TextStyle(fontSize: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -203,7 +204,7 @@ class AlertsService {
           },
           color: const Color.fromRGBO(0, 179, 134, 1.0),
           child: const Text(
-            "Close",
+            "Apply",
             style: TextStyle(color: Colors.white),
           ),
         ),

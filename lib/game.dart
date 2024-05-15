@@ -174,7 +174,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               alignment: Alignment.bottomCenter,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.5,
-                height: 30,
+                height: 25,
                 child: _buildHintsOption(context, state)
               ),
             ),
@@ -286,7 +286,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return BlinkEffect (
       child: ElevatedButton (
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.textHintButton,
+          backgroundColor: colorScheme.backgroundHintButton,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           alignment: Alignment.bottomCenter
@@ -296,7 +296,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         },
         child: Text(
           "Use a Hint",
-          style: TextStyle(color: colorScheme.backgroundHintButton),
+          style: TextStyle(color: colorScheme.textHintButton),
         ),
       )
     );

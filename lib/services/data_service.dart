@@ -23,9 +23,9 @@ class DataService {
     Hive.registerAdapter(ScoreAdapter());
     Hive.registerAdapter(PuzzleAdapter());
 
-    scoreBox = await Hive.openBox<Score>("score-v${Constants.appVersion}");
-    puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appVersion}");
-    appDataBox = await Hive.openBox<Map>('appData-v${Constants.appVersion}');
+    scoreBox = await Hive.openBox<Score>("score-v${Constants.appDataVersion}");
+    puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
+    appDataBox = await Hive.openBox<Map>('appData-v${Constants.appDataVersion}');
 
     version = await getVersion();
   }

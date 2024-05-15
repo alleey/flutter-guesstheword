@@ -264,7 +264,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      gameState.score = gameState.score.bump(500);
+      //gameState.score = gameState.score.bump(500);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
