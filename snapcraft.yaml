@@ -11,7 +11,7 @@ icon: snap/gui/guesstheword.png
 apps:
   guesstheword:
     command: desktop-launch $SNAP/usr/bin/guesstheword
-    desktop: guesstheword.desktop
+    desktop: snap/gui/guesstheword.desktop
     plugs:
       - desktop
 
