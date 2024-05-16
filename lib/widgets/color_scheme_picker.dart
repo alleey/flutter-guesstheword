@@ -48,8 +48,8 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
               });
             },
             child: Container(
-              height: 90,
-              width: 75,
+              height: 80,
+              width: 60,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: (e.key == selectedTheme) ? Colors.black : Colors.transparent,

@@ -204,7 +204,7 @@ class AlertsService {
           },
           color: const Color.fromRGBO(0, 179, 134, 1.0),
           child: const Text(
-            "Apply",
+            "Close",
             style: TextStyle(color: Colors.white),
           ),
         ),
