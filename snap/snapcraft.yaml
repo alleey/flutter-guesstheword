@@ -3,7 +3,7 @@ version: 1.1.2
 summary: Guess The Word
 description: Another take on classic hangman guess the word game.
 confinement: strict
-base: core20
+base: core18
 grade: stable
 icon: gui/guesstheword.png
 
