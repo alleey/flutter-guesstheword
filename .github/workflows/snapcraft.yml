@@ -53,5 +53,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Snap-guesstheword-${{ github.ref_name }}-${{ github.sha }}
-        path: snap
+        path: "*.snap"
 
