@@ -5,7 +5,7 @@ description: Another take on classic hangman guess the word game.
 confinement: strict
 base: core20
 grade: stable
-icon: snap/gui/guesstheword.png
+icon: gui/guesstheword.png
 
 apps:
   guesstheword:
