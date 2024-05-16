@@ -20,6 +20,7 @@ parts:
     plugin: dump
     source: build/linux/x64/release/bundle
     stage-packages:
+      - libarmadillo-dev
       - libunwind-dev
       - libgstreamer1.0-dev
       - libgstreamer-plugins-bad1.0-dev
