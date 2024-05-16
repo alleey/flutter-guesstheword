@@ -18,5 +18,5 @@ apps:
 parts:
   guesstheword:
     plugin: flutter
-    flutter-target: ../lib/main.dart
+    flutter-target: lib/main.dart
     source: .
