@@ -6,7 +6,7 @@ description: Another take on classic hangman guess the word game.
 confinement: strict
 base: core22
 grade: stable
-icon: gui/guesstheword.png
+icon: snap/gui/guesstheword.png
 
 apps:
   guesstheword:
@@ -19,4 +19,4 @@ parts:
   guesstheword:
     plugin: flutter
     flutter-target: ../lib/main.dart
-    source: ..
+    source: .
