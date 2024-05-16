@@ -15,6 +15,7 @@ sealed class GameColorSchemes {
     "4": GameColorScheme.theme4(),
     "5": GameColorScheme.theme5(),
     "6": GameColorScheme.theme6(),
+    "7": GameColorScheme.theme7(),
   };
 
   static Iterable<MapEntry<String, GameColorScheme>> get all => _schemes.entries;
@@ -87,43 +88,50 @@ class GameColorScheme {
     this.backgroundInputButton = Colors.black,
   });
 
-  factory GameColorScheme.defaultScheme() => GameColorScheme(
+  factory GameColorScheme.defaultScheme() {
 
-    backgroundTopPanel: Colors.green.shade700,
-    backgroundPuzzlePanel: Colors.red.shade600,
-    backgroundInputPanel: Colors.blue.shade600,
+    var color1 = _fromHex("114232");
+    var color2 = _fromHex("87a922");
+    var color3 = _fromHex("fcdc2a");
+    var color4 = _fromHex("f7f6bb");
 
-    textTopPanel: Colors.white,
-    backgroundTopButton: Colors.green.shade900,
-    textHintButton: Colors.white,
-    backgroundHintButton: Colors.green.shade700,
+    return GameColorScheme(
+      backgroundTopPanel: color1,
+      backgroundPuzzlePanel: color2,
+      backgroundInputPanel: color3,
 
-    colorIcons: Colors.yellow,
-    colorSuccess: const Color.fromARGB(255, 8, 254, 16),
-    colorFailure: Colors.redAccent,
-    colorHeart: Colors.yellow,
-    colorHeartBroken: Colors.black,
+      textTopPanel: color4,
+      backgroundTopButton: color1,
+      textHintButton: color1,
+      backgroundHintButton: color4,
 
-    textPuzzlePanel: Colors.white,
-    textPuzzleSymbols: SymbolPad.defaultColorForeground,
-    textPuzzleSymbolsFlipped: SymbolPad.defaultColorBackground,
-    backgroundPuzzleSymbols: SymbolPad.defaultColorBackground,
-    backgroundPuzzleSymbolsFlipped: Colors.white,
+      colorIcons: Colors.yellow,
+      colorSuccess: const Color.fromARGB(255, 8, 254, 16),
+      colorFailure: Colors.redAccent,
+      colorHeart: Colors.yellow,
+      colorHeartBroken: color4,
 
-    textInputPanel: Colors.white,
-    textInputSymbols: Colors.black,
-    textInputSymbolsFlipped: Colors.white,
-    backgroundInputSymbols: SymbolPad.defaultColorForeground,
-    backgroundInputSymbolsFlipped: Colors.blue.shade600,
-    backgroundInputButton: Colors.blue.shade900,
-  );
+      textPuzzlePanel: color1,
+      textPuzzleSymbols: color4,
+      textPuzzleSymbolsFlipped: color1,
+      backgroundPuzzleSymbols: color1,
+      backgroundPuzzleSymbolsFlipped: color4,
+
+      textInputPanel: color1,
+      textInputSymbols: color4,
+      backgroundInputSymbols: color1,
+      textInputSymbolsFlipped: color1,
+      backgroundInputSymbolsFlipped: color4,
+      backgroundInputButton: color1,
+    );
+  }
 
   factory GameColorScheme.theme1() {
 
     var color1 = _fromHex("151515");
-    var color2 = _fromHex("A91D3A");
-    var color3 = _fromHex("C73659");
-    var color4 = _fromHex("EEEEEE");
+    var color2 = _fromHex("a91d3a");
+    var color3 = _fromHex("c73659");
+    var color4 = _fromHex("eeeeee");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -158,10 +166,10 @@ class GameColorScheme {
 
   factory GameColorScheme.theme2() {
 
-    var color1 = _fromHex("F5DAD2");
-    var color2 = _fromHex("FCFFE0");
-    var color3 = _fromHex("BACD92");
-    var color4 = _fromHex("75A47F");
+    var color1 = _fromHex("f5dad2");
+    var color2 = _fromHex("fcffe0");
+    var color3 = _fromHex("bacd92");
+    var color4 = _fromHex("75a47f");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -196,10 +204,10 @@ class GameColorScheme {
 
   factory GameColorScheme.theme3() {
 
-    var color1 = _fromHex("C40C0C");
-    var color2 = _fromHex("FF6500");
-    var color3 = _fromHex("FF8A08");
-    var color4 = _fromHex("FFC100");
+    var color1 = _fromHex("c40c0c");
+    var color2 = _fromHex("ff6500");
+    var color3 = _fromHex("ff8a08");
+    var color4 = _fromHex("ffc100");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -236,10 +244,10 @@ class GameColorScheme {
 
   factory GameColorScheme.theme4() {
 
-    var color1 = _fromHex("12372A");
+    var color1 = _fromHex("12372a");
     var color2 = _fromHex("436850");
-    var color3 = _fromHex("ADBC9F");
-    var color4 = _fromHex("FBFADA");
+    var color3 = _fromHex("adbc9f");
+    var color4 = _fromHex("fbfada");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -263,7 +271,7 @@ class GameColorScheme {
       backgroundPuzzleSymbols: color1,
       backgroundPuzzleSymbolsFlipped: color4,
 
-      textInputPanel: color4,
+      textInputPanel: color1,
       textInputSymbols: color4,
       backgroundInputSymbols: color1,
       textInputSymbolsFlipped: color1,
@@ -274,10 +282,10 @@ class GameColorScheme {
 
   factory GameColorScheme.theme5() {
 
-    var color1 = _fromHex("F8F4EC");
-    var color2 = _fromHex("FF9BD2");
-    var color3 = _fromHex("D63484");
-    var color4 = _fromHex("402B3A");
+    var color1 = _fromHex("f8f4ec");
+    var color2 = _fromHex("ff9bd2");
+    var color3 = _fromHex("d63484");
+    var color4 = _fromHex("402b3a");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -296,7 +304,7 @@ class GameColorScheme {
       colorHeart: color3,
       colorHeartBroken: color4,
 
-      textPuzzlePanel: Colors.white,
+      textPuzzlePanel: color3,
       textPuzzleSymbols: Colors.white,
       textPuzzleSymbolsFlipped: color1,
       backgroundPuzzleSymbols: color3,
@@ -314,10 +322,10 @@ class GameColorScheme {
 
   factory GameColorScheme.theme6() {
 
-    var color1 = _fromHex("DCF2F1");
-    var color2 = _fromHex("7FC7D9");
+    var color1 = _fromHex("dcf2f1");
+    var color2 = _fromHex("7fc7d9");
     var color3 = _fromHex("365486");
-    var color4 = _fromHex("0F1035");
+    var color4 = _fromHex("0f1035");
 
     return GameColorScheme(
       backgroundTopPanel: color1,
@@ -336,13 +344,53 @@ class GameColorScheme {
       colorHeart: color4,
       colorHeartBroken: color2,
 
-      textPuzzlePanel: Colors.white,
+      textPuzzlePanel: color3,
       textPuzzleSymbols: Colors.white,
       textPuzzleSymbolsFlipped: color1,
       backgroundPuzzleSymbols: color3,
       backgroundPuzzleSymbolsFlipped: color4,
 
       textInputPanel: Colors.white,
+      textInputSymbols: Colors.white,
+      textInputSymbolsFlipped: color1,
+      backgroundInputSymbols: color2,
+      backgroundInputSymbolsFlipped: color4,
+      textInputButton: color4,
+      backgroundInputButton: color1,
+    );
+  }
+
+  factory GameColorScheme.theme7() {
+
+    var color1 = _fromHex("32012F");
+    var color2 = _fromHex("524C42");
+    var color3 = _fromHex("E2DFD0");
+    var color4 = _fromHex("F97300");
+
+    return GameColorScheme(
+      backgroundTopPanel: color1,
+      backgroundPuzzlePanel: color2,
+      backgroundInputPanel: color3,
+
+      textTopPanel: color3,
+      textTopButton: Colors.white,
+      backgroundTopButton: color2,
+      textHintButton: color1,
+      backgroundHintButton: color3,
+
+      colorIcons: Colors.yellow,
+      colorSuccess: color4,
+      colorFailure: color4,
+      colorHeart: color4,
+      colorHeartBroken: color2,
+
+      textPuzzlePanel: Colors.white,
+      textPuzzleSymbols: color1,
+      textPuzzleSymbolsFlipped: color1,
+      backgroundPuzzleSymbols: color3,
+      backgroundPuzzleSymbolsFlipped: color4,
+
+      textInputPanel: color1,
       textInputSymbols: Colors.white,
       textInputSymbolsFlipped: color1,
       backgroundInputSymbols: color2,

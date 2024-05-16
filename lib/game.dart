@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guess_the_word/widgets/alternating_color_squares.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
@@ -16,6 +17,8 @@ import 'services/data_service.dart';
 import 'widgets/blink_effect.dart';
 import 'widgets/flip_card.dart';
 import 'widgets/symbol_pad.dart';
+
+
 
 class PuzzlePage extends StatefulWidget {
   const PuzzlePage({super.key});
@@ -129,16 +132,44 @@ class _PuzzlePageState extends State<PuzzlePage> {
         ),
         Expanded(
           flex: 4,
-          child: Container(
-            color: colorScheme.backgroundPuzzlePanel,
-            child: _buildPuzzlePanel(context, state)
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  color: colorScheme.backgroundPuzzlePanel,
+                  child: _buildPuzzlePanel(context, state)
+                ),
+              ),
+              Positioned(
+                //top: -5,
+                child: AlternatingColorSquares(
+                  color1: colorScheme.backgroundTopPanel,
+                  color2: colorScheme.backgroundPuzzlePanel,
+                  squareSize: 6,
+                )
+              )
+            ]
           ),
         ),
         Expanded(
           flex: 5,
-          child: Container(
-            color: colorScheme.backgroundInputPanel,
-            child: _buildInputPanel(context, state)
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  color: colorScheme.backgroundInputPanel,
+                  child: _buildInputPanel(context, state)
+                ),
+              ),
+              Positioned(
+                //top: -5,
+                child: AlternatingColorSquares(
+                  color1: colorScheme.backgroundInputPanel,
+                  color2: colorScheme.backgroundPuzzlePanel,
+                  squareSize: 6,
+                )
+              )
+            ]
           ),
         ),
       ],
@@ -316,7 +347,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
-              color: colorScheme.textInputPanel,
+              color: colorScheme.textPuzzlePanel,
               ),
             ),
         ),

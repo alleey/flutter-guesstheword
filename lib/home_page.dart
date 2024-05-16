@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
 
   SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
   late String selectedTheme;
+  late bool ready = false;
 
   @override
   void initState() {
@@ -35,7 +36,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () => showAlert(context));
     return Scaffold(
         backgroundColor: SymbolButton.defaultColorBackground,
         appBar: PreferredSize(
@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
         body: BlocListener<SettingsBloc, SettingsBlocState>(
 
           listener: (BuildContext context, state) {
+
             switch(state) {
               case final SettingsReadBlocState s:
               if (s.name == KnownSettingsNames.settingTheme) {
@@ -52,8 +53,12 @@ class _HomePageState extends State<HomePage> {
               }
               break;
             }
+
+            showAlert(context);
           },
-          child: const PuzzlePage(),
+          child: ready ?
+            const PuzzlePage() :
+            const Center(child: CircularProgressIndicator()),
         )
       );
   }
@@ -108,8 +113,11 @@ class _HomePageState extends State<HomePage> {
   Future showAlert(BuildContext context) async {
     final appDataService = AppDataService(dataService: globalDataService);
     if (appDataService.getFlag("firstUse") ?? true) {
-      AlertsService().helpDialog(context).show();
+      await AlertsService().helpDialog(context).show();
       await appDataService.putFlag("firstUse", false);
     }
+    setState(() {
+      ready = true;
+    });
   }
 }
