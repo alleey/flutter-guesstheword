@@ -11,20 +11,11 @@ icon: snap/gui/guesstheword.png
 apps:
   guesstheword:
     command: desktop-launch $SNAP/usr/bin/guesstheword
-    desktop: guesstheword.desktop
+    desktop: snap/gui/guesstheword.desktop
     plugs:
       - desktop
 
 parts:
   guesstheword:
-    plugin: flutter
-    flutter-target: lib/main.dart
-    source: .
-    build-packages:
-      - libgtk-3-dev
-      - pkg-config
-      - libunwind-dev
-      - libgstreamer1.0-dev
-      - libgstreamer-plugins-bad1.0-dev
-      - libgstreamer-plugins-base1.0-dev
-      - libgstreamer-plugins-good1.0-dev
+    plugin: dump
+    source: build/linux/x64/release/bundle

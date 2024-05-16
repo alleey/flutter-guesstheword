@@ -44,6 +44,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-linux-desktop
+    - run: flutter build linux --release
 
     - name: Build Snap
       uses: snapcore/action-build@v1
