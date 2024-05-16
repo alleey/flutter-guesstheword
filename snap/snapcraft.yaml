@@ -2,8 +2,9 @@ name: guesstheword
 version: 1.1.2
 summary: Guess The Word
 description: Another take on classic hangman guess the word game.
+
 confinement: strict
-base: core18
+base: core22
 grade: stable
 icon: gui/guesstheword.png
 
@@ -13,9 +14,6 @@ apps:
     desktop: guesstheword.desktop
     plugs:
       - desktop
-      - desktop-legacy
-      - wayland
-      - x11
 
 parts:
   guesstheword:
