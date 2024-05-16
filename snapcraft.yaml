@@ -34,3 +34,6 @@ parts:
       - libgstreamer-plugins-good1.0-dev
       - libpsm-infinipath1
       - libpsm-infinipath1-dev
+    override-build: |
+      snapcraftctl build
+      ln -sf ../libpsm1/libpsm_infinipath.so.1.16  $SNAPCRAFT_PART_INSTALL/
