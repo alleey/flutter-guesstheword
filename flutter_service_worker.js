@@ -3,8 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"favicon%20(copy%201).png": "aeb6dd40b303b46b128ffc6446ab8a5f",
-"canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
+const RESOURCES = {"canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
 "canvaskit/skwasm.js": "5d4f9263ec93efeb022bb14a3881d240",
 "canvaskit/canvaskit.wasm": "9251bb81ae8464c4df3b072f84aa969b",
 "canvaskit/canvaskit.js.symbols": "74a84c23f5ada42fe063514c587968c6",
@@ -19,8 +18,8 @@ const RESOURCES = {"favicon%20(copy%201).png": "aeb6dd40b303b46b128ffc6446ab8a5f
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "manifest.json": "ed75df3432748cc0d165262743036387",
-"favicon.png": "5dcef449791fa27946b3d35ad8803796",
-"flutter_bootstrap.js": "b91f320ca11e9507983d4313eab96e96",
+"favicon.png": "aeb6dd40b303b46b128ffc6446ab8a5f",
+"flutter_bootstrap.js": "37c471a7ec1224fed08115f81ac2b517",
 "version.json": "34f2577cf860357d626d2a847831f625",
 "index.html": "ed1caad5f35fcb4a4f9bf96b9b64ae5d",
 "/": "ed1caad5f35fcb4a4f9bf96b9b64ae5d",
@@ -58,7 +57,7 @@ const RESOURCES = {"favicon%20(copy%201).png": "aeb6dd40b303b46b128ffc6446ab8a5f
 "assets/assets/puzzles/birds.json": "bf7cdab7cfceaf1293da746fa5e7c056",
 "assets/assets/puzzles/sea-creatures.json": "9f483a6cc2818ac5d3b23d631bbe17d4",
 "assets/assets/puzzles/fruits.json": "48765971a13a7b26e0218097bd4ef3dd",
-"assets/assets/version.json": "1834435dd7b5c702fc60c5a58c9c0fc2",
+"assets/assets/version.json": "112de56c436073438c506ef6de255546",
 "assets/assets/audio/mismatch.mp3": "797666bb071d553b69d2104b0ab67ca6",
 "assets/assets/audio/start.mp3": "6253d309e44915e665a1514f492c7828",
 "assets/assets/audio/match.mp3": "0bbb3c31dc32cc6cb2bff1cae5ec57a8",
