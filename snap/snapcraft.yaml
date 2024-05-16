@@ -1,0 +1,24 @@
+name: guesstheword
+version: 1.1.2
+summary: Guess The Word
+description: Another take on classic hangman guess the word game.
+confinement: strict
+base: core20
+grade: stable
+icon: guesstheword.png
+
+apps:
+  guesstheword:
+    command: desktop-launch $SNAP/usr/bin/guesstheword
+    desktop: guesstheword.desktop
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+
+parts:
+  guesstheword:
+    plugin: flutter
+    flutter-target: ../lib/main.dart
+    source: ..
