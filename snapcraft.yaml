@@ -22,7 +22,7 @@ parts:
     source: .
     build-packages:
       - libgtk-3-dev
-      - pkgconfg
+      - pkg-config
       - libunwind-dev
       - libgstreamer1.0-dev
       - libgstreamer-plugins-bad1.0-dev
