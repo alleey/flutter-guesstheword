@@ -140,8 +140,9 @@ class GameColorScheme {
 
       textTopPanel: color4,
       backgroundTopButton: color1,
+
       textHintButton: color4,
-      backgroundHintButton: color1,
+      backgroundHintButton: color3,
 
       colorIcons: Colors.yellow,
       colorSuccess: const Color.fromARGB(255, 8, 254, 16),
@@ -178,8 +179,8 @@ class GameColorScheme {
 
       textTopPanel: color4,
       backgroundTopButton: Colors.black,
-      textHintButton: color4,
-      backgroundHintButton: color1,
+      textHintButton: color2,
+      backgroundHintButton: color3,
 
       colorIcons: Colors.redAccent,
       colorSuccess: color4,

@@ -94,6 +94,7 @@ class AlertsService {
               child: Text(globalDataService.version)
             ),
             const Text.rich(
+              textAlign: TextAlign.justify,
               TextSpan(
                 children: [
                   TextSpan(
@@ -102,7 +103,8 @@ class AlertsService {
                       fontSize: 24,
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
-                    )
+
+                    ),
                   ),
                   TextSpan(
                     text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
