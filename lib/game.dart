@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guess_the_word/widgets/alternating_color_squares.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
@@ -14,11 +13,11 @@ import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'services/audio_service.dart';
 import 'services/data_service.dart';
+import 'widgets/alternating_color_squares.dart';
 import 'widgets/blink_effect.dart';
 import 'widgets/flip_card.dart';
+import 'widgets/party_popper_effect.dart';
 import 'widgets/symbol_pad.dart';
-
-
 
 class PuzzlePage extends StatefulWidget {
   const PuzzlePage({super.key});
@@ -85,7 +84,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               break;
 
             case InputMatchState _:
-              audioService.play("audio/match.mp3");
+              audioService.play(!state.isGameOver ? "audio/match.mp3" : "audio/win.mp3");
               break;
 
             case InputMismatchState _:
@@ -118,59 +117,66 @@ class _PuzzlePageState extends State<PuzzlePage> {
     );
   }
 
-  Column _buildLayout(BuildContext context, GameState state) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          flex: 3,
-          child: Container(
-            color: colorScheme.backgroundTopPanel,
-            child: _buildTopPanel(context, state)
+  Widget _buildLayout(BuildContext context, GameState state) {
+    return Stack(
+      children: [Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              color: colorScheme.backgroundTopPanel,
+              child: _buildTopPanel(context, state)
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Container(
-                  color: colorScheme.backgroundPuzzlePanel,
-                  child: _buildPuzzlePanel(context, state)
+          Expanded(
+            flex: 4,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    color: colorScheme.backgroundPuzzlePanel,
+                    child: _buildPuzzlePanel(context, state)
+                  ),
                 ),
-              ),
-              Positioned(
-                //top: -5,
-                child: AlternatingColorSquares(
-                  color1: colorScheme.backgroundTopPanel,
-                  color2: colorScheme.backgroundPuzzlePanel,
-                  squareSize: 6,
+                Positioned(
+                  //top: -5,
+                  child: AlternatingColorSquares(
+                    color1: colorScheme.backgroundTopPanel,
+                    color2: colorScheme.backgroundPuzzlePanel,
+                    squareSize: 6,
+                  )
                 )
-              )
-            ]
+              ]
+            ),
           ),
-        ),
-        Expanded(
-          flex: 5,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Container(
-                  color: colorScheme.backgroundInputPanel,
-                  child: _buildInputPanel(context, state)
+          Expanded(
+            flex: 5,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    color: colorScheme.backgroundInputPanel,
+                    child: _buildInputPanel(context, state)
+                  ),
                 ),
-              ),
-              Positioned(
-                //top: -5,
-                child: AlternatingColorSquares(
-                  color1: colorScheme.backgroundInputPanel,
-                  color2: colorScheme.backgroundPuzzlePanel,
-                  squareSize: 6,
+                Positioned(
+                  //top: -5,
+                  child: AlternatingColorSquares(
+                    color1: colorScheme.backgroundInputPanel,
+                    color2: colorScheme.backgroundPuzzlePanel,
+                    squareSize: 6,
+                  )
                 )
-              )
-            ]
+              ]
+            ),
           ),
+        ],
+      ),
+      if (state.isGameOver && state.isWin)
+        const Positioned(
+          child: PartyPopperEffect()
         ),
       ],
     );

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guess_the_word/common/game_color_scheme.dart';
 
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
+import 'common/game_color_scheme.dart';
 import 'game.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
@@ -30,8 +31,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme));
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
   }
 
   @override
