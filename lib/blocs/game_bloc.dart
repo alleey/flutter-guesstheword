@@ -47,8 +47,15 @@ class ResetState extends GameBlocState {}
 class NoMorePuzzleState extends GameBlocState {}
 class PuzzleStartState extends GameBlocState {}
 
-class InputMatchState extends GameBlocState {}
-class InputMismatchState extends GameBlocState {}
+class InputMatchState extends GameBlocState {
+  final bool isGameOver;
+  InputMatchState({this.isGameOver = false});
+}
+
+class InputMismatchState extends GameBlocState {
+  final bool isGameOver;
+  InputMismatchState({this.isGameOver = false});
+}
 
 enum Difficulty {
   easy,
@@ -264,7 +271,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      //gameState.score = gameState.score.bump(500);
+      gameState.score = gameState.score.bump(500);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
@@ -282,7 +289,9 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         }
 
         log("score: ${gameState.score}");
-        emit(gameState.lastInputError ? InputMismatchState() : InputMatchState());
+        emit(gameState.lastInputError ?
+          InputMismatchState(isGameOver: gameState.isGameOver) :
+          InputMatchState(isGameOver: gameState.isGameOver));
         emit(GameState.clone(gameState));
       }
     });
@@ -306,7 +315,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       }
 
       log("score: ${gameState.score}");
-      emit(InputMatchState());
+      emit(InputMatchState(isGameOver: gameState.isGameOver));
       emit(GameState.clone(gameState));
     });
 

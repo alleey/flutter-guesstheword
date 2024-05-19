@@ -28,9 +28,6 @@ class PuzzleService {
 
     final index = random.nextInt(dataService.puzzleBox.length);
     final puzzle = dataService.puzzleBox.getAt(index)!;
-
-    await dataService.puzzleBox.deleteAt(index);
-    await dataService.puzzleBox.flush();
     return (index, puzzle);
   }
 
