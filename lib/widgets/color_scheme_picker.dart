@@ -42,9 +42,7 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
             onTap: () {
               setState(() {
                 selectedTheme = e.key;
-                if (widget.selectedTheme != selectedTheme) {
-                  widget.onSelect(selectedTheme);
-                }
+                widget.onSelect(selectedTheme);
               });
             },
             child: Container(

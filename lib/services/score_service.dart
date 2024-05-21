@@ -23,7 +23,7 @@ class ScoreService {
   List<Score> highScores() {
     return Iterable<int>.generate(Constants.maxScoreHistory)
         .map((e) => highest(e))
-        .where((e) => e.instance > 0)
+        .where((e) => e.instance > 0 && e.gamesPlayed > 0)
         .toList();
   }
 

@@ -1,216 +1,235 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
-import '../blocs/settings_bloc.dart';
 import '../common/constants.dart';
+import '../common/game_color_scheme.dart';
 import '../widgets/color_scheme_picker.dart';
+import '../widgets/dialogs/ok_dialog.dart';
+import '../widgets/dialogs/yesno_dialog.dart';
 import 'data_service.dart';
 import 'score_service.dart';
 
 class AlertsService {
 
-  Alert yesNoDialog(BuildContext context, {
+  Future<dynamic> yesNoDialog(BuildContext context, {
     String? title,
-    String? desc,
-    AlertType? type = AlertType.warning,
+    Widget content = const SizedBox(),
+    required GameColorScheme colorScheme,
     String yesLabel = "Yes",
     String noLabel = "No",
-    VoidCallback? callback
-  }) {
-    return Alert(
+    VoidCallback? onAccept,
+    VoidCallback? onReject,
+  }) => showGeneralDialog(
       context: context,
-      title: title,
-      desc: desc,
-      style: const AlertStyle(
-        descStyle: TextStyle(fontSize: 14,),
-      ),
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            callback?.call();
-            Navigator.pop(context);
-          },
-          color: Colors.red,
-          child: Text(
-            yesLabel,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        DialogButton(
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-            child: Text(
-              noLabel,
-              style: const TextStyle(color: Colors.white),
-            ),
-        )
-      ],
+      barrierColor: Colors.black.withOpacity(0.7),
+      barrierDismissible: false,
+      transitionDuration: const Duration(milliseconds: 250),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation,
+          child: child,
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return YesNoDialog(
+          colorScheme: colorScheme,
+          title: title ?? "",
+          yesLabel: yesLabel,
+          noLabel: noLabel,
+          content: content,
+          onAccept: onAccept ?? () {},
+          onReject: onReject,
+        );
+      }
     );
-  }
 
-  Alert okDialog(BuildContext context, {
+  Future<dynamic> okDialog(BuildContext context, {
     String? title,
-    String? desc,
     Widget content = const SizedBox(),
+    required GameColorScheme colorScheme,
     String okLabel = "Continue",
     VoidCallback? callback
-  }) {
-    return Alert(
+  }) => showGeneralDialog(
       context: context,
-      title: title,
-      desc: desc,
-      content: content,
-      style: const AlertStyle(
-        descStyle: TextStyle(fontSize: 14,),
-      ),
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            callback?.call();
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: const Color.fromRGBO(0, 179, 134, 1.0),
-          child: Text(
-            okLabel,
-            style: const TextStyle(color: Colors.white),
-          ),
-        )
-      ],
+      barrierColor: Colors.black.withOpacity(0.7),
+      barrierDismissible: false,
+      transitionDuration: const Duration(milliseconds: 250),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation,
+          child: child,
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return OkDialog(
+          colorScheme: colorScheme,
+          title: title ?? "",
+          okLabel: okLabel,
+          content: content,
+          onClose: () {}
+        );
+      },
     );
-  }
 
-  Alert helpDialog(BuildContext context) {
-    return Alert(
-      context: context,
-      title: "Guess The Word",
-      padding: const EdgeInsets.all(10),
-      content: DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) => yesNoDialog(
+      context,
+      colorScheme:  colorScheme,
+      title: "RESET GAME",
+      content: Text.rich(
+        textAlign: TextAlign.justify,
+        TextSpan(
           children: [
-            Align(
-              alignment: Alignment.center,
-              child: Text(globalDataService.version)
+            TextSpan(
+              text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
+              style: TextStyle(
+                color: colorScheme.textPuzzlePanel,
+              )
             ),
-            const Text.rich(
-              textAlign: TextAlign.justify,
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '\u{273D}  ',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-
-                    ),
-                  ),
-                  TextSpan(
-                    text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
-                  ),
-                  TextSpan(
-                    text: '\u{2726}  ',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    )
-                  ),
-                  TextSpan(
-                    text: "A hint token is awared for every ${Constants.scoreBumpForHintBonus} points earned. ",
-                  ),
-                  TextSpan(
-                    text: "Hint tokens are carried forward even if you reset the game.",
-                    style: TextStyle(
-                      color: Colors.red,
-                    )
-                  ),
-                ],
-              ),
+            TextSpan(
+              text: "Continue?",
+              style: TextStyle(
+                color: colorScheme.textPuzzlePanel,
+                fontWeight: FontWeight.bold,
+              )
             ),
-          ]
+          ],
         ),
       ),
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: const Color.fromRGBO(0, 179, 134, 1.0),
-          child: const Text(
-            "Close",
-            style: TextStyle(color: Colors.white),
+      onAccept:onAccept
+    );
+
+  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) => okDialog(
+      context,
+      colorScheme: colorScheme,
+      title: "Guess The Word",
+      okLabel: "Close",
+      content:
+        Column(children: [
+        Text.rich(
+          textAlign: TextAlign.center,
+          TextSpan(
+            children: [
+              TextSpan(
+                text: globalDataService.version,
+                style: TextStyle(
+                  color: colorScheme.backgroundTopPanel,
+                )
+              ),
+            ],
           ),
         ),
-      ],
+        Text.rich(
+          textAlign: TextAlign.justify,
+          TextSpan(
+            style: TextStyle(
+              color: colorScheme.textPuzzlePanel,
+            ),
+            children: [
+              TextSpan(
+                text: '\u{273D}  ',
+                style: TextStyle(
+                  color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const TextSpan(
+                text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
+              ),
+              TextSpan(
+                text: '\u{2726}  ',
+                style: TextStyle(
+                  color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              const TextSpan(
+                text: "A hint token is awared for every ${Constants.scoreBumpForHintBonus} points earned. ",
+              ),
+              TextSpan(
+                text: "Hint tokens are carried forward even if you reset the game.",
+                style: TextStyle(
+                  color: colorScheme.backgroundTopPanel,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+            ],
+          ),
+        ),
+      ]),
     );
-  }
 
-  Alert highScoresDialog(BuildContext context) {
+  Future<dynamic> highScoresDialog(BuildContext context, GameColorScheme colorScheme) {
 
     final scoreService = ScoreService(dataService: globalDataService);
     final scores = scoreService.highScores();
 
-    return Alert(
-      context: context,
+    return okDialog(
+      context,
+      colorScheme: colorScheme,
       title: "HIGH SCORES",
-      content: DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 14),
-        child: Column(
-          children:
-            scores.map( (e) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("${e.value}"),
-                      Text("${e.wins}"),
-                      Text("${e.losses}"),
-                    ],
-                  ),
-                );
-              }
-            ).toList(),
-        ),
-      ),
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: const Color.fromRGBO(0, 179, 134, 1.0),
-          child: const Text(
-            "Close",
-            style: TextStyle(color: Colors.white),
+      okLabel: "Close",
+      content:
+        scores.isEmpty ?
+          Text.rich(
+            textAlign: TextAlign.center,
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: "Nothing scored yet!",
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                  )
+                ),
+              ],
+            ),
+          ) : DefaultTextStyle.merge(
+          style: const TextStyle(fontSize: 14),
+          child: DefaultTextStyle.merge(
+            style: TextStyle(
+              color: colorScheme.textPuzzlePanel,
+            ),
+            child: Column(
+              children:[
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Played"),
+                    Text("Won"),
+                    Text("Lost"),
+                  ],
+                ),
+                ...scores.map( (e) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("${e.value}"),
+                          Text("${e.wins}"),
+                          Text("${e.losses}"),
+                        ],
+                      ),
+                    );
+                  }
+                ),
+            ]),
           ),
         ),
-      ],
     );
   }
 
-  Alert themePicker(BuildContext context, {
+  Future<dynamic> themePicker(BuildContext context, {
     required String selectedTheme,
-    required ColorSchemeSelectionCallback callback
+    required ColorSchemeSelectionCallback onSelect
   }) {
-
-    return Alert(
-      context: context,
+    final colorScheme = GameColorSchemes.scheme(selectedTheme);
+    return okDialog(
+      context,
+      colorScheme: colorScheme,
       title: "Pick a Theme",
-      content: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: callback,),
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: const Color.fromRGBO(0, 179, 134, 1.0),
-          child: const Text(
-            "Close",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
+      okLabel: "Close",
+      content: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
     );
   }
 }

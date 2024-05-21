@@ -13,8 +13,6 @@ import 'widgets/symbol_button.dart';
 
 class HomePage extends StatefulWidget {
 
-  static const dataLossWarning = "Resetting the game will reset all puzzles already finished. High scores will be preserved.\n Continue?";
-
   const HomePage({
     super.key,
   });
@@ -57,7 +55,9 @@ class _HomePageState extends State<HomePage> {
             switch(state) {
               case final SettingsReadBlocState s:
               if (s.name == KnownSettingsNames.settingTheme) {
-                selectedTheme = s.value ?? GameColorSchemes.defaultThemeName;
+                setState(() {
+                  selectedTheme = s.value ?? GameColorSchemes.defaultThemeName;
+                });
               }
               break;
             }
@@ -76,42 +76,41 @@ class _HomePageState extends State<HomePage> {
       leading:
         IconButton(
           icon: const Icon(Icons.description_outlined),
-          onPressed: () {
-            AlertsService().helpDialog(context).show();
+          onPressed: () async {
+            await AlertsService().helpDialog(context, GameColorSchemes.scheme(selectedTheme));
           },
         ),
 
       actions: [
         IconButton(
           icon: const Icon(Icons.bar_chart),
-          onPressed: () {
-            AlertsService().highScoresDialog(context).show();
+          onPressed: () async {
+            await AlertsService().highScoresDialog(context, GameColorSchemes.scheme(selectedTheme));
           },
         ),
         IconButton(
           icon: const Icon(Icons.refresh),
-          onPressed: () {
-            AlertsService().yesNoDialog(
+          onPressed: () async {
+            await AlertsService().resetGameDialog(
                 context,
-                title: "RESET GAME",
-                desc: HomePage.dataLossWarning,
-                callback: () {
+                GameColorSchemes.scheme(selectedTheme),
+                onAccept: () {
                   final bloc = BlocProvider.of<GameBloc>(context);
                   bloc.add(ResetGameEvent());
                 }
-            ).show();
+            );
           },
         ),
         IconButton(
           icon: const Icon(Icons.palette_outlined),
-          onPressed: () {
-            AlertsService().themePicker(
+          onPressed: () async {
+            await AlertsService().themePicker(
               context,
               selectedTheme: selectedTheme,
-              callback: (newTheme) {
+              onSelect: (newTheme) {
                 settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingTheme, value: newTheme, reload: true));
               }
-            ).show();
+            );
           },
         ),
       ],
@@ -119,11 +118,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future showAlert(BuildContext context) async {
+
     final appDataService = AppDataService(dataService: globalDataService);
     if (appDataService.getFlag("firstUse") ?? true) {
-      await AlertsService().helpDialog(context).show();
+      await AlertsService().helpDialog(context, GameColorSchemes.scheme(selectedTheme));
       await appDataService.putFlag("firstUse", false);
     }
+
     setState(() {
       ready = true;
     });
