@@ -67,7 +67,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         }
       },
       child: BlocConsumer<GameBloc, GameBlocState>(
-        listener: (context, state) {
+        listener: (context, state) async {
 
           log("listener(GameBloc): $state");
           switch (state) {
@@ -92,15 +92,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
               break;
 
             case NoMorePuzzleState _:
-              AlertsService().okDialog(
+              await AlertsService().okDialog(
                 context,
                 title: "Congratulations!",
-                desc: resetGameQuestion,
+                content: const Text(resetGameQuestion),
+                colorScheme: colorScheme,
                 callback: () {
                   final bloc = BlocProvider.of<GameBloc>(context);
                   bloc.add(ResetGameEvent());
                 }
-              ).show();
+              );
               break;
           }
         },
