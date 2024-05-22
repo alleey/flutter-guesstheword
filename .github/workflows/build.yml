@@ -50,7 +50,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json`);
 
     - name: Build Web and Android
       uses: subosito/flutter-action@v2
@@ -59,8 +59,8 @@ jobs:
         flutter-version-file: pubspec.yaml
         architecture: x64
     - run: flutter pub get
-    - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
-    - run: flutter build apk --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
+    - run: flutter build apk --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Website
       uses: actions/upload-artifact@v3
@@ -111,7 +111,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json`);
 
     - name: Build Linux
       uses: subosito/flutter-action@v2
@@ -121,7 +121,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-linux-desktop
-    - run: flutter build linux --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build linux --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Linux Bundle
       uses: actions/upload-artifact@v3
@@ -160,7 +160,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json`);
 
     - name: Build Windows
       uses: subosito/flutter-action@v2
@@ -170,7 +170,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-windows-desktop
-    - run: flutter build windows --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build windows --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Windows Bundle
       uses: actions/upload-artifact@v3
@@ -209,7 +209,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json`);
 
     - name: Build Macos
       uses: subosito/flutter-action@v2
@@ -219,7 +219,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-macos-desktop
-    - run: flutter build macos --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build macos --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Windows Bundle
       uses: actions/upload-artifact@v3
