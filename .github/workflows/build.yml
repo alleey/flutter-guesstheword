@@ -45,10 +45,12 @@ jobs:
 
     - name: Write version to file
       uses: actions/github-script@v6
+      env:
+        DATA: ${{ steps.extract_version.outputs.value }}
       with:
         script: |
           const fs = require('fs');
-          const version = ${{ steps.extract_version.outputs.value }};
+          const version = process.env.DATA;
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json successfully`);
 
