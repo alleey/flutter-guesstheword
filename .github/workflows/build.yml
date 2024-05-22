@@ -144,7 +144,7 @@ jobs:
           const { execSync } = require('child_process');
           let latestTag;
           try {
-            latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
+            latestTag = execSync('git describe --tags `git rev-list --tags  -n 1`').toString().trim();
           } catch (error) {
             console.log('No tags found, using default version 0.0.1');
             latestTag = 'v0.0.1';

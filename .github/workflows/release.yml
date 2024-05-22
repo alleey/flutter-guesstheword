@@ -27,7 +27,7 @@ jobs:
           const tag = github.context.ref.split('/').pop();
           const version = tag.startsWith('v') ? tag.substring(1) : tag;
           console.log(`Tag:${tag} -> Version:${version}`);
-          return { value: version };
+          core.setOutput('value', version)
 
     - name: Create Release
       id: create_release
@@ -55,16 +55,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ needs.setup.outputs.version }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
-
-    - name: Write version to file
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -127,7 +118,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ needs.setup.outputs.version }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -169,7 +160,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ needs.setup.outputs.version }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -211,7 +202,7 @@ jobs:
           const fs = require('fs');
           const version = '${{ needs.setup.outputs.version }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
