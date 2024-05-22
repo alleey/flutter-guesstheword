@@ -42,7 +42,8 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const tag = github.context.ref.split('/').pop();
+          const ref = process.env.GITHUB_REF as string;
+          const tag = ref.split('/').pop();
           const version = tag.startsWith('v') ? tag.substring(1) : tag;
           console.log(`Tag:${tag} -> Version:${version}`);
           core.setOutput('value', version)
@@ -115,7 +116,8 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const tag = github.context.ref.split('/').pop();
+          const ref = process.env.GITHUB_REF as string;
+          const tag = ref.split('/').pop();
           const version = tag.startsWith('v') ? tag.substring(1) : tag;
           console.log(`Tag:${tag} -> Version:${version}`);
           core.setOutput('value', version)
@@ -167,7 +169,8 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const tag = github.context.ref.split('/').pop();
+          const ref = process.env.GITHUB_REF as string;
+          const tag = ref.split('/').pop();
           const version = tag.startsWith('v') ? tag.substring(1) : tag;
           console.log(`Tag:${tag} -> Version:${version}`);
           core.setOutput('value', version)
@@ -219,7 +222,8 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const tag = github.context.ref.split('/').pop();
+          const ref = process.env.GITHUB_REF as string;
+          const tag = ref.split('/').pop();
           const version = tag.startsWith('v') ? tag.substring(1) : tag;
           console.log(`Tag:${tag} -> Version:${version}`);
           core.setOutput('value', version)
