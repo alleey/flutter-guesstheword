@@ -48,9 +48,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Add version info to assets/version.json
-      run: |
-        echo "{\"version\": \"v${{ needs.setup.outputs.version }}\"}" > assets/version.json
+    - name: Write version to file
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const version = needs.setup.outputs.version;
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${content} written to assets/version.json successfully`);
+
+    - name: Write version to file
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const version = needs.setup.outputs.version;
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${content} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -59,7 +73,7 @@ jobs:
         flutter-version-file: pubspec.yaml
         architecture: x64
     - run: flutter pub get
-    - run: flutter build web --base-href /flutter-guesstheword/
+    - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
     - run: flutter build apk --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
 
     - name: Deploy Web
@@ -106,9 +120,14 @@ jobs:
     - name: Install app dependencies
       run: sudo apt-get install -y -f libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
 
-    - name: Add version info to assets/version.json
-      run: |
-        echo "{\"version\": \"v${{ needs.setup.outputs.version }}\"}" > assets/version.json
+    - name: Write version to file
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const version = needs.setup.outputs.version;
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${content} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -143,9 +162,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Add version info to assets/version.json
-      run: |
-        echo "{\"version\": \"v${{ needs.setup.outputs.version }}\"}" > assets/version.json
+    - name: Write version to file
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const version = needs.setup.outputs.version;
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${content} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -180,9 +204,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Add version info to assets/version.json
-      run: |
-        echo "{\"version\": \"v${{ needs.setup.outputs.version }}\"}" > assets/version.json
+    - name: Write version to file
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const version = needs.setup.outputs.version;
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${content} written to assets/version.json successfully`);
 
     - name: Build
       uses: subosito/flutter-action@v2
