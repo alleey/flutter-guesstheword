@@ -1,6 +1,4 @@
 
-import 'package:flutter/material.dart';
-
 class Constants
 {
   static const int appDataVersion = 5;
@@ -26,10 +24,4 @@ class Constants
     "elements", "emotions", "flowers", "fruits",
     "olympics", "sea-creatures", "vegetables",
   ];
-}
-
-class DialogConstants
-{
-  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 25, vertical: 40);
-  static const EdgeInsets insetPadding = EdgeInsets.symmetric(horizontal: 15, vertical: 20);
 }

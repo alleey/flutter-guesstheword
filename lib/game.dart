@@ -9,14 +9,16 @@ import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
 import 'common/constants.dart';
 import 'common/game_color_scheme.dart';
+import 'common/layout_constants.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'services/audio_service.dart';
 import 'services/data_service.dart';
-import 'widgets/alternating_color_squares.dart';
-import 'widgets/blink_effect.dart';
-import 'widgets/flip_card.dart';
-import 'widgets/party_popper_effect.dart';
+import 'widgets/common/alternating_color_squares.dart';
+import 'widgets/common/blink_effect.dart';
+import 'widgets/common/flip_card.dart';
+import 'widgets/common/party_popper_effect.dart';
+import 'widgets/common/responsive_layout.dart';
 import 'widgets/symbol_pad.dart';
 
 class PuzzlePage extends StatefulWidget {
@@ -119,6 +121,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildLayout(BuildContext context, GameState state) {
+    var squareSize = 6.0;
     return Stack(
       children: [Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -146,7 +149,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   child: AlternatingColorSquares(
                     color1: colorScheme.backgroundTopPanel,
                     color2: colorScheme.backgroundPuzzlePanel,
-                    squareSize: 6,
+                    squareSize: squareSize,
                   )
                 )
               ]
@@ -167,7 +170,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   child: AlternatingColorSquares(
                     color1: colorScheme.backgroundInputPanel,
                     color2: colorScheme.backgroundPuzzlePanel,
-                    squareSize: 6,
+                    squareSize: squareSize,
                   )
                 )
               ]
@@ -184,6 +187,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildTopPanel(BuildContext context, GameState state) {
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final hintWidthPct = layout.get<double>(AppLayoutConstants.hintWidthPctKey);
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -206,13 +213,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ],
         ),
 
-        if (!state.isGameOver && state.isHelpAvailable)
+        if ( !state.isGameOver && state.isHelpAvailable)
           Positioned(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: 25,
+                width: MediaQuery.of(context).size.width * hintWidthPct,
                 child: _buildHintsOption(context, state)
               ),
             ),
@@ -222,14 +228,17 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildScorePanel(BuildContext context, GameState state) {
-    final fontSize = Theme.of(context).textTheme.titleLarge?.fontSize ?? Constants.defaultFontSize;
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: Text.rich(
         textAlign: TextAlign.center,
         TextSpan(
           style: TextStyle(
-            fontSize: fontSize,
+            fontSize: titleFontSize,
             color: colorScheme.textTopPanel,
           ),
           children: [
@@ -281,20 +290,20 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
-    final fontSize = Theme.of(context).textTheme.titleLarge?.fontSize ?? Constants.defaultFontSize;
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        FittedBox(
-          fit: BoxFit.contain,
-          child: Text(
-            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
-            ),
+        Text(
+          state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
+          style: TextStyle(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.bold,
+            color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
           ),
         ),
         const SizedBox(width: 20,),
@@ -305,14 +314,19 @@ class _PuzzlePageState extends State<PuzzlePage> {
               backgroundColor: colorScheme.backgroundTopButton,
               side: BorderSide(width: 2, color: colorScheme.textTopPanel),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              alignment: Alignment.center,
+              minimumSize: Size.zero,
             ),
             onPressed: () {
               startPuzzle();
             },
-            child: Text(
-              "Go Next",
-              style: TextStyle(color: colorScheme.textTopButton)
+            child: Center(
+              child: Text(
+                "Go Next",
+                style: TextStyle(
+                  color: colorScheme.textTopButton,
+                  fontSize: titleFontSize,
+                )
+              ),
             )
           ),
         )
@@ -321,27 +335,38 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildHintsOption(BuildContext context, GameState state) {
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
     return BlinkEffect (
       child: ElevatedButton (
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.backgroundHintButton,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          alignment: Alignment.bottomCenter
+          padding: EdgeInsets.zero,
+          alignment: Alignment.center,
         ),
         onPressed: () {
           gameBloc.add(UseHintTokenEvent());
         },
         child: Text(
           "Use a Hint",
-          style: TextStyle(color: colorScheme.textHintButton),
+          style: TextStyle(
+            color: colorScheme.textHintButton,
+            fontSize: bodyFontSize
+          ),
         ),
       )
     );
   }
 
   Widget _buildPuzzlePanel(BuildContext context, GameState state) {
-    final fontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? Constants.defaultFontSize;
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -352,7 +377,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             " ${state.hint} ",
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: fontSize,
+              fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
               color: colorScheme.textPuzzlePanel,
               ),
@@ -372,7 +397,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             spacing: 3,
             runSpacing: 3,
             alignment: WrapAlignment.start,
-            buttonSize: const Size(45, 30),
+            buttonSize: buttonSize,
             onSelect: (c, f) {},
           ),
         )
@@ -381,89 +406,101 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildInputPanel(BuildContext context, GameState state) {
-    final fontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? Constants.defaultFontSize;
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+    final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
+    final inputPanelWidthPct = layout.get<double>(AppLayoutConstants.inputPanelWidthPctKey);
+
     final tried = state.symbolSet
         .split('')
         .map((e) => state.puzzle.toLowerCase().contains(e) ? '\u{2713}' : '\u{2717}')
         .join();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (!state.isGameOver)
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              "Pick your letters wisely \u{2193}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.textInputPanel,
-                ),
-              ),
-          ),
-        if (!state.isGameOver)
-          SymbolPad(
-            frontSymbols: state.symbolSet.toUpperCase(),
-            backSymbols: tried,
-            flipped: state.used,
-            foregroundColor: colorScheme.textInputSymbols,
-            backgroundColor: colorScheme.backgroundInputSymbols,
-            foregroundColorFlipped: colorScheme.textInputSymbolsFlipped,
-            backgroundColorFlipped: colorScheme.backgroundInputSymbolsFlipped,
-            spacing: 3,
-            runSpacing: 3,
-            buttonSize: const Size(45, 30),
-            onSelect: (c, flipped) {
-              if (!flipped) gameBloc.add(UserInputEvent(c));
-            },
-          ),
-        if (state.isGameOver)
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text.rich(
-              textAlign: TextAlign.center,
-              TextSpan(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (!state.isGameOver)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                "Pick your letters wisely \u{2193}",
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: fontSize,
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.bold,
                   color: colorScheme.textInputPanel,
-                ),
-                children: [
-                  const TextSpan(text: 'Find more about\n',),
-                  TextSpan(
-                    text: state.puzzle,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
-                  const TextSpan(text: ' \u{2193}',),
-                ],
-              ),
-            )
-          ),
-        if (state.isGameOver)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.backgroundInputButton,
-              side: BorderSide(width: 2, color: colorScheme.textInputPanel),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              alignment: Alignment.bottomCenter,
+                ),
             ),
-            onPressed: () async {
-              final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
-              await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
-            },
-            child: Text(
-              'Google',
-              style: TextStyle(
-                fontSize: fontSize,
-                color: colorScheme.textInputButton,
+          if (!state.isGameOver)
+            SizedBox(
+              width: MediaQuery.of(context).size.width * inputPanelWidthPct,
+              child: SymbolPad(
+                frontSymbols: state.symbolSet.toUpperCase(),
+                backSymbols: tried,
+                flipped: state.used,
+                foregroundColor: colorScheme.textInputSymbols,
+                backgroundColor: colorScheme.backgroundInputSymbols,
+                foregroundColorFlipped: colorScheme.textInputSymbolsFlipped,
+                backgroundColorFlipped: colorScheme.backgroundInputSymbolsFlipped,
+                spacing: 3,
+                runSpacing: 3,
+                buttonSize: buttonSize,
+                onSelect: (c, flipped) {
+                  if (!flipped) gameBloc.add(UserInputEvent(c));
+                },
               ),
             ),
-          ),
-      ],
+          if (state.isGameOver)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  style: TextStyle(
+                    fontSize: bodyFontSize,
+                    color: colorScheme.textInputPanel,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Find more about\n',),
+                    TextSpan(
+                      text: state.puzzle,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const TextSpan(text: ' \u{2193}',),
+                  ],
+                ),
+              )
+            ),
+          if (state.isGameOver)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.backgroundInputButton,
+                side: BorderSide(width: 2, color: colorScheme.textInputPanel),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                alignment: Alignment.bottomCenter,
+              ),
+              onPressed: () async {
+                final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
+                await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+              },
+              child: Text(
+                'Google',
+                style: TextStyle(
+                  fontSize: bodyFontSize,
+                  color: colorScheme.textInputButton,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

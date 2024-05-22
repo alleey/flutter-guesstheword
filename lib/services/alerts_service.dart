@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../common/constants.dart';
 import '../common/game_color_scheme.dart';
+import '../common/layout_constants.dart';
 import '../widgets/color_scheme_picker.dart';
 import '../widgets/dialogs/ok_dialog.dart';
 import '../widgets/dialogs/yesno_dialog.dart';
+import '../widgets/common/responsive_layout.dart';
 import 'data_service.dart';
 import 'score_service.dart';
 
@@ -18,7 +20,9 @@ class AlertsService {
     String noLabel = "No",
     VoidCallback? onAccept,
     VoidCallback? onReject,
-  }) => showGeneralDialog(
+  }) {
+    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    return showGeneralDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
       barrierDismissible: false,
@@ -36,11 +40,14 @@ class AlertsService {
           yesLabel: yesLabel,
           noLabel: noLabel,
           content: content,
+          width: MediaQuery.of(context).size.width * screenCoverPct.width,
+          height: MediaQuery.of(context).size.height * screenCoverPct.height,
           onAccept: onAccept ?? () {},
           onReject: onReject,
         );
       }
     );
+  }
 
   Future<dynamic> okDialog(BuildContext context, {
     String? title,
@@ -48,7 +55,9 @@ class AlertsService {
     required GameColorScheme colorScheme,
     String okLabel = "Continue",
     VoidCallback? callback
-  }) => showGeneralDialog(
+  }) {
+    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    return showGeneralDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
       barrierDismissible: false,
@@ -65,12 +74,20 @@ class AlertsService {
           title: title ?? "",
           okLabel: okLabel,
           content: content,
+          width: MediaQuery.of(context).size.width * screenCoverPct.width,
+          height: MediaQuery.of(context).size.height * screenCoverPct.height,
           onClose: () {}
         );
       },
     );
+  }
 
-  Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) => yesNoDialog(
+  Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) {
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+    return yesNoDialog(
       context,
       colorScheme:  colorScheme,
       title: "RESET GAME",
@@ -82,6 +99,7 @@ class AlertsService {
               text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
               style: TextStyle(
                 color: colorScheme.textPuzzlePanel,
+                fontSize: bodyFontSize,
               )
             ),
             TextSpan(
@@ -89,6 +107,7 @@ class AlertsService {
               style: TextStyle(
                 color: colorScheme.textPuzzlePanel,
                 fontWeight: FontWeight.bold,
+                fontSize: titleFontSize,
               )
             ),
           ],
@@ -96,8 +115,12 @@ class AlertsService {
       ),
       onAccept:onAccept
     );
+  }
 
-  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) => okDialog(
+  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) {
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    return okDialog(
       context,
       colorScheme: colorScheme,
       title: "Guess The Word",
@@ -128,7 +151,7 @@ class AlertsService {
                 text: '\u{273D}  ',
                 style: TextStyle(
                   color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                  fontSize: 24,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -139,7 +162,7 @@ class AlertsService {
                 text: '\u{2726}  ',
                 style: TextStyle(
                   color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                  fontSize: 24,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                 )
               ),
@@ -158,11 +181,15 @@ class AlertsService {
         ),
       ]),
     );
+  }
 
   Future<dynamic> highScoresDialog(BuildContext context, GameColorScheme colorScheme) {
 
     final scoreService = ScoreService(dataService: globalDataService);
     final scores = scoreService.highScores();
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return okDialog(
       context,
@@ -179,12 +206,13 @@ class AlertsService {
                   text: "Nothing scored yet!",
                   style: TextStyle(
                     color: colorScheme.textPuzzlePanel,
+                    fontSize: titleFontSize,
                   )
                 ),
               ],
             ),
           ) : DefaultTextStyle.merge(
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: bodyFontSize),
           child: DefaultTextStyle.merge(
             style: TextStyle(
               color: colorScheme.textPuzzlePanel,

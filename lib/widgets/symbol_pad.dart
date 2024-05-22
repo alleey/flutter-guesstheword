@@ -1,7 +1,7 @@
 import 'package:bit_array/bit_array.dart';
 import 'package:flutter/material.dart';
 
-import 'flip_card.dart';
+import 'common/flip_card.dart';
 import 'symbol_button.dart';
 
 typedef SymbolSelectCallback = void Function(String, bool flipped);
@@ -18,9 +18,9 @@ class SymbolPad extends StatelessWidget {
     super.key,
     required this.frontSymbols,
     required this.backSymbols,
+    required this.buttonSize,
     this.flipped,
     this.whiteSpace,
-    this.buttonSize,
     this.whiteSpaceWidth = defaultWhiteSpaceWidth,
     this.foregroundColor = defaultColorForeground,
     this.backgroundColor = defaultColorBackground,
@@ -38,7 +38,7 @@ class SymbolPad extends StatelessWidget {
 
   final String frontSymbols;
   final String backSymbols;
-  final Size? buttonSize;
+  final Size buttonSize;
   final double? whiteSpaceWidth;
   final Color foregroundColor;
   final Color backgroundColor;
