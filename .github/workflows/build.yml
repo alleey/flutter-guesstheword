@@ -19,47 +19,36 @@ permissions:
   contents: write
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract_version.outputs.value }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Fetch all history for tags
-
-      - name: Extract latest tag version
-        id: extract_version
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { execSync } = require('child_process');
-            let latestTag;
-            try {
-              latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
-            } catch (error) {
-              console.log('No tags found, using default version 0.0.1');
-              latestTag = 'v0.0.1';
-            }
-            const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
-            console.log(`Tag:${latestTag} -> Version:${version}`);
-            return { value: version };
-
   build-web-android:
     runs-on: ubuntu-latest
-    needs: [setup]
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for tags
+
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          let latestTag;
+          try {
+            latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
+          } catch (error) {
+            console.log('No tags found, using default version 0.0.1');
+            latestTag = 'v0.0.1';
+          }
+          const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          console.log(`Tag:${latestTag} -> Version:${version}`);
+          return { value: version };
 
     - name: Write version to file
       uses: actions/github-script@v6
-      env:
-        VERSION: ${{ needs.setup.outputs.version }}
       with:
         script: |
           const fs = require('fs');
-          const version = process.env.VERSION;
+          const version = ${{ steps.extract_version.outputs.value }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json successfully`);
 
@@ -87,9 +76,10 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
-    needs: [setup]
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for tags
 
     - name: Install flutter dependencies
       run: sudo apt-get install -y -f clang cmake ninja-build libgtk-3-dev
@@ -97,14 +87,31 @@ jobs:
     - name: Install app dependencies
       run: sudo apt-get install -y -f libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
 
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          let latestTag;
+          try {
+            latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
+          } catch (error) {
+            console.log('No tags found, using default version 0.0.1');
+            latestTag = 'v0.0.1';
+          }
+          const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          console.log(`Tag:${latestTag} -> Version:${version}`);
+          return { value: version };
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = ${{ steps.extract_version.outputs.value }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build Linux
       uses: subosito/flutter-action@v2
@@ -124,18 +131,36 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    needs: [setup]
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for tags
+
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          let latestTag;
+          try {
+            latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
+          } catch (error) {
+            console.log('No tags found, using default version 0.0.1');
+            latestTag = 'v0.0.1';
+          }
+          const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          console.log(`Tag:${latestTag} -> Version:${version}`);
+          return { value: version };
 
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = ${{ steps.extract_version.outputs.value }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build Windows
       uses: subosito/flutter-action@v2
@@ -155,18 +180,36 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
-    needs: [setup]
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for tags
+
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          let latestTag;
+          try {
+            latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
+          } catch (error) {
+            console.log('No tags found, using default version 0.0.1');
+            latestTag = 'v0.0.1';
+          }
+          const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          console.log(`Tag:${latestTag} -> Version:${version}`);
+          return { value: version };
 
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = ${{ steps.extract_version.outputs.value }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build Macos
       uses: subosito/flutter-action@v2
