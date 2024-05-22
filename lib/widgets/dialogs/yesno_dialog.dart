@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/settings_bloc.dart';
-import '../../common/constants.dart';
 import '../../common/game_color_scheme.dart';
+import '../../common/layout_constants.dart';
 import '../../services/app_data_service.dart';
-import '../alternating_color_squares.dart';
+import '../common/alternating_color_squares.dart';
+import '../common/responsive_layout.dart';
 
 class YesNoDialog extends StatefulWidget {
 
@@ -20,8 +21,8 @@ class YesNoDialog extends StatefulWidget {
     this.noLabel = "No",
     this.width,
     this.height,
-    this.padding = DialogConstants.padding,
-    this.insetPadding = DialogConstants.insetPadding,
+    this.padding = DialogLayoutConstants.padding,
+    this.insetPadding = DialogLayoutConstants.insetPadding,
   });
 
   final GameColorScheme colorScheme;
@@ -108,6 +109,11 @@ class _YesNoDialogState extends State<YesNoDialog> {
   }
 
   Widget _buildContents(BuildContext context, GameColorScheme scheme) {
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -123,7 +129,7 @@ class _YesNoDialogState extends State<YesNoDialog> {
                   style: TextStyle(
                     color: scheme.backgroundPuzzleSymbolsFlipped,
                     fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                    fontSize: titleFontSize,
                   )
                 ),
               ],
@@ -133,13 +139,12 @@ class _YesNoDialogState extends State<YesNoDialog> {
         widget.content,
         const Spacer(),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: scheme.backgroundPuzzleSymbols,
                 foregroundColor: scheme.textPuzzleSymbols,
-                alignment: Alignment.bottomCenter,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -148,14 +153,19 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 Navigator.of(context, rootNavigator: true).pop();
                 widget.onAccept();
               },
-              child: Center(
+              // Is there any good method on planet earth to vertically center text inside elevated button
+              // without a padding hack?
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   widget.yesLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
+                    fontSize: bodyFontSize
                   ),
                 ),
               ),
             ),
+            const SizedBox(width: 10,),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
@@ -169,10 +179,14 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 Navigator.of(context, rootNavigator: true).pop();
                 widget.onReject?.call();
               },
-              child: Center(
+              // Is there any good method on planet earth to vertically center text inside elevated button
+              // without a padding hack?
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   widget.noLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
+                    fontSize: bodyFontSize
                   ),
                 ),
               ),

@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../common/game_color_scheme.dart';
+import '../common/layout_constants.dart';
+import 'common/responsive_layout.dart';
 
 
 typedef ColorSchemeSelectionCallback = void Function(String schmeName);
@@ -33,6 +35,10 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
 
   @override
   Widget build(BuildContext context) {
+
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final itemSize = layout.get<Size>(AppLayoutConstants.themePickerItemSizeKey);
+
     return Wrap(
       alignment: WrapAlignment.center,
         runSpacing: 3,
@@ -46,11 +52,11 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
               });
             },
             child: Container(
-              height: 80,
-              width: 60,
+              height: itemSize.height,
+              width: itemSize.width,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: (e.key == selectedTheme) ? Colors.black : Colors.transparent,
+                  color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
                   width: 3
                 )
               ),
@@ -58,9 +64,24 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
                 padding: const EdgeInsets.all(3.0),
                 child: Column(
                   children: [
-                    Expanded(child: Container(color: e.value.backgroundTopPanel, child: const SizedBox(height: 100, width: 100,),)),
-                    Expanded(child: Container(color: e.value.backgroundPuzzlePanel, child: const SizedBox(height: 100, width: 100,),)),
-                    Expanded(child: Container(color: e.value.backgroundInputPanel, child: const SizedBox(height: 100, width: 100,),)),
+                    Expanded(
+                      child: Container(
+                        color: e.value.backgroundTopPanel,
+                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: e.value.backgroundPuzzlePanel,
+                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: e.value.backgroundInputPanel,
+                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                      ),
+                    ),
                   ]
                 ),
               ),

@@ -16,7 +16,7 @@ class AppDataService {
 
   bool? getFlag(String key) {
     final flags = getObject("flags");
-    if (!flags!.containsKey(key)) {
+    if (!flags.containsKey(key)) {
       return null;
     }
     return flags[key];
@@ -24,13 +24,13 @@ class AppDataService {
 
   Future putFlag(String key, bool value) async {
     final flags = getObject("flags");
-    flags![key] = value;
+    flags[key] = value;
     await dataService.appDataBox.put("flags", flags);
   }
 
   String? getSetting(String key) {
     final flags = getObject("strings");
-    if (!flags!.containsKey(key)) {
+    if (!flags.containsKey(key)) {
       return null;
     }
     return flags[key];
@@ -38,7 +38,7 @@ class AppDataService {
 
   Future putSetting(String key, String value) async {
     final flags = getObject("strings");
-    flags![key] = value;
+    flags[key] = value;
     await dataService.appDataBox.put("strings", flags);
   }
 

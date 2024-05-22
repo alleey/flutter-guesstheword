@@ -14,7 +14,7 @@ class SymbolButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onSelect,
-    this.buttonSize,
+    required this.buttonSize,
     this.foregroundColor = defaultColorForeground,
     this.backgroundColor = defaultColorBackground,
   });
@@ -22,45 +22,69 @@ class SymbolButton extends StatelessWidget {
   final String text;
   final Color foregroundColor;
   final Color backgroundColor;
-  final Size? buttonSize;
+  final Size buttonSize;
   final SymbolPressCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
-    return _wrapInSized(
-      size: buttonSize,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
-          alignment: Alignment.center,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        onPressed: () {
-          onSelect.call(text);
-          //FlipCardRequest().dispatch(context);
-        },
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-      ),
-    );
+    return _buildKey(text);
+    // return SizedBox(
+    //   width: buttonSize.width,
+    //   height: buttonSize.height,
+    //   child: ElevatedButton(
+    //     style: ElevatedButton.styleFrom(
+    //       backgroundColor: backgroundColor,
+    //       foregroundColor: foregroundColor,
+    //       alignment: Alignment.center,
+    //       padding: EdgeInsets.zero,
+    //       shape: RoundedRectangleBorder(
+    //         borderRadius: BorderRadius.circular(8),
+    //       ),
+    //     ),
+    //     onPressed: () {
+    //       onSelect.call(text);
+    //       //FlipCardRequest().dispatch(context);
+    //     },
+    //     child: Text(
+    //       text,
+    //       style: const TextStyle(
+    //         fontWeight: FontWeight.normal,
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 
-  Widget _wrapInSized({ required Widget child, Size? size }) {
-    if (size != null) {
-      return SizedBox(
-        width: size.width,
-        height: size.height,
-        child: child,
-      );
-    }
-    return child;
+  Widget _buildKey(String text) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: SizedBox(
+        width: buttonSize.width,
+        height: buttonSize.height,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            alignment: Alignment.center,
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            minimumSize: Size.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          onPressed: () {
+            onSelect.call(text);
+          },
+          child: Text(
+            text,
+            style: TextStyle(
+              color: foregroundColor,
+            ),
+          ),
+        )
+      )
+    );
   }
 }

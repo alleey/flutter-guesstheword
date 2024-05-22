@@ -41,6 +41,7 @@ dependencies:
   device_frame: ^1.1.0
   url_launcher: ^6.2.6
 
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
