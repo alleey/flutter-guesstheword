@@ -17,18 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
-      version: ${{ steps.extract_version.outputs.value }}
     steps:
-    - name: Extract tag version
-      id: extract_version
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const tag = github.context.ref.split('/').pop();
-          const version = tag.startsWith('v') ? tag.substring(1) : tag;
-          console.log(`Tag:${tag} -> Version:${version}`);
-          core.setOutput('value', version)
-
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -48,12 +37,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const tag = github.context.ref.split('/').pop();
+          const version = tag.startsWith('v') ? tag.substring(1) : tag;
+          console.log(`Tag:${tag} -> Version:${version}`);
+          core.setOutput('value', version)
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json`);
 
@@ -64,8 +63,8 @@ jobs:
         flutter-version-file: pubspec.yaml
         architecture: x64
     - run: flutter pub get
-    - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
-    - run: flutter build apk --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
+    - run: flutter build apk --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Deploy Web
       uses: JamesIves/github-pages-deploy-action@v4
@@ -111,12 +110,22 @@ jobs:
     - name: Install app dependencies
       run: sudo apt-get install -y -f libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
 
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const tag = github.context.ref.split('/').pop();
+          const version = tag.startsWith('v') ? tag.substring(1) : tag;
+          console.log(`Tag:${tag} -> Version:${version}`);
+          core.setOutput('value', version)
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json`);
 
@@ -128,7 +137,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-linux-desktop
-    - run: flutter build linux --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build linux --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Archive Linux Release
       uses: thedoctor0/zip-release@master
@@ -153,12 +162,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const tag = github.context.ref.split('/').pop();
+          const version = tag.startsWith('v') ? tag.substring(1) : tag;
+          console.log(`Tag:${tag} -> Version:${version}`);
+          core.setOutput('value', version)
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json`);
 
@@ -170,7 +189,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-windows-desktop
-    - run: flutter build windows --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build windows --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Archive Windows Release
       uses: thedoctor0/zip-release@master
@@ -195,12 +214,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Extract latest tag version
+      id: extract_version
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const tag = github.context.ref.split('/').pop();
+          const version = tag.startsWith('v') ? tag.substring(1) : tag;
+          console.log(`Tag:${tag} -> Version:${version}`);
+          core.setOutput('value', version)
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json`);
 
@@ -212,7 +241,7 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter config --enable-macos-desktop
-    - run: flutter build macos --release --build-name=${{ needs.setup.outputs.version }} --build-number=${{ github.run_number }}
+    - run: flutter build macos --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Archive Macos Release
       uses: thedoctor0/zip-release@master
