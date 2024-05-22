@@ -24,6 +24,9 @@ jobs:
     outputs:
       version: ${{ steps.extract_version.outputs.value }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Extract latest tag version
         id: extract_version
         uses: actions/github-script@v6
@@ -38,7 +41,7 @@ jobs:
               latestTag = 'v0.0.1';
             }
             const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
-            console.log(`Tag:${tag} -> Version:${version}`);
+            console.log(`Tag:${latestTag} -> Version:${version}`);
             return { value: version };
 
   build-web-android:
