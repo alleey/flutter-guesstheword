@@ -43,11 +43,14 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
-    - name: Add version info
-      env:
-        Version: ${{ steps.extract_version.outputs.value }}
-      run: |
-        echo "{\"version\": \"$Version\"}" > assets/version.json
+    - name: Write version to file
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const version = '${{ steps.extract_version.outputs.value }}';
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build Web and Android
       uses: subosito/flutter-action@v2
@@ -106,7 +109,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const version = ${{ steps.extract_version.outputs.value }};
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json successfully`);
 
@@ -148,14 +151,14 @@ jobs:
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
           console.log(`Tag:${latestTag} -> Version:${version}`);
-          return { value: version };
+          core.setOutput('value', version)
 
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = ${{ steps.extract_version.outputs.value }};
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json successfully`);
 
@@ -197,14 +200,14 @@ jobs:
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
           console.log(`Tag:${latestTag} -> Version:${version}`);
-          return { value: version };
+          core.setOutput('value', version)
 
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = ${{ steps.extract_version.outputs.value }};
+          const version = '${{ steps.extract_version.outputs.value }}';
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json successfully`);
 
