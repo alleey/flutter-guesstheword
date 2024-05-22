@@ -57,7 +57,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const version = needs.setup.outputs.version;
+          const version = ${{ needs.setup.outputs.version }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${content} written to assets/version.json successfully`);
 
@@ -100,7 +100,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const version = needs.setup.outputs.version;
+          const version = ${{ needs.setup.outputs.version }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${content} written to assets/version.json successfully`);
 
@@ -131,7 +131,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const version = needs.setup.outputs.version;
+          const version = ${{ needs.setup.outputs.version }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${content} written to assets/version.json successfully`);
 
@@ -162,7 +162,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const version = needs.setup.outputs.version;
+          const version = ${{ needs.setup.outputs.version }};
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${content} written to assets/version.json successfully`);
 
