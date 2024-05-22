@@ -54,12 +54,14 @@ jobs:
 
     - name: Write version to file
       uses: actions/github-script@v6
+      env:
+        VERSION: ${{ needs.setup.outputs.version }}
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ needs.setup.outputs.version }}';
+          const version = process.env.VERSION;
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${content} written to assets/version.json successfully`);
+          console.log(`${version} written to assets/version.json successfully`);
 
     - name: Build Web and Android
       uses: subosito/flutter-action@v2
