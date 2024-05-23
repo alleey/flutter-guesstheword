@@ -232,60 +232,67 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final layout = ResponsiveLayoutProvider.layout(context);
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text.rich(
-        textAlign: TextAlign.center,
-        TextSpan(
-          style: TextStyle(
-            fontSize: titleFontSize,
-            color: colorScheme.textTopPanel,
+    return Semantics(
+      excludeSemantics: true,
+      label: "Score is ${state.score.value}, ${state.score.wins} wins and ${state.score.losses} losses. You have ${state.score.hintTokens} available hints.",
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text.rich(
+          textAlign: TextAlign.center,
+          TextSpan(
+            style: TextStyle(
+              fontSize: titleFontSize,
+              color: colorScheme.textTopPanel,
+            ),
+            children: [
+              TextSpan(
+                text: '\u{273D}',
+                style: TextStyle(
+                  color: colorScheme.colorIcons,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              TextSpan(
+                text: "${state.score.value}-${state.score.wins}-${state.score.losses}      ",
+              ),
+              TextSpan(
+                text: '\u{2726}',
+                style: TextStyle(
+                  color: colorScheme.colorIcons,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              TextSpan(
+                text: "${state.score.hintTokens}",
+              ),
+            ],
           ),
-          children: [
-            TextSpan(
-              text: '\u{273D}',
-              style: TextStyle(
-                color: colorScheme.colorIcons,
-                fontWeight: FontWeight.bold,
-              )
-            ),
-            TextSpan(
-              text: "${state.score.value}-${state.score.wins}-${state.score.losses}      ",
-            ),
-            TextSpan(
-              text: '\u{2726}',
-              style: TextStyle(
-                color: colorScheme.colorIcons,
-                fontWeight: FontWeight.bold,
-              )
-            ),
-            TextSpan(
-              text: "${state.score.hintTokens}",
-            ),
-          ],
         ),
       ),
     );
   }
 
   Widget _buildStatusPanel(BuildContext context, GameState state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children:
-      [
-        ...Iterable<int>.generate(Constants.maxErrors).map((e)
-          => FlipCard(
-              showFront: (e > (state.errorCount - 1)),
-              frontCard: Icon(Icons.favorite, size: 36, color: colorScheme.colorHeart),
-              backCard: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.rotationX(math.pi),
-                child: Icon(Icons.heart_broken, size: 36, color: colorScheme.colorHeartBroken)
-              ),
-              transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
-            )),
-      ],
+    return Semantics(
+      label: "${Constants.maxErrors - state.errorCount} attempts left",
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children:
+        [
+          ...Iterable<int>.generate(Constants.maxErrors).map((e)
+            => FlipCard(
+                showFront: (e > (state.errorCount - 1)),
+                frontCard: Icon(Icons.favorite, size: 36, color: colorScheme.colorHeart),
+                backCard: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationX(math.pi),
+                  child: Icon(Icons.heart_broken, size: 36, color: colorScheme.colorHeartBroken)
+                ),
+                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+              )),
+        ],
+      ),
     );
   }
 
@@ -298,36 +305,45 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
-          style: TextStyle(
-            fontSize: titleFontSize,
-            fontWeight: FontWeight.bold,
-            color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
+        Semantics(
+          label: state.isWin ? "You won! ${state.winBonus} points earned" : 'Sorry, you lost!',
+          excludeSemantics: true,
+          child: Text(
+            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
+            style: TextStyle(
+              fontSize: titleFontSize,
+              fontWeight: FontWeight.bold,
+              color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
+            ),
           ),
         ),
         const SizedBox(width: 20,),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.backgroundTopButton,
-              side: BorderSide(width: 2, color: colorScheme.textTopPanel),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              minimumSize: Size.zero,
-            ),
-            onPressed: () {
-              startPuzzle();
-            },
-            child: Center(
-              child: Text(
-                "Go Next",
-                style: TextStyle(
-                  color: colorScheme.textTopButton,
-                  fontSize: titleFontSize,
-                )
+          child: Semantics(
+            button: true,
+            label: "Try the next puzzle",
+            excludeSemantics: true,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.backgroundTopButton,
+                side: BorderSide(width: 2, color: colorScheme.textTopPanel),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                minimumSize: Size.zero,
               ),
-            )
+              onPressed: () {
+                startPuzzle();
+              },
+              child: Center(
+                child: Text(
+                  "Go Next",
+                  style: TextStyle(
+                    color: colorScheme.textTopButton,
+                    fontSize: titleFontSize,
+                  )
+                ),
+              )
+            ),
           ),
         )
       ],
@@ -340,21 +356,26 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return BlinkEffect (
-      child: ElevatedButton (
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.backgroundHintButton,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: EdgeInsets.zero,
-          alignment: Alignment.center,
-        ),
-        onPressed: () {
-          gameBloc.add(UseHintTokenEvent());
-        },
-        child: Text(
-          "Use a Hint",
-          style: TextStyle(
-            color: colorScheme.textHintButton,
-            fontSize: bodyFontSize
+      child: Semantics(
+        label: "Use a hint",
+        button: true,
+        excludeSemantics: true,
+        child: ElevatedButton (
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.backgroundHintButton,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: EdgeInsets.zero,
+            alignment: Alignment.center,
+          ),
+          onPressed: () {
+            gameBloc.add(UseHintTokenEvent());
+          },
+          child: Text(
+            "Use a Hint",
+            style: TextStyle(
+              color: colorScheme.textHintButton,
+              fontSize: bodyFontSize
+            ),
           ),
         ),
       )
@@ -371,17 +392,21 @@ class _PuzzlePageState extends State<PuzzlePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            " ${state.hint} ",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.textPuzzlePanel,
+        Semantics(
+          label: "The puzzle word is. ${state.hint}",
+          excludeSemantics: true,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              " ${state.hint} ",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.textPuzzlePanel,
+                ),
               ),
-            ),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(2.0),
@@ -425,17 +450,21 @@ class _PuzzlePageState extends State<PuzzlePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (!state.isGameOver)
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                "Pick your letters wisely \u{2193}",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.textInputPanel,
+            Semantics(
+              label: "Pick your letters wisely",
+              excludeSemantics: true,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "Pick your letters wisely \u{2193}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.textInputPanel,
+                    ),
                   ),
-                ),
+              ),
             ),
           if (!state.isGameOver)
             SizedBox(
