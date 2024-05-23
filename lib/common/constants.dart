@@ -1,7 +1,7 @@
 
 class Constants
 {
-  static const int appDataVersion = 5;
+  static const int appDataVersion = 1;
   static const int maxErrors = 6;
   static const int maxScoreHistory = 10;
   static const int scoreBumpForHintBonus = 100;
@@ -20,8 +20,10 @@ class Constants
   static const int revealHard = 3;
 
   static const puzzleSets = [
-    "animals", "birds", "cars", "cartoons", "capitals", "countries",
-    "elements", "emotions", "flowers", "fruits",
-    "olympics", "sea-creatures", "vegetables",
+    "animals", "birds", "cars", "cartoons", "capitals",
+    "countries", "desserts",
+    "elements", "emotions", "flowers", "fruits", "martialarts", "moons",
+    "olympics", "scientists", "sea-creatures", "superheroes",
+    "vegetables",
   ];
 }
