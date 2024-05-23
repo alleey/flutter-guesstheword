@@ -21,6 +21,10 @@ permissions:
 jobs:
   build-web-android:
     runs-on: ubuntu-latest
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -52,6 +56,16 @@ jobs:
           fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
           console.log(`${version} written to assets/version.json`);
 
+    - name: Decode and save keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/keystore.jks
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
     - name: Build Web and Android
       uses: subosito/flutter-action@v2
       with:
@@ -60,7 +74,21 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
+    - run: flutter build appbundle --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
     - run: flutter build apk --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
+
+    - name: Sign APK
+      run: |
+        jarsigner -verbose -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android/app/keystore.jks \
+          -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD \
+          build/app/outputs/flutter-apk/app-release.apk $KEY_ALIAS
+
+    - name: Sign AppBundle
+      run: |
+        zip -d build/app/outputs/bundle/release/app-release.aab META-INF/\*
+        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android/app/keystore.jks \
+          -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD \
+          build/app/outputs/bundle/release/app-release.aab $KEY_ALIAS
 
     - name: Attach Website
       uses: actions/upload-artifact@v3
@@ -73,6 +101,12 @@ jobs:
       with:
         name: APK-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/app/outputs/flutter-apk/app-release.apk
+
+    - name: Attach AppBundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: AppBundle-guesstheword-${{ github.ref_name }}-${{ github.sha }}
+        path: build/app/outputs/bundle/release/app-release.aab
 
   build-linux:
     runs-on: ubuntu-latest
