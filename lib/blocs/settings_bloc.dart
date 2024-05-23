@@ -1,7 +1,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guess_the_word/services/app_data_service.dart';
 
+import '../services/app_data_service.dart';
 import '../services/data_service.dart';
 
 ////////////////////////////////////////////

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
-import 'package:guess_the_word/common/constants.dart';
-
+import '../common/constants.dart';
 import '../models/score.dart';
 import 'data_service.dart';
 
