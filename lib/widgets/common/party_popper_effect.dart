@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class PartyPopperEffect extends StatefulWidget {
   const PartyPopperEffect({
     super.key,
-    this.duration = const Duration(seconds: 1),
+    this.duration = const Duration(milliseconds: 1200),
     this.maxRibbons = 100,
   });
 

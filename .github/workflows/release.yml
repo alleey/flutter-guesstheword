@@ -87,8 +87,8 @@ jobs:
         architecture: x64
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
-    - run: flutter build appbundle --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
-    # - run: flutter build apk --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }}
+    - run: flutter build appbundle --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }} --dart-define=MIN_SDK_VERSION=24
+    # - run: flutter build apk --release --build-name=${{ steps.extract_version.outputs.value }} --build-number=${{ github.run_number }} --dart-define=MIN_SDK_VERSION=24
 
     # - name: Sign APK
     #   run: |

@@ -23,6 +23,8 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+def minSdkVersion = project.hasProperty('minSdkVersion') ? project.minSdkVersion.toInteger() : 24
+
 android {
     namespace = "io.alleey.development.guess_the_word"
     compileSdk = flutter.compileSdkVersion
@@ -38,7 +40,7 @@ android {
         applicationId = "io.alleey.development.guess_the_word"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdk = flutter.minSdkVersion
+        minSdk = minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
