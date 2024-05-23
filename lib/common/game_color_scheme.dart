@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/widgets/symbol_pad.dart';
+
+import '../widgets/symbol_pad.dart';
 
 ////////////////////////////////////////////
 

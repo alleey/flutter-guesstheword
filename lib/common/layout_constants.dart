@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/widgets/common/responsive_layout.dart';
+
+import '../widgets/common/responsive_layout.dart';
 
 class DialogLayoutConstants
 {
