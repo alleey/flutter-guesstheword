@@ -393,12 +393,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Semantics(
-          label: "The puzzle word is. ${state.hint}",
+          label: "${state.puzzle.length} lettered ${state.hint}",
           excludeSemantics: true,
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              " ${state.hint} ",
+              state.hint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: titleFontSize,
@@ -424,6 +424,13 @@ class _PuzzlePageState extends State<PuzzlePage> {
             alignment: WrapAlignment.start,
             buttonSize: buttonSize,
             onSelect: (c, f) {},
+            symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
+              return Semantics(
+                label: !isFront ? backLabel.toLowerCase() : "Hidden Letter",
+                excludeSemantics: true,
+                child: widget
+              );
+            },
           ),
         )
       ],
@@ -440,7 +447,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
     final tried = state.symbolSet
         .split('')
-        .map((e) => state.puzzle.toLowerCase().contains(e) ? '\u{2713}' : '\u{2717}')
+        .map((e) => state.puzzle.toLowerCase().contains(e) ? '\u{2713}' : '\u{2169}')
         .join();
 
     return Padding(
@@ -482,6 +489,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 buttonSize: buttonSize,
                 onSelect: (c, flipped) {
                   if (!flipped) gameBloc.add(UserInputEvent(c));
+                },
+                symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
+                  bool ticked = backLabel == "\u{2713}";
+                  return Semantics(
+                    keyboardKey: true,
+                    label: isFront ? frontLabel.toLowerCase() :
+                      (ticked ? "Letter $frontLabel is ticked" : "Letter $frontLabel is crossed"),
+                    excludeSemantics: true,
+                    child: widget
+                  );
                 },
               ),
             ),

@@ -91,44 +91,6 @@ class GameColorScheme {
 
   factory GameColorScheme.defaultScheme() {
 
-    var color1 = _fromHex("114232");
-    var color2 = _fromHex("87a922");
-    var color3 = _fromHex("fcdc2a");
-    var color4 = _fromHex("f7f6bb");
-
-    return GameColorScheme(
-      backgroundTopPanel: color1,
-      backgroundPuzzlePanel: color2,
-      backgroundInputPanel: color3,
-
-      textTopPanel: color4,
-      backgroundTopButton: color1,
-      textHintButton: color1,
-      backgroundHintButton: color4,
-
-      colorIcons: Colors.yellow,
-      colorSuccess: const Color.fromARGB(255, 8, 254, 16),
-      colorFailure: Colors.redAccent,
-      colorHeart: Colors.yellow,
-      colorHeartBroken: color4,
-
-      textPuzzlePanel: color1,
-      textPuzzleSymbols: color4,
-      textPuzzleSymbolsFlipped: color1,
-      backgroundPuzzleSymbols: color1,
-      backgroundPuzzleSymbolsFlipped: color4,
-
-      textInputPanel: color1,
-      textInputSymbols: color4,
-      backgroundInputSymbols: color1,
-      textInputSymbolsFlipped: color1,
-      backgroundInputSymbolsFlipped: color4,
-      backgroundInputButton: color1,
-    );
-  }
-
-  factory GameColorScheme.theme1() {
-
     var color1 = _fromHex("151515");
     var color2 = _fromHex("a91d3a");
     var color3 = _fromHex("c73659");
@@ -158,6 +120,45 @@ class GameColorScheme {
       backgroundPuzzleSymbolsFlipped: color4,
 
       textInputPanel: color4,
+      textInputSymbols: color4,
+      backgroundInputSymbols: color1,
+      textInputSymbolsFlipped: color1,
+      backgroundInputSymbolsFlipped: color4,
+      backgroundInputButton: color1,
+    );
+
+  }
+
+  factory GameColorScheme.theme1() {
+
+    var color1 = _fromHex("114232");
+    var color2 = _fromHex("87a922");
+    var color3 = _fromHex("fcdc2a");
+    var color4 = _fromHex("f7f6bb");
+
+    return GameColorScheme(
+      backgroundTopPanel: color1,
+      backgroundPuzzlePanel: color2,
+      backgroundInputPanel: color3,
+
+      textTopPanel: color4,
+      backgroundTopButton: color1,
+      textHintButton: color1,
+      backgroundHintButton: color4,
+
+      colorIcons: Colors.yellow,
+      colorSuccess: const Color.fromARGB(255, 8, 254, 16),
+      colorFailure: Colors.redAccent,
+      colorHeart: Colors.yellow,
+      colorHeartBroken: color4,
+
+      textPuzzlePanel: color1,
+      textPuzzleSymbols: color4,
+      textPuzzleSymbolsFlipped: color1,
+      backgroundPuzzleSymbols: color1,
+      backgroundPuzzleSymbolsFlipped: color4,
+
+      textInputPanel: color1,
       textInputSymbols: color4,
       backgroundInputSymbols: color1,
       textInputSymbolsFlipped: color1,

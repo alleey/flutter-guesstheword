@@ -1,5 +1,5 @@
 {
-    "hint": "A Dessert",
+    "hint": "Dessert Name",
     "values": [
         "Apple Pie",
         "Baklava",
@@ -19,13 +19,11 @@
         "Creme Brulee",
         "Creme Caramel",
         "Cupcakes",
-        "Éclair",
-        "Éclair",
+        "Eclair",
         "Flan",
         "Fried Ice Cream",
         "Fruit Tart",
         "Gelato",
-        "Ice Cream Sundae",
         "Macarons",
         "Mousse",
         "Panna Cotta",
@@ -39,6 +37,7 @@
         "Rice Pudding",
         "Scones",
         "Tiramisu",
-        "Trifle"
+        "Trifle",
+        "Truffle Cake"
     ]
 }

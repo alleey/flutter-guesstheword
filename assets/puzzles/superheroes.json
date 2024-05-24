@@ -1,5 +1,5 @@
 {
-    "hint": "A Superhero",
+    "hint": "Superhero",
     "values": [
         "Ant Man",
         "Aquaman",
@@ -36,7 +36,6 @@
         "Luke Cage",
         "Miss Marvel",
         "Red Hood",
-        "Silver Surfer",
         "Vision",
         "Zatanna"
       ]

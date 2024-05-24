@@ -5,6 +5,7 @@ import 'common/flip_card.dart';
 import 'symbol_button.dart';
 
 typedef SymbolSelectCallback = void Function(String, bool flipped);
+typedef DecoratorFunction = Widget Function(Widget widget, int index, bool isFront, String frontLabel, String backLabel);
 
 class SymbolPad extends StatelessWidget {
 
@@ -29,9 +30,12 @@ class SymbolPad extends StatelessWidget {
     this.spacing = 0.0,
     this.runSpacing = 0.0,
     this.alignment = WrapAlignment.center,
-    required this.onSelect
-  }) :  assert(frontSymbols.length == backSymbols.length) {
-
+    required this.onSelect,
+    DecoratorFunction? symbolDecorator,
+  }):
+    assert(frontSymbols.length == backSymbols.length),
+    symbolDecorator = symbolDecorator ?? ((widget,_, __,___,____) => widget)
+  {
     flipped = flipped ?? BitArray(frontSymbols.length);
     whiteSpace = whiteSpace ?? BitArray(frontSymbols.length);
   }
@@ -44,12 +48,13 @@ class SymbolPad extends StatelessWidget {
   final Color backgroundColor;
   final Color foregroundColorFlipped;
   final Color backgroundColorFlipped;
-  final SymbolSelectCallback onSelect;
   final double spacing;
   final double runSpacing;
   final WrapAlignment alignment;
   late BitArray? flipped;
   late BitArray? whiteSpace;
+  final SymbolSelectCallback onSelect;
+  final DecoratorFunction symbolDecorator;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +63,7 @@ class SymbolPad extends StatelessWidget {
 
   Widget _buildPanel(BuildContext context) {
 
-    final symbolList = frontSymbols.split('').asMap();
+    final symbolList = frontSymbols.split('');
     return Wrap(
       spacing: spacing,
       runSpacing: runSpacing,
@@ -74,17 +79,16 @@ class SymbolPad extends StatelessWidget {
 
   Widget _buildCard(BuildContext c, int index) {
 
-    return FlipCard(
-      showFront: !flipped![index],
-      frontCard: SymbolButton(
+    var frontFace = SymbolButton(
           text: frontSymbols[index],
           foregroundColor: foregroundColor,
           backgroundColor: backgroundColor,
           buttonSize: buttonSize,
           onSelect: (ch) {
             onSelect.call(ch, false);
-          }),
-      backCard: SymbolButton(
+          }
+        );
+    var backFace = SymbolButton(
           text: backSymbols[index],
           foregroundColor: foregroundColorFlipped,
           backgroundColor: backgroundColorFlipped,
@@ -92,7 +96,12 @@ class SymbolPad extends StatelessWidget {
           onSelect: (ch) {
             onSelect.call(ch, true);
           }
-      ),
+      );
+
+    return FlipCard(
+      showFront: !flipped![index],
+      frontCard: symbolDecorator(frontFace, index, true, frontSymbols[index], backSymbols[index]),
+      backCard: symbolDecorator(backFace, index, false, frontSymbols[index], backSymbols[index]),
     );
   }
 }

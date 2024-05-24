@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
         Semantics(
           button: true,
           excludeSemantics: true,
-          label: 'Learn about the game and how to play',
+          label: 'About the game',
           child: IconButton(
             icon: const Icon(Icons.description_outlined),
             onPressed: () async {
@@ -109,8 +109,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   GameColorSchemes.scheme(selectedTheme),
                   onAccept: () {
-                    final bloc = BlocProvider.of<GameBloc>(context);
-                    bloc.add(ResetGameEvent());
+                    BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
                   }
               );
             },
@@ -140,9 +139,10 @@ class _HomePageState extends State<HomePage> {
   Future showAlert(BuildContext context) async {
 
     final appDataService = AppDataService(dataService: globalDataService);
-    if (appDataService.getFlag("firstUse") ?? true) {
+
+    if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true) {
       await AlertsService().helpDialog(context, GameColorSchemes.scheme(selectedTheme));
-      await appDataService.putFlag("firstUse", false);
+      await appDataService.putFlag(KnownSettingsNames.firstUse, false);
     }
 
     setState(() {

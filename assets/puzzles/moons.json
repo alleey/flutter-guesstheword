@@ -1,5 +1,5 @@
 {
-    "hint": "Name of a Moon",
+    "hint": "Moon",
     "values": [
         "Adrastea",
         "Aegaeon",
@@ -56,7 +56,6 @@
         "Larissa",
         "Leda",
         "Lysithea",
-        "Mars Moons",
         "Megaclite",
         "Metis",
         "Mimas",
@@ -84,7 +83,6 @@
         "Qurenus",
         "Rhea",
         "Rosalind",
-        "Saturn Moons",
         "Siarnaq",
         "Skathi",
         "Skoll",
@@ -101,7 +99,6 @@
         "Titania",
         "Triton",
         "Umbriel",
-        "Uranus Moons",
         "Ymir"
     ]
 }
