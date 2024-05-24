@@ -2,6 +2,7 @@ import 'data_service.dart';
 
 class KnownSettingsNames
 {
+  static const String firstUse = "firstUse";
   static const String settingTheme = "theme";
 }
 

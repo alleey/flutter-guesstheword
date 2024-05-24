@@ -44,45 +44,49 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
         runSpacing: 3,
         spacing: 3,
         children: GameColorSchemes.all.mapIndexed((index, e) =>
-          InkWell(
-            onTap: () {
-              setState(() {
-                selectedTheme = e.key;
-                widget.onSelect(selectedTheme);
-              });
-            },
-            child: Container(
-              height: itemSize.height,
-              width: itemSize.width,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
-                  width: 3
-                )
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        color: e.value.backgroundTopPanel,
-                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+          Semantics(
+            label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
+            button: true,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  selectedTheme = e.key;
+                  widget.onSelect(selectedTheme);
+                });
+              },
+              child: Container(
+                height: itemSize.height,
+                width: itemSize.width,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
+                    width: 3
+                  )
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          color: e.value.backgroundTopPanel,
+                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: e.value.backgroundPuzzlePanel,
-                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                      Expanded(
+                        child: Container(
+                          color: e.value.backgroundPuzzlePanel,
+                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: e.value.backgroundInputPanel,
-                        child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                      Expanded(
+                        child: Container(
+                          color: e.value.backgroundInputPanel,
+                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                        ),
                       ),
-                    ),
-                  ]
+                    ]
+                  ),
                 ),
               ),
             ),

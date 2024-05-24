@@ -115,21 +115,24 @@ class _OkDialogState extends State<OkDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: widget.title,
-                  style: TextStyle(
-                    color: scheme.backgroundPuzzleSymbolsFlipped,
-                    fontWeight: FontWeight.bold,
-                    fontSize: titleFontSize,
-                  )
-                ),
-              ],
+        Semantics(
+          container: true,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text.rich(
+              textAlign: TextAlign.center,
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: widget.title,
+                    style: TextStyle(
+                      color: scheme.backgroundPuzzleSymbolsFlipped,
+                      fontWeight: FontWeight.bold,
+                      fontSize: titleFontSize,
+                    )
+                  ),
+                ],
+              ),
             ),
           ),
         ),

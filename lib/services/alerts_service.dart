@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../common/constants.dart';
@@ -91,26 +92,29 @@ class AlertsService {
       context,
       colorScheme:  colorScheme,
       title: "RESET GAME",
-      content: Text.rich(
-        textAlign: TextAlign.justify,
-        TextSpan(
-          children: [
-            TextSpan(
-              text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
-              style: TextStyle(
-                color: colorScheme.textPuzzlePanel,
-                fontSize: bodyFontSize,
-              )
-            ),
-            TextSpan(
-              text: "Continue?",
-              style: TextStyle(
-                color: colorScheme.textPuzzlePanel,
-                fontWeight: FontWeight.bold,
-                fontSize: titleFontSize,
-              )
-            ),
-          ],
+      content: Semantics(
+        container: true,
+        child: Text.rich(
+          textAlign: TextAlign.justify,
+          TextSpan(
+            children: [
+              TextSpan(
+                text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
+                style: TextStyle(
+                  color: colorScheme.textPuzzlePanel,
+                  fontSize: bodyFontSize,
+                )
+              ),
+              TextSpan(
+                text: "Would you like to reset?",
+                style: TextStyle(
+                  color: colorScheme.textPuzzlePanel,
+                  fontWeight: FontWeight.bold,
+                  fontSize: titleFontSize,
+                )
+              ),
+            ],
+          ),
         ),
       ),
       onAccept:onAccept
@@ -127,56 +131,81 @@ class AlertsService {
       okLabel: "Close",
       content:
         Column(children: [
-        Text.rich(
-          textAlign: TextAlign.center,
-          TextSpan(
-            children: [
-              TextSpan(
-                text: globalDataService.version,
-                style: TextStyle(
-                  color: colorScheme.backgroundTopPanel,
-                )
-              ),
-            ],
+        Semantics(
+          label: "Game version is ${globalDataService.version}",
+          container: true,
+          excludeSemantics: true,
+          child: Text.rich(
+            textAlign: TextAlign.center,
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: globalDataService.version,
+                  style: TextStyle(
+                    color: colorScheme.backgroundTopPanel,
+                  )
+                ),
+              ],
+            ),
           ),
         ),
-        Text.rich(
-          textAlign: TextAlign.justify,
-          TextSpan(
-            style: TextStyle(
-              color: colorScheme.textPuzzlePanel,
-            ),
-            children: [
-              TextSpan(
-                text: '\u{273D}  ',
-                style: TextStyle(
-                  color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
+
+        Semantics(
+          container: true,
+          child: Text.rich(
+            textAlign: TextAlign.justify,
+            TextSpan(
+              style: TextStyle(
+                color: colorScheme.textPuzzlePanel,
+              ),
+              children: [
+                TextSpan(
+                  semanticsLabel: "Point 1.",
+                  text: '\u{273D}  ',
+                  style: TextStyle(
+                    color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                const TextSpan(
+                  text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        Semantics(
+          container: true,
+          child: Text.rich(
+            textAlign: TextAlign.justify,
+            TextSpan(
+              style: TextStyle(
+                color: colorScheme.textPuzzlePanel,
               ),
-              const TextSpan(
-                text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
-              ),
-              TextSpan(
-                text: '\u{2726}  ',
-                style: TextStyle(
-                  color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                )
-              ),
-              const TextSpan(
-                text: "A hint token is awared for every ${Constants.scoreBumpForHintBonus} points earned. ",
-              ),
-              TextSpan(
-                text: "Hint tokens are carried forward even if you reset the game.",
-                style: TextStyle(
-                  color: colorScheme.backgroundTopPanel,
-                  fontWeight: FontWeight.bold,
-                )
-              ),
-            ],
+              children: [
+                TextSpan(
+                  text: '\u{2726}  ',
+                  semanticsLabel: "Point 2.",
+                  style: TextStyle(
+                    color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
+                const TextSpan(
+                  text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
+                ),
+                TextSpan(
+                  text: "Hint tokens are carried forward even if you reset the game.",
+                  style: TextStyle(
+                    color: colorScheme.backgroundTopPanel,
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
+              ],
+            ),
           ),
         ),
       ]),
@@ -198,18 +227,21 @@ class AlertsService {
       okLabel: "Close",
       content:
         scores.isEmpty ?
-          Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: "Nothing scored yet!",
-                  style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
-                    fontSize: titleFontSize,
-                  )
-                ),
-              ],
+          Semantics(
+            container: true,
+            child: Text.rich(
+              textAlign: TextAlign.center,
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: "No score has been recorded yet. Win some puzzles to record a score!",
+                    style: TextStyle(
+                      color: colorScheme.textPuzzlePanel,
+                      fontSize: titleFontSize,
+                    )
+                  ),
+                ],
+              ),
             ),
           ) : DefaultTextStyle.merge(
           style: TextStyle(fontSize: bodyFontSize),
@@ -219,24 +251,34 @@ class AlertsService {
             ),
             child: Column(
               children:[
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Played"),
-                    Text("Won"),
-                    Text("Lost"),
-                  ],
+                Semantics(
+                  label: "Below is the list of top scores, games won and lost",
+                  excludeSemantics: true,
+                  container: true,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Score"),
+                      Text("Won"),
+                      Text("Lost"),
+                    ],
+                  ),
                 ),
-                ...scores.map( (e) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("${e.value}"),
-                          Text("${e.wins}"),
-                          Text("${e.losses}"),
-                        ],
+                ...scores.mapIndexed((i, e) {
+                    return Semantics(
+                      label: "Item ${i+1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
+                      container: true,
+                      excludeSemantics: true,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("${e.value}"),
+                            Text("${e.wins}"),
+                            Text("${e.losses}"),
+                          ],
+                        ),
                       ),
                     );
                   }
