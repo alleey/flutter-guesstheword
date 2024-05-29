@@ -64,8 +64,8 @@ class AppLayoutConstants
   static const String themePickerItemSizeKey = "app.themePickerItemSize";
   static final themePickerItemSize = ResponsiveValue.from(
     small: const Size(60, 80),
-    medium: const Size(120, 160),
-    large: const Size(120, 160),
+    medium: const Size(80, 120),
+    large: const Size(110, 140),
   );
 
   static final layout = <String, ResponsiveValue<dynamic>>{
