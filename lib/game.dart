@@ -10,6 +10,7 @@ import 'blocs/settings_bloc.dart';
 import 'common/constants.dart';
 import 'common/game_color_scheme.dart';
 import 'common/layout_constants.dart';
+import 'common/utils.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'services/audio_service.dart';
@@ -426,7 +427,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
             onSelect: (c, f) {},
             symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
               return Semantics(
-                label: !isFront ? backLabel.toLowerCase() : "Hidden Letter",
+                label: !isFront ? "${numberToOrdinal(index)} letter. ${backLabel.toLowerCase()}" :
+                                  "${numberToOrdinal(index)} letter. Hidden",
                 excludeSemantics: true,
                 child: widget
               );
@@ -494,8 +496,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   bool ticked = backLabel == "\u{2713}";
                   return Semantics(
                     keyboardKey: true,
-                    label: isFront ? frontLabel.toLowerCase() :
-                      (ticked ? "Letter $frontLabel is ticked" : "Letter $frontLabel is crossed"),
+                    label: isFront ? "Key ${frontLabel.toLowerCase()}" :
+                                    (ticked ? "Key ${frontLabel.toLowerCase()} is ticked" : "Key ${frontLabel.toLowerCase()} is crossed"),
                     excludeSemantics: true,
                     child: widget
                   );

@@ -116,6 +116,7 @@ class _OkDialogState extends State<OkDialog> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
+          header: true,
           container: true,
           child: FittedBox(
             fit: BoxFit.scaleDown,
