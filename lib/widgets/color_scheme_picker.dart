@@ -48,6 +48,15 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
             label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
             button: true,
             child: InkWell(
+              canRequestFocus: true,
+              onFocusChange: (focus) {
+                if (focus) {
+                  setState(() {
+                    selectedTheme = e.key;
+                    widget.onSelect(selectedTheme);
+                  });
+                }
+              },
               onTap: () {
                 setState(() {
                   selectedTheme = e.key;
