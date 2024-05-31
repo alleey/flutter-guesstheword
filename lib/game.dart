@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ import 'widgets/common/party_popper_effect.dart';
 import 'widgets/common/responsive_layout.dart';
 import 'widgets/symbol_pad.dart';
 
+
 class PuzzlePage extends StatefulWidget {
   const PuzzlePage({super.key});
 
@@ -43,7 +43,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   @override
   void initState() {
     super.initState();
-    colorScheme = GameColorSchemes.scheme(appDataService.getSetting("theme") ?? "default");
+    colorScheme = GameColorSchemes.fromName(appDataService.getSetting(KnownSettingsNames.settingTheme) ?? "default");
     startPuzzle();
   }
 
@@ -57,13 +57,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return BlocListener<SettingsBloc, SettingsBlocState>(
       listener: (BuildContext context, state) {
 
-        log("listener(SettingsBloc): $state");
         switch(state) {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
             setState(() {
-              log("listener(SettingsBloc): $state");
-              colorScheme = GameColorSchemes.scheme(s.value);
+              colorScheme = GameColorSchemes.fromName(s.value);
             });
           }
           break;
@@ -72,7 +70,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: BlocConsumer<GameBloc, GameBlocState>(
         listener: (context, state) async {
 
-          log("listener(GameBloc): $state");
+          // Hack neded on Android TV for autofocus effects
+          await setHighlightMode();
+
           switch (state) {
 
             case ResetState _:
@@ -110,7 +110,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
         },
         builder: (context, state) {
 
-          log("builder(GameBloc): $state");
           if (state is GameState) {
             return _buildLayout(context, state);
           }
@@ -124,65 +123,66 @@ class _PuzzlePageState extends State<PuzzlePage> {
   Widget _buildLayout(BuildContext context, GameState state) {
     var squareSize = 6.0;
     return Stack(
-      children: [Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              color: colorScheme.backgroundTopPanel,
-              child: _buildTopPanel(context, state)
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Container(
+                color: colorScheme.backgroundTopPanel,
+                child: _buildTopPanel(context, state)
+              ),
             ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    color: colorScheme.backgroundPuzzlePanel,
-                    child: _buildPuzzlePanel(context, state)
+            Expanded(
+              flex: 4,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      color: colorScheme.backgroundPuzzlePanel,
+                      child: _buildPuzzlePanel(context, state)
+                    ),
                   ),
-                ),
-                Positioned(
-                  //top: -5,
-                  child: AlternatingColorSquares(
-                    color1: colorScheme.backgroundTopPanel,
-                    color2: colorScheme.backgroundPuzzlePanel,
-                    squareSize: squareSize,
+                  Positioned(
+                    //top: -5,
+                    child: AlternatingColorSquares(
+                      color1: colorScheme.backgroundTopPanel,
+                      color2: colorScheme.backgroundPuzzlePanel,
+                      squareSize: squareSize,
+                    )
                   )
-                )
-              ]
+                ]
+              ),
             ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    color: colorScheme.backgroundInputPanel,
-                    child: _buildInputPanel(context, state)
+            Expanded(
+              flex: 5,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      color: colorScheme.backgroundInputPanel,
+                      child: _buildInputPanel(context, state)
+                    ),
                   ),
-                ),
-                Positioned(
-                  //top: -5,
-                  child: AlternatingColorSquares(
-                    color1: colorScheme.backgroundInputPanel,
-                    color2: colorScheme.backgroundPuzzlePanel,
-                    squareSize: squareSize,
+                  Positioned(
+                    //top: -5,
+                    child: AlternatingColorSquares(
+                      color1: colorScheme.backgroundInputPanel,
+                      color2: colorScheme.backgroundPuzzlePanel,
+                      squareSize: squareSize,
+                    )
                   )
-                )
-              ]
+                ]
+              ),
             ),
-          ),
-        ],
-      ),
-      if (state.isGameOver && state.isWin)
-        const Positioned(
-          child: PartyPopperEffect()
+          ],
         ),
+        if (state.isGameOver && state.isWin)
+          const Positioned(
+            child: PartyPopperEffect()
+          ),
       ],
     );
   }
@@ -321,29 +321,37 @@ class _PuzzlePageState extends State<PuzzlePage> {
         const SizedBox(width: 20,),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Semantics(
-            button: true,
-            label: "Try the next puzzle",
-            excludeSemantics: true,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.backgroundTopButton,
-                side: BorderSide(width: 2, color: colorScheme.textTopPanel),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                minimumSize: Size.zero,
-              ),
-              onPressed: () {
-                startPuzzle();
-              },
-              child: Center(
-                child: Text(
-                  "Go Next",
-                  style: TextStyle(
-                    color: colorScheme.textTopButton,
-                    fontSize: titleFontSize,
-                  )
+          child: FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
+            child: Semantics(
+              button: true,
+              label: "Try the next puzzle",
+              excludeSemantics: true,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.backgroundTopButton,
+                  side: BorderSide(width: 2, color: colorScheme.textTopPanel),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  minimumSize: Size.zero,
+                ).copyWith(
+                  overlayColor: StateDependentColor(colorScheme.textTopButton),
                 ),
-              )
+                onPressed: () {
+                  startPuzzle();
+                },
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Text(
+                      "Go Next",
+                      style: TextStyle(
+                        color: colorScheme.textTopButton,
+                        fontSize: titleFontSize,
+                      )
+                    ),
+                  ),
+                )
+              ),
             ),
           ),
         )
@@ -357,25 +365,33 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return BlinkEffect (
-      child: Semantics(
-        label: "Use a hint",
-        button: true,
-        excludeSemantics: true,
-        child: ElevatedButton (
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.backgroundHintButton,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: EdgeInsets.zero,
-            alignment: Alignment.center,
-          ),
-          onPressed: () {
-            gameBloc.add(UseHintTokenEvent());
-          },
-          child: Text(
-            "Use a Hint",
-            style: TextStyle(
-              color: colorScheme.textHintButton,
-              fontSize: bodyFontSize
+      child: FocusTraversalOrder(
+        order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+        child: Semantics(
+          label: "Use a hint",
+          button: true,
+          excludeSemantics: true,
+          child: ElevatedButton (
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.backgroundHintButton,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: EdgeInsets.zero,
+              alignment: Alignment.center,
+            ).copyWith(
+              overlayColor: StateDependentColor(colorScheme.textHintButton),
+            ),
+            onPressed: () {
+              gameBloc.add(UseHintTokenEvent());
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
+                "Use a Hint",
+                style: TextStyle(
+                  color: colorScheme.textHintButton,
+                  fontSize: bodyFontSize
+                ),
+              ),
             ),
           ),
         ),
@@ -389,53 +405,63 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Semantics(
-          label: "${state.puzzle.length} lettered ${state.hint}",
-          excludeSemantics: true,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              state.hint,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: titleFontSize,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.textPuzzlePanel,
+    return Focus(
+      canRequestFocus: false,
+      descendantsAreFocusable: false,
+      descendantsAreTraversable: false,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Semantics(
+            label: "${state.puzzle.length} lettered ${state.hint}",
+            excludeSemantics: true,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                state.hint,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.textPuzzlePanel,
+                  ),
                 ),
-              ),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: SymbolPad(
-            frontSymbols: '?' * state.puzzle.length,
-            backSymbols: state.puzzle.toUpperCase(),
-            flipped: state.revealed,
-            whiteSpace: state.whiteSpace,
-            foregroundColor: colorScheme.textPuzzleSymbols,
-            backgroundColor: colorScheme.backgroundPuzzleSymbols,
-            foregroundColorFlipped: colorScheme.textPuzzleSymbolsFlipped,
-            backgroundColorFlipped: colorScheme.backgroundPuzzleSymbolsFlipped,
-            spacing: 3,
-            runSpacing: 3,
-            alignment: WrapAlignment.start,
-            buttonSize: buttonSize,
-            onSelect: (c, f) {},
-            symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
-              return Semantics(
-                label: !isFront ? "${numberToOrdinal(index)} letter. ${backLabel.toLowerCase()}" :
-                                  "${numberToOrdinal(index)} letter. Hidden",
-                excludeSemantics: true,
-                child: widget
-              );
-            },
-          ),
-        )
-      ],
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: SymbolPad(
+              frontSymbols: '?' * state.puzzle.length,
+              backSymbols: state.puzzle.toUpperCase(),
+              flipped: state.revealed,
+              whiteSpace: state.whiteSpace,
+              foregroundColor: colorScheme.textPuzzleSymbols,
+              backgroundColor: colorScheme.backgroundPuzzleSymbols,
+              foregroundColorFlipped: colorScheme.textPuzzleSymbolsFlipped,
+              backgroundColorFlipped: colorScheme.backgroundPuzzleSymbolsFlipped,
+              spacing: 3,
+              runSpacing: 3,
+              alignment: WrapAlignment.start,
+              buttonSize: buttonSize,
+              onSelect: (c, f) {},
+              symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
+                final keyWidget = Semantics(
+                    label: !isFront ? "${numberToOrdinal(index)} letter. ${backLabel.toLowerCase()}" :
+                    "${numberToOrdinal(index)} letter. Hidden",
+                    excludeSemantics: true,
+                    child: widget
+                );
+                return isFront ? widget : Focus(
+                    canRequestFocus: false,
+                    descendantsAreFocusable: false,
+                    child: keyWidget,
+                );
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -475,10 +501,13 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   ),
               ),
             ),
+
+          // Input keyboard
           if (!state.isGameOver)
             SizedBox(
               width: MediaQuery.of(context).size.width * inputPanelWidthPct,
               child: SymbolPad(
+                autofocus: true,
                 frontSymbols: state.symbolSet.toUpperCase(),
                 backSymbols: tried,
                 flipped: state.used,
@@ -493,17 +522,31 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   if (!flipped) gameBloc.add(UserInputEvent(c));
                 },
                 symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
-                  bool ticked = backLabel == "\u{2713}";
-                  return Semantics(
+
+                  final ticked = backLabel == "\u{2713}";
+                  final keyWidget = Semantics(
+                    focusable: false,
                     keyboardKey: true,
                     label: isFront ? "Key ${frontLabel.toLowerCase()}" :
                                     (ticked ? "Key ${frontLabel.toLowerCase()} is ticked" : "Key ${frontLabel.toLowerCase()} is crossed"),
                     excludeSemantics: true,
-                    child: widget
+                    child: FocusTraversalOrder(
+                      order: GroupFocusOrder(GroupFocusOrder.groupKeys, index),
+                      child: widget
+                    ),
                   );
+
+                  return isFront ? keyWidget:
+                    Focus(
+                      canRequestFocus: false,
+                      descendantsAreFocusable: false,
+                      child: keyWidget,
+                    );
                 },
               ),
             ),
+
+          // "Find more about" label
           if (state.isGameOver)
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -527,23 +570,30 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 ),
               )
             ),
+
+          // Google button
           if (state.isGameOver)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.backgroundInputButton,
-                side: BorderSide(width: 2, color: colorScheme.textInputPanel),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                alignment: Alignment.bottomCenter,
-              ),
-              onPressed: () async {
-                final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
-                await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
-              },
-              child: Text(
-                'Google',
-                style: TextStyle(
-                  fontSize: bodyFontSize,
-                  color: colorScheme.textInputButton,
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.backgroundInputButton,
+                  side: BorderSide(width: 2, color: colorScheme.textInputPanel),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  alignment: Alignment.bottomCenter,
+                ).copyWith(
+                  overlayColor: StateDependentColor(colorScheme.textInputPanel),
+                ),
+                onPressed: () async {
+                  final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
+                  await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+                },
+                child: Text(
+                  'Google',
+                  style: TextStyle(
+                    fontSize: bodyFontSize,
+                    color: colorScheme.textInputButton,
+                  ),
                 ),
               ),
             ),

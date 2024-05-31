@@ -1,4 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
+import '../common/utils.dart';
 
 typedef SymbolPressCallback = void Function(String);
 
@@ -9,12 +13,12 @@ class SymbolButton extends StatelessWidget {
   static const Color defaultColorBackground = Color.fromARGB(0xff, 0x00, 0x20, 0x3F);
   static const Color defaultColorForeground = Color.fromARGB(0xff, 0xAD, 0xEF, 0xD1);
 
-
   const SymbolButton({
     super.key,
     required this.text,
     required this.onSelect,
     required this.buttonSize,
+    this.autofocus = false,
     this.foregroundColor = defaultColorForeground,
     this.backgroundColor = defaultColorBackground,
   });
@@ -23,37 +27,11 @@ class SymbolButton extends StatelessWidget {
   final Color foregroundColor;
   final Color backgroundColor;
   final Size buttonSize;
+  final bool autofocus;
   final SymbolPressCallback onSelect;
 
   @override
-  Widget build(BuildContext context) {
-    return _buildKey(text);
-    // return SizedBox(
-    //   width: buttonSize.width,
-    //   height: buttonSize.height,
-    //   child: ElevatedButton(
-    //     style: ElevatedButton.styleFrom(
-    //       backgroundColor: backgroundColor,
-    //       foregroundColor: foregroundColor,
-    //       alignment: Alignment.center,
-    //       padding: EdgeInsets.zero,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(8),
-    //       ),
-    //     ),
-    //     onPressed: () {
-    //       onSelect.call(text);
-    //       //FlipCardRequest().dispatch(context);
-    //     },
-    //     child: Text(
-    //       text,
-    //       style: const TextStyle(
-    //         fontWeight: FontWeight.normal,
-    //       ),
-    //     ),
-    //   ),
-    // );
-  }
+  Widget build(BuildContext context) => _buildKey(text);
 
   Widget _buildKey(String text) {
     return Container(
@@ -64,23 +42,30 @@ class SymbolButton extends StatelessWidget {
       child: SizedBox(
         width: buttonSize.width,
         height: buttonSize.height,
-        child: TextButton(
-          style: TextButton.styleFrom(
+        child: ElevatedButton(
+          autofocus: autofocus,
+          style: ElevatedButton.styleFrom(
             alignment: Alignment.center,
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
             minimumSize: Size.zero,
+            padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
+          ).copyWith(
+            overlayColor: StateDependentColor(foregroundColor),
           ),
           onPressed: () {
             onSelect.call(text);
           },
-          child: Text(
-            text,
-            style: TextStyle(
-              color: foregroundColor,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: foregroundColor,
+              ),
             ),
           ),
         )

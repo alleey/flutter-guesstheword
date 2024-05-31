@@ -130,85 +130,92 @@ class AlertsService {
       title: "Guess The Word",
       okLabel: "Close",
       content:
-        Column(children: [
-        Semantics(
-          label: "Game version is ${globalDataService.version}",
-          container: true,
-          excludeSemantics: true,
-          child: Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: globalDataService.version,
-                  style: TextStyle(
-                    color: colorScheme.backgroundTopPanel,
-                  )
-                ),
-              ],
-            ),
-          ),
-        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
 
-        Semantics(
-          container: true,
-          child: Text.rich(
-            textAlign: TextAlign.justify,
-            TextSpan(
-              style: TextStyle(
-                color: colorScheme.textPuzzlePanel,
-              ),
-              children: [
-                TextSpan(
-                  semanticsLabel: "Point 1.",
-                  text: '\u{273D}  ',
-                  style: TextStyle(
-                    color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
+            Align(
+              alignment: Alignment.center,
+              child: Semantics(
+                label: "Game version is ${globalDataService.version}",
+                container: true,
+                excludeSemantics: true,
+                child: Text.rich(
+                  textAlign: TextAlign.center,
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: globalDataService.version,
+                        style: TextStyle(
+                          color: colorScheme.backgroundTopPanel,
+                        )
+                      ),
+                    ],
                   ),
                 ),
-                const TextSpan(
-                  text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.\n",
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        Semantics(
-          container: true,
-          child: Text.rich(
-            textAlign: TextAlign.justify,
-            TextSpan(
-              style: TextStyle(
-                color: colorScheme.textPuzzlePanel,
               ),
-              children: [
-                TextSpan(
-                  text: '\u{2726}  ',
-                  semanticsLabel: "Point 2.",
-                  style: TextStyle(
-                    color: colorScheme.backgroundPuzzleSymbolsFlipped,
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
-                  )
-                ),
-                const TextSpan(
-                  text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
-                ),
-                TextSpan(
-                  text: "Hint tokens are carried forward even if you reset the game.",
-                  style: TextStyle(
-                    color: colorScheme.backgroundTopPanel,
-                    fontWeight: FontWeight.bold,
-                  )
-                ),
-              ],
             ),
-          ),
-        ),
-      ]),
+
+            Semantics(
+              container: true,
+              child: Text.rich(
+                textAlign: TextAlign.justify,
+                TextSpan(
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                  ),
+                  children: [
+                    TextSpan(
+                      semanticsLabel: "Point 1.",
+                      text: '\u{273D}  ',
+                      style: TextStyle(
+                        color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.",
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Semantics(
+              container: true,
+              child: Text.rich(
+                textAlign: TextAlign.justify,
+                TextSpan(
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: '\u{2726}  ',
+                      semanticsLabel: "Point 2.",
+                      style: TextStyle(
+                        color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
+                    const TextSpan(
+                      text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
+                    ),
+                    TextSpan(
+                      text: "Hint tokens are carried forward even if you reset the game.",
+                      style: TextStyle(
+                        color: colorScheme.backgroundTopPanel,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ]),
     );
   }
 
@@ -289,11 +296,11 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> themePicker(BuildContext context, {
+  Future<dynamic> colorSchemePicker(BuildContext context, {
     required String selectedTheme,
     required ColorSchemeSelectionCallback onSelect
   }) {
-    final colorScheme = GameColorSchemes.scheme(selectedTheme);
+    final colorScheme = GameColorSchemes.fromName(selectedTheme);
     return okDialog(
       context,
       colorScheme: colorScheme,

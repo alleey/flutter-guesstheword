@@ -93,6 +93,8 @@ class ResponsiveLayoutProvider extends InheritedWidget {
   bool get isSmall => _deviceType == ResponsiveDevice.small;
   bool get isMedium => _deviceType == ResponsiveDevice.medium;
   bool get isLarge => _deviceType == ResponsiveDevice.large;
+  bool get isPortrait => _constraints.minWidth < _constraints.maxHeight;
+  bool get isLandscape => _constraints.minWidth > _constraints.maxHeight;
 
   ResponsiveLayout get activeLayout {
     return _layouts[_deviceType]!;

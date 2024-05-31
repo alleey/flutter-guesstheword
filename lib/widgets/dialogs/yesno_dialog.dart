@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/settings_bloc.dart';
 import '../../common/game_color_scheme.dart';
 import '../../common/layout_constants.dart';
+import '../../common/utils.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
@@ -58,7 +59,7 @@ class _YesNoDialogState extends State<YesNoDialog> {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
             setState(() {
-              activeColorScheme = GameColorSchemes.scheme(s.value);
+              activeColorScheme = GameColorSchemes.fromName(s.value);
             });
           }
           break;
@@ -80,7 +81,10 @@ class _YesNoDialogState extends State<YesNoDialog> {
           children: [
             Padding(
               padding: widget.padding,
-              child: _buildContents(context, scheme),
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(),
+                child: _buildContents(context, scheme)
+              ),
             ),
             Positioned(
               child: Align(
@@ -152,6 +156,8 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
+              ).copyWith(
+                overlayColor: StateDependentColor(scheme.textPuzzleSymbols),
               ),
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
@@ -171,13 +177,15 @@ class _YesNoDialogState extends State<YesNoDialog> {
             ),
             const SizedBox(width: 10,),
             ElevatedButton(
+              autofocus: true,
               style: ElevatedButton.styleFrom(
                 backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                 foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                alignment: Alignment.bottomCenter,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
+              ).copyWith(
+                overlayColor: StateDependentColor(scheme.textPuzzleSymbolsFlipped),
               ),
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();

@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:bit_array/bit_array.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'common/flip_card.dart';
@@ -17,11 +20,12 @@ class SymbolPad extends StatelessWidget {
 
   SymbolPad({
     super.key,
+    this.autofocus = false,
     required this.frontSymbols,
     required this.backSymbols,
     required this.buttonSize,
-    this.flipped,
-    this.whiteSpace,
+    BitArray? flipped,
+    BitArray? whiteSpace,
     this.whiteSpaceWidth = defaultWhiteSpaceWidth,
     this.foregroundColor = defaultColorForeground,
     this.backgroundColor = defaultColorBackground,
@@ -34,12 +38,11 @@ class SymbolPad extends StatelessWidget {
     DecoratorFunction? symbolDecorator,
   }):
     assert(frontSymbols.length == backSymbols.length),
-    symbolDecorator = symbolDecorator ?? ((widget,_, __,___,____) => widget)
-  {
-    flipped = flipped ?? BitArray(frontSymbols.length);
-    whiteSpace = whiteSpace ?? BitArray(frontSymbols.length);
-  }
+    symbolDecorator = symbolDecorator ?? ((widget,_, __,___,____) => widget),
+    flippedMask = flipped ?? BitArray(frontSymbols.length),
+    whiteSpaceMask = whiteSpace ?? BitArray(frontSymbols.length);
 
+  final bool autofocus;
   final String frontSymbols;
   final String backSymbols;
   final Size buttonSize;
@@ -51,8 +54,8 @@ class SymbolPad extends StatelessWidget {
   final double spacing;
   final double runSpacing;
   final WrapAlignment alignment;
-  late BitArray? flipped;
-  late BitArray? whiteSpace;
+  final BitArray flippedMask;
+  final BitArray whiteSpaceMask;
   final SymbolSelectCallback onSelect;
   final DecoratorFunction symbolDecorator;
 
@@ -64,42 +67,47 @@ class SymbolPad extends StatelessWidget {
   Widget _buildPanel(BuildContext context) {
 
     final symbolList = frontSymbols.split('');
+    final firstUnset = flippedMask.asIntIterable(false).first;
+
     return Wrap(
       spacing: spacing,
       runSpacing: runSpacing,
       alignment: alignment,
-      children: Iterable<int>.generate(symbolList.length).map((index) {
-        if (whiteSpace![index]) {
+      children: symbolList.mapIndexed((index, sym) {
+
+        if (whiteSpaceMask[index]) {
           return SizedBox(width: whiteSpaceWidth,);
         }
-        return _buildCard(context, index);
+        return _buildCard(context, index, autofocus: autofocus && index == firstUnset);
       }).toList(),
     );
   }
 
-  Widget _buildCard(BuildContext c, int index) {
+  Widget _buildCard(BuildContext c, int index, {bool autofocus = false}) {
 
-    var frontFace = SymbolButton(
-          text: frontSymbols[index],
-          foregroundColor: foregroundColor,
-          backgroundColor: backgroundColor,
-          buttonSize: buttonSize,
-          onSelect: (ch) {
-            onSelect.call(ch, false);
-          }
-        );
-    var backFace = SymbolButton(
-          text: backSymbols[index],
-          foregroundColor: foregroundColorFlipped,
-          backgroundColor: backgroundColorFlipped,
-          buttonSize: buttonSize,
-          onSelect: (ch) {
-            onSelect.call(ch, true);
-          }
-      );
+    Widget frontFace = SymbolButton(
+      autofocus: autofocus,
+      text: frontSymbols[index],
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      buttonSize: buttonSize,
+      onSelect: (ch) {
+        onSelect.call(ch, false);
+      }
+    );
+
+    Widget backFace = SymbolButton(
+      text: backSymbols[index],
+      foregroundColor: foregroundColorFlipped,
+      backgroundColor: backgroundColorFlipped,
+      buttonSize: buttonSize,
+      onSelect: (ch) {
+        onSelect.call(ch, true);
+      }
+    );
 
     return FlipCard(
-      showFront: !flipped![index],
+      showFront: !flippedMask[index],
       frontCard: symbolDecorator(frontFace, index, true, frontSymbols[index], backSymbols[index]),
       backCard: symbolDecorator(backFace, index, false, frontSymbols[index], backSymbols[index]),
     );

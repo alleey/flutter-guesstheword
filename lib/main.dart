@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,15 +21,14 @@ Future<void> main() async {
   await PuzzleService(dataService: globalDataService).importAll();
 
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_)
-  {
-    //runApp(const DeviceFrameWrapper(child: MyApp()));
-    runApp(const MyApp());
-  });
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Future<void> _setPortraitOnlyMode() async
+    => SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,11 @@ class MyApp extends StatelessWidget {
             constraints: constraints,
             breakpoints:  ResponsiveValue.from(small: 600, medium: 1200),
             provider: (layout) {
+
+              if (!kIsWeb && layout.isSmall) {
+                _setPortraitOnlyMode();
+              }
+
               layout.provideAll(AppLayoutConstants.layout);
               layout.provideAll(DialogLayoutConstants.layout);
             },
