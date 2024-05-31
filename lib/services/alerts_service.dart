@@ -296,11 +296,11 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> themePicker(BuildContext context, {
+  Future<dynamic> colorSchemePicker(BuildContext context, {
     required String selectedTheme,
     required ColorSchemeSelectionCallback onSelect
   }) {
-    final colorScheme = GameColorSchemes.scheme(selectedTheme);
+    final colorScheme = GameColorSchemes.fromName(selectedTheme);
     return okDialog(
       context,
       colorScheme: colorScheme,

@@ -1,16 +1,17 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../common/utils.dart';
 
 typedef SymbolPressCallback = void Function(String);
 
-class SymbolButton extends StatelessWidget {
+class SymbolButton extends StatefulWidget {
 
   static const double defaultWidth = 45;
   static const double defaultHeight = 25;
   static const Color defaultColorBackground = Color.fromARGB(0xff, 0x00, 0x20, 0x3F);
   static const Color defaultColorForeground = Color.fromARGB(0xff, 0xAD, 0xEF, 0xD1);
-
 
   const SymbolButton({
     super.key,
@@ -30,37 +31,46 @@ class SymbolButton extends StatelessWidget {
   final SymbolPressCallback onSelect;
 
   @override
-  Widget build(BuildContext context) => _buildKey(text);
+  State<SymbolButton> createState() => _SymbolButtonState();
+}
+
+class _SymbolButtonState extends State<SymbolButton> {
+  @override
+  Widget build(BuildContext context) => _buildKey(widget.text);
 
   Widget _buildKey(String text) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: widget.backgroundColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: SizedBox(
-        width: buttonSize.width,
-        height: buttonSize.height,
+        width: widget.buttonSize.width,
+        height: widget.buttonSize.height,
         child: ElevatedButton(
-          autofocus: autofocus,
+          autofocus: widget.autofocus,
           style: ElevatedButton.styleFrom(
             alignment: Alignment.center,
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor,
+            backgroundColor: widget.backgroundColor,
+            foregroundColor: widget.foregroundColor,
             minimumSize: Size.zero,
+            padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
           ).copyWith(
-            overlayColor: StateDependentColor(foregroundColor),
+            overlayColor: StateDependentColor(widget.foregroundColor),
           ),
           onPressed: () {
-            onSelect.call(text);
+            widget.onSelect.call(text);
           },
-          child: Text(
-            text,
-            style: TextStyle(
-              color: foregroundColor,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: widget.foregroundColor,
+              ),
             ),
           ),
         )

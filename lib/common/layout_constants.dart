@@ -61,8 +61,8 @@ class AppLayoutConstants
     large: 0.3,
   );
 
-  static const String themePickerItemSizeKey = "app.themePickerItemSize";
-  static final themePickerItemSize = ResponsiveValue.from(
+  static const String colorSchemePickerItemSizeKey = "app.colorSchemePickerItemSize";
+  static final colorSchemePickerItemSize = ResponsiveValue.from(
     small: const Size(60, 80),
     medium: const Size(80, 120),
     large: const Size(110, 140),
@@ -74,6 +74,6 @@ class AppLayoutConstants
     symbolButtonSizeKey: symbolButtonSize,
     inputPanelWidthPctKey: inputPanelWidthPct,
     hintWidthPctKey: hintWidthPct,
-    themePickerItemSizeKey: themePickerItemSize,
+    colorSchemePickerItemSizeKey: colorSchemePickerItemSize,
   };
 }

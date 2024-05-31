@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -44,7 +43,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   @override
   void initState() {
     super.initState();
-    colorScheme = GameColorSchemes.scheme(appDataService.getSetting("theme") ?? "default");
+    colorScheme = GameColorSchemes.fromName(appDataService.getSetting(KnownSettingsNames.settingTheme) ?? "default");
     startPuzzle();
   }
 
@@ -58,13 +57,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return BlocListener<SettingsBloc, SettingsBlocState>(
       listener: (BuildContext context, state) {
 
-        log("listener(SettingsBloc): $state");
         switch(state) {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
             setState(() {
-              log("listener(SettingsBloc): $state");
-              colorScheme = GameColorSchemes.scheme(s.value);
+              colorScheme = GameColorSchemes.fromName(s.value);
             });
           }
           break;
@@ -73,7 +70,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: BlocConsumer<GameBloc, GameBlocState>(
         listener: (context, state) async {
 
-          log("listener(GameBloc): $state");
+          // Hack neded on Android TV for autofocus effects
+          await setHighlightMode();
+
           switch (state) {
 
             case ResetState _:
@@ -111,7 +110,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
         },
         builder: (context, state) {
 
-          log("builder(GameBloc): $state");
           if (state is GameState) {
             return _buildLayout(context, state);
           }
@@ -324,7 +322,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: FocusTraversalOrder(
-            order: const NumericFocusOrder(50),
+            order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
             child: Semantics(
               button: true,
               label: "Try the next puzzle",
@@ -368,7 +366,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
     return BlinkEffect (
       child: FocusTraversalOrder(
-        order: const NumericFocusOrder(51),
+        order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
         child: Semantics(
           label: "Use a hint",
           button: true,
@@ -448,11 +446,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
               buttonSize: buttonSize,
               onSelect: (c, f) {},
               symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
-                return Semantics(
-                  label: !isFront ? "${numberToOrdinal(index)} letter. ${backLabel.toLowerCase()}" :
-                                    "${numberToOrdinal(index)} letter. Hidden",
-                  excludeSemantics: true,
-                  child: widget
+                final keyWidget = Semantics(
+                    label: !isFront ? "${numberToOrdinal(index)} letter. ${backLabel.toLowerCase()}" :
+                    "${numberToOrdinal(index)} letter. Hidden",
+                    excludeSemantics: true,
+                    child: widget
+                );
+                return isFront ? widget : Focus(
+                    canRequestFocus: false,
+                    descendantsAreFocusable: false,
+                    child: keyWidget,
                 );
               },
             ),
@@ -498,10 +501,13 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   ),
               ),
             ),
+
+          // Input keyboard
           if (!state.isGameOver)
             SizedBox(
               width: MediaQuery.of(context).size.width * inputPanelWidthPct,
               child: SymbolPad(
+                autofocus: true,
                 frontSymbols: state.symbolSet.toUpperCase(),
                 backSymbols: tried,
                 flipped: state.used,
@@ -516,20 +522,31 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   if (!flipped) gameBloc.add(UserInputEvent(c));
                 },
                 symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
-                  bool ticked = backLabel == "\u{2713}";
-                  return Semantics(
+
+                  final ticked = backLabel == "\u{2713}";
+                  final keyWidget = Semantics(
+                    focusable: false,
                     keyboardKey: true,
                     label: isFront ? "Key ${frontLabel.toLowerCase()}" :
                                     (ticked ? "Key ${frontLabel.toLowerCase()} is ticked" : "Key ${frontLabel.toLowerCase()} is crossed"),
                     excludeSemantics: true,
                     child: FocusTraversalOrder(
-                      order: NumericFocusOrder(index.toDouble()),
+                      order: GroupFocusOrder(GroupFocusOrder.groupKeys, index),
                       child: widget
                     ),
                   );
+
+                  return isFront ? keyWidget:
+                    Focus(
+                      canRequestFocus: false,
+                      descendantsAreFocusable: false,
+                      child: keyWidget,
+                    );
                 },
               ),
             ),
+
+          // "Find more about" label
           if (state.isGameOver)
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -553,9 +570,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 ),
               )
             ),
+
+          // Google button
           if (state.isGameOver)
             FocusTraversalOrder(
-              order: const NumericFocusOrder(60),
+              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.backgroundInputButton,

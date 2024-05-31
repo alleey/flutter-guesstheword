@@ -59,7 +59,7 @@ class _YesNoDialogState extends State<YesNoDialog> {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
             setState(() {
-              activeColorScheme = GameColorSchemes.scheme(s.value);
+              activeColorScheme = GameColorSchemes.fromName(s.value);
             });
           }
           break;
@@ -181,7 +181,6 @@ class _YesNoDialogState extends State<YesNoDialog> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                 foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                alignment: Alignment.bottomCenter,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),

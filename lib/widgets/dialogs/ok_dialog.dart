@@ -56,7 +56,7 @@ class _OkDialogState extends State<OkDialog> {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
             setState(() {
-              activeColorScheme = GameColorSchemes.scheme(s.value);
+              activeColorScheme = GameColorSchemes.fromName(s.value);
             });
           }
           break;

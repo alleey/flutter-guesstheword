@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
 import 'common/game_color_scheme.dart';
+import 'common/utils.dart';
 import 'game.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
@@ -60,7 +61,7 @@ class _HomePageState extends State<HomePage> {
                 case final SettingsReadBlocState s:
                 if (s.name == KnownSettingsNames.settingTheme) {
                   setState(() {
-                    selectedTheme = s.value ?? GameColorSchemes.defaultThemeName;
+                    selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
                   });
                 }
                 break;
@@ -80,7 +81,7 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       leading:
         FocusTraversalOrder(
-          order: const NumericFocusOrder(100),
+          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
           child: Semantics(
             button: true,
             excludeSemantics: true,
@@ -88,7 +89,7 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.description_outlined),
               onPressed: () async {
-                await AlertsService().helpDialog(context, GameColorSchemes.scheme(selectedTheme));
+                await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -96,7 +97,7 @@ class _HomePageState extends State<HomePage> {
 
       actions: [
         FocusTraversalOrder(
-          order: const NumericFocusOrder(101),
+          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 1),
           child: Semantics(
             button: true,
             excludeSemantics: true,
@@ -104,13 +105,13 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.bar_chart),
               onPressed: () async {
-                await AlertsService().highScoresDialog(context, GameColorSchemes.scheme(selectedTheme));
+                await AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
         ),
         FocusTraversalOrder(
-          order: const NumericFocusOrder(102),
+          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 2),
           child: Semantics(
             button: true,
             excludeSemantics: true,
@@ -120,7 +121,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 await AlertsService().resetGameDialog(
                     context,
-                    GameColorSchemes.scheme(selectedTheme),
+                    GameColorSchemes.fromName(selectedTheme),
                     onAccept: () {
                       BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
                     }
@@ -130,7 +131,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         FocusTraversalOrder(
-          order: const NumericFocusOrder(103),
+          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 3),
           child: Semantics(
             button: true,
             excludeSemantics: true,
@@ -138,7 +139,7 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.palette_outlined),
               onPressed: () async {
-                await AlertsService().themePicker(
+                await AlertsService().colorSchemePicker(
                   context,
                   selectedTheme: selectedTheme,
                   onSelect: (newTheme) {
@@ -157,8 +158,9 @@ class _HomePageState extends State<HomePage> {
 
     final appDataService = AppDataService(dataService: globalDataService);
 
-    if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true) {
-      await AlertsService().helpDialog(context, GameColorSchemes.scheme(selectedTheme));
+    if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
+    {
+      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
     }
 

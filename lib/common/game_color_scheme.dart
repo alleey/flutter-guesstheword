@@ -6,10 +6,10 @@ import '../widgets/symbol_pad.dart';
 
 sealed class GameColorSchemes {
 
-  static const String defaultThemeName = "default";
+  static const String defaultSchemeName = "default";
 
   static final Map<String, GameColorScheme> _schemes = {
-    defaultThemeName: GameColorScheme.defaultScheme(),
+    defaultSchemeName: GameColorScheme.defaultScheme(),
     "1": GameColorScheme.theme1(),
     "2": GameColorScheme.theme2(),
     "3": GameColorScheme.theme3(),
@@ -20,8 +20,8 @@ sealed class GameColorSchemes {
   };
 
   static Iterable<MapEntry<String, GameColorScheme>> get all => _schemes.entries;
-  static GameColorScheme scheme(String? name) =>
-    _schemes.containsKey(name ?? defaultThemeName) ? _schemes[name]! : GameColorScheme.defaultScheme();
+  static GameColorScheme fromName(String? name) =>
+    _schemes.containsKey(name ?? defaultSchemeName) ? _schemes[name]! : GameColorScheme.defaultScheme();
 }
 
 ////////////////////////////////////////////

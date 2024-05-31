@@ -10,7 +10,46 @@ import 'symbol_button.dart';
 typedef SymbolSelectCallback = void Function(String, bool flipped);
 typedef DecoratorFunction = Widget Function(Widget widget, int index, bool isFront, String frontLabel, String backLabel);
 
-class SymbolPad extends StatelessWidget {
+class FocusedButton extends StatefulWidget {
+  final Widget child;
+
+  const FocusedButton({super.key, required this.child});
+
+  @override
+  _FocusedButtonState createState() => _FocusedButtonState();
+}
+
+class _FocusedButtonState extends State<FocusedButton> {
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: (hasFocus) {
+        setState(() {});
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class SymbolPad extends StatefulWidget {
 
   static const double defaultWhiteSpaceWidth = 20;
   static const double defaultButtonWidth = 25;
@@ -20,6 +59,7 @@ class SymbolPad extends StatelessWidget {
 
   SymbolPad({
     super.key,
+    this.autofocus = false,
     required this.frontSymbols,
     required this.backSymbols,
     required this.buttonSize,
@@ -39,10 +79,9 @@ class SymbolPad extends StatelessWidget {
     assert(frontSymbols.length == backSymbols.length),
     symbolDecorator = symbolDecorator ?? ((widget,_, __,___,____) => widget),
     flippedMask = flipped ?? BitArray(frontSymbols.length),
-    whiteSpaceMask = whiteSpace ?? BitArray(frontSymbols.length)
-  {
-  }
+    whiteSpaceMask = whiteSpace ?? BitArray(frontSymbols.length);
 
+  final bool autofocus;
   final String frontSymbols;
   final String backSymbols;
   final Size buttonSize;
@@ -60,61 +99,61 @@ class SymbolPad extends StatelessWidget {
   final DecoratorFunction symbolDecorator;
 
   @override
+  State<SymbolPad> createState() => _SymbolPadState();
+}
+
+class _SymbolPadState extends State<SymbolPad> {
+  @override
   Widget build(BuildContext context) {
     return _buildPanel(context);
   }
 
   Widget _buildPanel(BuildContext context) {
 
-    final symbolList = frontSymbols.split('');
-    final firstUnset = flippedMask.asIntIterable(false).first;
-
-    log("first unset: $firstUnset");
+    final symbolList = widget.frontSymbols.split('');
+    final firstUnset = widget.flippedMask.asIntIterable(false).first;
 
     return Wrap(
-      spacing: spacing,
-      runSpacing: runSpacing,
-      alignment: alignment,
+      spacing: widget.spacing,
+      runSpacing: widget.runSpacing,
+      alignment: widget.alignment,
       children: symbolList.mapIndexed((index, sym) {
 
-        if (whiteSpaceMask[index]) {
-          return SizedBox(width: whiteSpaceWidth,);
+        if (widget.whiteSpaceMask[index]) {
+          return SizedBox(width: widget.whiteSpaceWidth,);
         }
-        return _buildCard(context, index, autofocus: index == firstUnset);
+        return _buildCard(context, index, autofocus: widget.autofocus && index == firstUnset);
       }).toList(),
     );
   }
 
   Widget _buildCard(BuildContext c, int index, {bool autofocus = false}) {
 
-    var frontFace = SymbolButton(
+    Widget frontFace = SymbolButton(
       autofocus: autofocus,
-      text: frontSymbols[index],
-      foregroundColor: foregroundColor,
-      backgroundColor: backgroundColor,
-      buttonSize: buttonSize,
+      text: widget.frontSymbols[index],
+      foregroundColor: widget.foregroundColor,
+      backgroundColor: widget.backgroundColor,
+      buttonSize: widget.buttonSize,
       onSelect: (ch) {
-        onSelect.call(ch, false);
+        widget.onSelect.call(ch, false);
       }
     );
-    var backFace = SymbolButton(
-      text: backSymbols[index],
-      foregroundColor: foregroundColorFlipped,
-      backgroundColor: backgroundColorFlipped,
-      buttonSize: buttonSize,
+
+    Widget backFace = SymbolButton(
+      text: widget.backSymbols[index],
+      foregroundColor: widget.foregroundColorFlipped,
+      backgroundColor: widget.backgroundColorFlipped,
+      buttonSize: widget.buttonSize,
       onSelect: (ch) {
-        onSelect.call(ch, true);
+        widget.onSelect.call(ch, true);
       }
     );
 
     return FlipCard(
-      showFront: !flippedMask[index],
-      frontCard: symbolDecorator(frontFace, index, true, frontSymbols[index], backSymbols[index]),
-      backCard: Focus(
-        canRequestFocus: false,
-        descendantsAreFocusable: false,
-        child: symbolDecorator(backFace, index, false, frontSymbols[index], backSymbols[index])
-      ),
+      showFront: !widget.flippedMask[index],
+      frontCard: widget.symbolDecorator(frontFace, index, true, widget.frontSymbols[index], widget.backSymbols[index]),
+      backCard: widget.symbolDecorator(backFace, index, false, widget.frontSymbols[index], widget.backSymbols[index]),
     );
   }
 }
