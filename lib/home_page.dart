@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
+import 'common/custom_traversal_policy.dart';
 import 'common/game_color_scheme.dart';
-import 'common/utils.dart';
+import 'common/native.dart';
 import 'game.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
 
     return FocusTraversalGroup(
-      policy: OrderedTraversalPolicy(),
+      policy: const CustomOrderedTraversalPolicy(),
       child: Scaffold(
           backgroundColor: SymbolButton.defaultColorBackground,
           appBar: PreferredSize(
@@ -55,7 +55,10 @@ class _HomePageState extends State<HomePage> {
           ),
           body: BlocListener<SettingsBloc, SettingsBlocState>(
 
-            listener: (BuildContext context, state) {
+            listener: (BuildContext context, state) async {
+
+              // Hack neded on Android TV for autofocus effects
+              await setTraditionalFocusHighlightStrategy();
 
               switch(state) {
                 case final SettingsReadBlocState s:
@@ -67,7 +70,13 @@ class _HomePageState extends State<HomePage> {
                 break;
               }
 
-              showAlert(context);
+              if (context.mounted) {
+                await showFirstUsagePrompt(context);
+              }
+
+              setState(() {
+                ready = true;
+              });
             },
             child: ready ?
               const PuzzlePage() :
@@ -154,18 +163,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future showAlert(BuildContext context) async {
-
+  Future showFirstUsagePrompt(BuildContext context) async {
     final appDataService = AppDataService(dataService: globalDataService);
-
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
     }
-
-    setState(() {
-      ready = true;
-    });
   }
 }

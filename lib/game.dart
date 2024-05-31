@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
 import 'common/constants.dart';
+import 'common/custom_traversal_policy.dart';
 import 'common/game_color_scheme.dart';
 import 'common/layout_constants.dart';
 import 'common/utils.dart';
@@ -69,9 +70,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
       },
       child: BlocConsumer<GameBloc, GameBlocState>(
         listener: (context, state) async {
-
-          // Hack neded on Android TV for autofocus effects
-          await setHighlightMode();
 
           switch (state) {
 
