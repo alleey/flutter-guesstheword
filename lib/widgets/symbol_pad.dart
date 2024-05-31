@@ -10,46 +10,7 @@ import 'symbol_button.dart';
 typedef SymbolSelectCallback = void Function(String, bool flipped);
 typedef DecoratorFunction = Widget Function(Widget widget, int index, bool isFront, String frontLabel, String backLabel);
 
-class FocusedButton extends StatefulWidget {
-  final Widget child;
-
-  const FocusedButton({super.key, required this.child});
-
-  @override
-  _FocusedButtonState createState() => _FocusedButtonState();
-}
-
-class _FocusedButtonState extends State<FocusedButton> {
-  late FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      focusNode: _focusNode,
-      onFocusChange: (hasFocus) {
-        setState(() {});
-      },
-      child: widget.child,
-    );
-  }
-}
-
-class SymbolPad extends StatefulWidget {
+class SymbolPad extends StatelessWidget {
 
   static const double defaultWhiteSpaceWidth = 20;
   static const double defaultButtonWidth = 25;
@@ -99,30 +60,25 @@ class SymbolPad extends StatefulWidget {
   final DecoratorFunction symbolDecorator;
 
   @override
-  State<SymbolPad> createState() => _SymbolPadState();
-}
-
-class _SymbolPadState extends State<SymbolPad> {
-  @override
   Widget build(BuildContext context) {
     return _buildPanel(context);
   }
 
   Widget _buildPanel(BuildContext context) {
 
-    final symbolList = widget.frontSymbols.split('');
-    final firstUnset = widget.flippedMask.asIntIterable(false).first;
+    final symbolList = frontSymbols.split('');
+    final firstUnset = flippedMask.asIntIterable(false).first;
 
     return Wrap(
-      spacing: widget.spacing,
-      runSpacing: widget.runSpacing,
-      alignment: widget.alignment,
+      spacing: spacing,
+      runSpacing: runSpacing,
+      alignment: alignment,
       children: symbolList.mapIndexed((index, sym) {
 
-        if (widget.whiteSpaceMask[index]) {
-          return SizedBox(width: widget.whiteSpaceWidth,);
+        if (whiteSpaceMask[index]) {
+          return SizedBox(width: whiteSpaceWidth,);
         }
-        return _buildCard(context, index, autofocus: widget.autofocus && index == firstUnset);
+        return _buildCard(context, index, autofocus: autofocus && index == firstUnset);
       }).toList(),
     );
   }
@@ -131,29 +87,29 @@ class _SymbolPadState extends State<SymbolPad> {
 
     Widget frontFace = SymbolButton(
       autofocus: autofocus,
-      text: widget.frontSymbols[index],
-      foregroundColor: widget.foregroundColor,
-      backgroundColor: widget.backgroundColor,
-      buttonSize: widget.buttonSize,
+      text: frontSymbols[index],
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      buttonSize: buttonSize,
       onSelect: (ch) {
-        widget.onSelect.call(ch, false);
+        onSelect.call(ch, false);
       }
     );
 
     Widget backFace = SymbolButton(
-      text: widget.backSymbols[index],
-      foregroundColor: widget.foregroundColorFlipped,
-      backgroundColor: widget.backgroundColorFlipped,
-      buttonSize: widget.buttonSize,
+      text: backSymbols[index],
+      foregroundColor: foregroundColorFlipped,
+      backgroundColor: backgroundColorFlipped,
+      buttonSize: buttonSize,
       onSelect: (ch) {
-        widget.onSelect.call(ch, true);
+        onSelect.call(ch, true);
       }
     );
 
     return FlipCard(
-      showFront: !widget.flippedMask[index],
-      frontCard: widget.symbolDecorator(frontFace, index, true, widget.frontSymbols[index], widget.backSymbols[index]),
-      backCard: widget.symbolDecorator(backFace, index, false, widget.frontSymbols[index], widget.backSymbols[index]),
+      showFront: !flippedMask[index],
+      frontCard: symbolDecorator(frontFace, index, true, frontSymbols[index], backSymbols[index]),
+      backCard: symbolDecorator(backFace, index, false, frontSymbols[index], backSymbols[index]),
     );
   }
 }

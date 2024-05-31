@@ -6,7 +6,7 @@ import '../common/utils.dart';
 
 typedef SymbolPressCallback = void Function(String);
 
-class SymbolButton extends StatefulWidget {
+class SymbolButton extends StatelessWidget {
 
   static const double defaultWidth = 45;
   static const double defaultHeight = 25;
@@ -31,45 +31,40 @@ class SymbolButton extends StatefulWidget {
   final SymbolPressCallback onSelect;
 
   @override
-  State<SymbolButton> createState() => _SymbolButtonState();
-}
-
-class _SymbolButtonState extends State<SymbolButton> {
-  @override
-  Widget build(BuildContext context) => _buildKey(widget.text);
+  Widget build(BuildContext context) => _buildKey(text);
 
   Widget _buildKey(String text) {
     return Container(
       decoration: BoxDecoration(
-        color: widget.backgroundColor,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: SizedBox(
-        width: widget.buttonSize.width,
-        height: widget.buttonSize.height,
+        width: buttonSize.width,
+        height: buttonSize.height,
         child: ElevatedButton(
-          autofocus: widget.autofocus,
+          autofocus: autofocus,
           style: ElevatedButton.styleFrom(
             alignment: Alignment.center,
-            backgroundColor: widget.backgroundColor,
-            foregroundColor: widget.foregroundColor,
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
             minimumSize: Size.zero,
             padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
           ).copyWith(
-            overlayColor: StateDependentColor(widget.foregroundColor),
+            overlayColor: StateDependentColor(foregroundColor),
           ),
           onPressed: () {
-            widget.onSelect.call(text);
+            onSelect.call(text);
           },
           child: Padding(
             padding: const EdgeInsets.only(top: 3),
             child: Text(
               text,
               style: TextStyle(
-                color: widget.foregroundColor,
+                color: foregroundColor,
               ),
             ),
           ),
