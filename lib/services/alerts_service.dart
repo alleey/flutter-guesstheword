@@ -6,6 +6,7 @@ import '../common/game_color_scheme.dart';
 import '../common/layout_constants.dart';
 import '../widgets/color_scheme_picker.dart';
 import '../widgets/dialogs/ok_dialog.dart';
+import '../widgets/dialogs/popup_dialog.dart';
 import '../widgets/dialogs/yesno_dialog.dart';
 import '../widgets/common/responsive_layout.dart';
 import 'data_service.dart';
@@ -13,7 +14,7 @@ import 'score_service.dart';
 
 class AlertsService {
 
-  Future<dynamic> yesNoDialog(BuildContext context, {
+  Future<bool?> yesNoDialog(BuildContext context, {
     String? title,
     Widget content = const SizedBox(),
     required GameColorScheme colorScheme,
@@ -23,7 +24,7 @@ class AlertsService {
     VoidCallback? onReject,
   }) {
     final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
-    return showGeneralDialog(
+    return showGeneralDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
       barrierDismissible: false,
@@ -83,6 +84,71 @@ class AlertsService {
     );
   }
 
+  VoidCallback popupDialog(BuildContext context, {
+    String? title,
+    Widget content = const SizedBox(),
+    required GameColorScheme colorScheme,
+  }) {
+    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    showGeneralDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      barrierDismissible: false,
+      transitionDuration: const Duration(milliseconds: 250),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation,
+          child: child,
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return PopupDialog(
+          colorScheme: colorScheme,
+          title: title ?? "",
+          content: content,
+          width: MediaQuery.of(context).size.width * screenCoverPct.width,
+          height: MediaQuery.of(context).size.height * screenCoverPct.height,
+        );
+      },
+    );
+    return () => Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  // Returns a function that can be used to dismiss the popup.
+  //
+  VoidCallback popup(BuildContext context, GameColorScheme colorScheme, {
+    String title = "Processing ...",
+    required String message,
+  }) {
+    final layout = ResponsiveLayoutProvider.layout(context);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+    return popupDialog(
+      context,
+      colorScheme:  colorScheme,
+      title: title,
+      content: Center(
+        child: Semantics(
+          container: true,
+          child: Text.rich(
+            textAlign: TextAlign.center,
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: message,
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                    fontSize: bodyFontSize,
+                  )
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) {
     final layout = ResponsiveLayoutProvider.layout(context);
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
@@ -94,26 +160,29 @@ class AlertsService {
       title: "RESET GAME",
       content: Semantics(
         container: true,
-        child: Text.rich(
-          textAlign: TextAlign.justify,
-          TextSpan(
-            children: [
-              TextSpan(
-                text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
-                style: TextStyle(
-                  color: colorScheme.textPuzzlePanel,
-                  fontSize: bodyFontSize,
-                )
-              ),
-              TextSpan(
-                text: "Would you like to reset?",
-                style: TextStyle(
-                  color: colorScheme.textPuzzlePanel,
-                  fontWeight: FontWeight.bold,
-                  fontSize: titleFontSize,
-                )
-              ),
-            ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text.rich(
+            textAlign: TextAlign.justify,
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                    fontSize: bodyFontSize,
+                  )
+                ),
+                TextSpan(
+                  text: "Would you like to reset the game?",
+                  style: TextStyle(
+                    color: colorScheme.textPuzzlePanel,
+                    fontWeight: FontWeight.bold,
+                    fontSize: titleFontSize,
+                  )
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -124,6 +193,8 @@ class AlertsService {
   Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) {
     final layout = ResponsiveLayoutProvider.layout(context);
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
     return okDialog(
       context,
       colorScheme: colorScheme,
@@ -149,6 +220,7 @@ class AlertsService {
                         text: globalDataService.version,
                         style: TextStyle(
                           color: colorScheme.backgroundTopPanel,
+                          fontSize: bodyFontSize,
                         )
                       ),
                     ],
@@ -164,6 +236,7 @@ class AlertsService {
                 TextSpan(
                   style: TextStyle(
                     color: colorScheme.textPuzzlePanel,
+                    fontSize: bodyFontSize,
                   ),
                   children: [
                     TextSpan(
@@ -176,7 +249,7 @@ class AlertsService {
                       ),
                     ),
                     const TextSpan(
-                      text: "Score is calculated as the number of yellow hearts multiplied by the length of the puzzle.",
+                      text: "Score is calculated as the number of lives multiplied by the length of the puzzle.",
                     ),
                   ],
                 ),
@@ -190,6 +263,7 @@ class AlertsService {
                 TextSpan(
                   style: TextStyle(
                     color: colorScheme.textPuzzlePanel,
+                    fontSize: bodyFontSize,
                   ),
                   children: [
                     TextSpan(
@@ -234,65 +308,94 @@ class AlertsService {
       okLabel: "Close",
       content:
         scores.isEmpty ?
-          Semantics(
-            container: true,
-            child: Text.rich(
-              textAlign: TextAlign.center,
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: "No score has been recorded yet. Win some puzzles to record a score!",
-                    style: TextStyle(
-                      color: colorScheme.textPuzzlePanel,
-                      fontSize: titleFontSize,
-                    )
-                  ),
-                ],
+          Center(
+            child: Semantics(
+              container: true,
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "No score has been recorded yet. Win some puzzles to record a score!",
+                      style: TextStyle(
+                        color: colorScheme.textPuzzlePanel,
+                        fontSize: titleFontSize,
+                      )
+                    ),
+                  ],
+                ),
               ),
             ),
-          ) : DefaultTextStyle.merge(
-          style: TextStyle(fontSize: bodyFontSize),
-          child: DefaultTextStyle.merge(
+          ) :
+          DefaultTextStyle.merge(
             style: TextStyle(
+              fontSize: bodyFontSize,
               color: colorScheme.textPuzzlePanel,
             ),
-            child: Column(
-              children:[
-                Semantics(
-                  label: "Below is the list of top scores, games won and lost",
-                  excludeSemantics: true,
-                  container: true,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Score"),
-                      Text("Won"),
-                      Text("Lost"),
-                    ],
-                  ),
-                ),
-                ...scores.mapIndexed((i, e) {
-                    return Semantics(
-                      label: "Item ${i+1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
-                      container: true,
-                      excludeSemantics: true,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("${e.value}"),
-                            Text("${e.wins}"),
-                            Text("${e.losses}"),
-                          ],
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children:[
+                  Semantics(
+                    label: "Below is the list of top scores, games won and lost",
+                    excludeSemantics: true,
+                    container: true,
+                    child: const Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Score',
+                            textAlign: TextAlign.left,
+                          ),
                         ),
-                      ),
-                    );
-                  }
-                ),
-            ]),
+                        Expanded(
+                          child: Text(
+                            'Won',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            'Lost',
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ...scores.mapIndexed((i, e) {
+                      return Semantics(
+                        label: "Item ${i+1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
+                        container: true,
+                        excludeSemantics: true,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "${e.value}",
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "${e.wins}",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "${e.losses}",
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ]
+                        ),
+                      );
+                    }
+                  ),
+              ]),
+            ),
           ),
-        ),
     );
   }
 
@@ -306,7 +409,23 @@ class AlertsService {
       colorScheme: colorScheme,
       title: "Pick a Theme",
       okLabel: "Close",
-      content: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
+      content: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
+      ),
+    );
+  }
+
+
+  Future<dynamic> gameNeedsResetDialog(BuildContext context, GameColorScheme colorScheme, {
+    required VoidCallback callback
+  }) {
+    return okDialog(
+      context,
+      title: "Congratulations!",
+      content: const Text("You've finished all the puzzles. To keep playing the game must reset"),
+      colorScheme: colorScheme,
+      callback: callback,
     );
   }
 }

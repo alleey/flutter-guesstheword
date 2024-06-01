@@ -116,33 +116,35 @@ class _OkDialogState extends State<OkDialog> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           header: true,
           container: true,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text.rich(
-              textAlign: TextAlign.center,
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: widget.title,
-                    style: TextStyle(
-                      color: scheme.backgroundPuzzleSymbolsFlipped,
-                      fontWeight: FontWeight.bold,
-                      fontSize: titleFontSize,
-                    )
-                  ),
-                ],
+          child: Container(
+            color: scheme.textPuzzleSymbolsFlipped.withOpacity(0.3),
+            padding: const EdgeInsets.only(bottom: 4, top: 10),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: widget.title,
+                      style: TextStyle(
+                        color: scheme.backgroundPuzzleSymbolsFlipped,
+                        fontWeight: FontWeight.bold,
+                        fontSize: titleFontSize,
+                      )
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        widget.content,
-        const Spacer(),
+        Expanded(child: widget.content),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

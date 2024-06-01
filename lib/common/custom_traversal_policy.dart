@@ -29,11 +29,6 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
   const CustomOrderedTraversalPolicy({super.requestFocusCallback});
 
   @override
-  FocusNode? findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction) {
-    throw UnimplementedError();
-  }
-
-  @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
 
     final sortedNodes = _sortNodes(currentNode.enclosingScope!);
@@ -41,7 +36,7 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
   }
 
   @override
-  bool inDirection(FocusNode currentNode, TraversalDirection direction) {
+  FocusNode? findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction) {
 
     final sortedNodes = _sortNodes(currentNode.enclosingScope!);
     final groupedNodes = _groupNodes(sortedNodes);
@@ -59,11 +54,30 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
         break;
     }
 
-    if (nextNode != null) {
-      nextNode.requestFocus();
-      return true;
+    return nextNode;
+  }
+
+  @override
+  bool inDirection(FocusNode currentNode, TraversalDirection direction) {
+
+    final nextNode = findFirstFocusInDirection(currentNode, direction);
+    if (nextNode == null) {
+      return false;
     }
-    return false;
+
+    final ScrollPositionAlignmentPolicy alignmentPolicy = switch (direction) {
+      TraversalDirection.up => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      TraversalDirection.right => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    };
+
+    requestFocusCallback(
+      nextNode,
+      alignmentPolicy: alignmentPolicy,
+    );
+
+    return true;
   }
 
   FocusNode? _findNodeLeftOrRight(Map<int, List<_GroupFocusOrderNodeInfo>> groupedNodes, FocusNode currentNode, TraversalDirection direction) {

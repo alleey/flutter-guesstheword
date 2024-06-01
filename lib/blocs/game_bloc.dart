@@ -56,6 +56,13 @@ class InputMismatchState extends GameBlocState {
   final bool isGameOver;
   InputMismatchState({this.isGameOver = false});
 }
+class WaitState extends GameBlocState {
+  final String message;
+  WaitState({required this.message});
+}
+class WaitResetState extends WaitState {
+  WaitResetState({required super.message});
+}
 
 enum Difficulty {
   easy,
@@ -242,6 +249,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
   {
     on<ResetGameEvent>((event, emit) async {
 
+      emit(WaitResetState(message: "Please wait while the game is reset"));
+
       await appDataService.resetData();
       await puzzleService.resetData();
       await scoreService.resetData();
@@ -271,7 +280,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      // gameState.score = gameState.score.bump(500);
+      //gameState.score = gameState.score.bump(5000);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
@@ -285,8 +294,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         await scoreService.put(gameState.score);
         if (gameState.isGameOver) {
           await puzzleService.delete(gameState.puzzleId);
-          canGoNext = true;
         }
+        canGoNext = gameState.isGameOver;
 
         log("score: ${gameState.score}");
         emit(gameState.lastInputError ?
@@ -313,6 +322,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       for(var i =0; i < math.min(reveal, leastOccuring.length); i++) {
         gameState.reveal(leastOccuring[i]);
       }
+      canGoNext = gameState.isGameOver;
 
       log("score: ${gameState.score}");
       emit(InputMatchState(isGameOver: gameState.isGameOver));

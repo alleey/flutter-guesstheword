@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
       policy: const CustomOrderedTraversalPolicy(),
       child: Scaffold(
           backgroundColor: SymbolButton.defaultColorBackground,
-          appBar: PreferredSize(
+          appBar: !ready ? null : PreferredSize(
             preferredSize: const Size.fromHeight(40.0),
             child: _buildAppBar(context),
           ),
@@ -62,21 +62,17 @@ class _HomePageState extends State<HomePage> {
 
               switch(state) {
                 case final SettingsReadBlocState s:
+
                 if (s.name == KnownSettingsNames.settingTheme) {
                   setState(() {
                     selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
+                    ready = true;
+                    showFirstUsagePrompt(context);
                   });
                 }
                 break;
               }
 
-              if (context.mounted) {
-                await showFirstUsagePrompt(context);
-              }
-
-              setState(() {
-                ready = true;
-              });
             },
             child: ready ?
               const PuzzlePage() :
@@ -87,7 +83,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   AppBar _buildAppBar(BuildContext context) {
+    final colorScheme = GameColorSchemes.fromName(selectedTheme);
     return AppBar(
+      backgroundColor: colorScheme.backgroundTopPanel,
+      foregroundColor: colorScheme.textTopPanel,
       leading:
         FocusTraversalOrder(
           order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
@@ -97,8 +96,9 @@ class _HomePageState extends State<HomePage> {
             label: 'About the game',
             child: IconButton(
               icon: const Icon(Icons.description_outlined),
-              onPressed: () async {
-                await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -113,8 +113,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Open high scores',
             child: IconButton(
               icon: const Icon(Icons.bar_chart),
-              onPressed: () async {
-                await AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -127,13 +128,14 @@ class _HomePageState extends State<HomePage> {
             label: 'Reset game',
             child: IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () async {
-                await AlertsService().resetGameDialog(
-                    context,
-                    GameColorSchemes.fromName(selectedTheme),
-                    onAccept: () {
-                      BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
-                    }
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().resetGameDialog(
+                  context,
+                  GameColorSchemes.fromName(selectedTheme),
+                  onAccept: () {
+                    BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
+                  }
                 );
               },
             ),
@@ -147,8 +149,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Change color scheme',
             child: IconButton(
               icon: const Icon(Icons.palette_outlined),
-              onPressed: () async {
-                await AlertsService().colorSchemePicker(
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().colorSchemePicker(
                   context,
                   selectedTheme: selectedTheme,
                   onSelect: (newTheme) {
@@ -164,11 +167,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future showFirstUsagePrompt(BuildContext context) async {
+
     final appDataService = AppDataService(dataService: globalDataService);
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
-      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
+      AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
     }
   }
 }

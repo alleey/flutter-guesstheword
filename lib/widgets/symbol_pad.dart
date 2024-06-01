@@ -67,7 +67,7 @@ class SymbolPad extends StatelessWidget {
   Widget _buildPanel(BuildContext context) {
 
     final symbolList = frontSymbols.split('');
-    final firstUnset = flippedMask.asIntIterable(false).first;
+    final firstUnset = flippedMask.asIntIterable(false).firstOrNull ?? -1;
 
     return Wrap(
       spacing: spacing,

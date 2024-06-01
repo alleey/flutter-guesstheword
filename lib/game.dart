@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -32,11 +33,10 @@ class PuzzlePage extends StatefulWidget {
 
 class _PuzzlePageState extends State<PuzzlePage> {
 
-  static const resetGameQuestion = "You've finished all the puzzles. To keep playing the game must reset";
-
   final appDataService = AppDataService(dataService: globalDataService);
   final audioService = AudioService();
   late GameColorScheme colorScheme;
+  late VoidCallback? dismissActivePopup;
 
   GameBloc get gameBloc => BlocProvider.of<GameBloc>(context);
   SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
@@ -58,6 +58,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return BlocListener<SettingsBloc, SettingsBlocState>(
       listener: (BuildContext context, state) {
 
+        log("listener SettingsBlocState: $state");
         switch(state) {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
@@ -71,9 +72,15 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: BlocConsumer<GameBloc, GameBlocState>(
         listener: (context, state) async {
 
+          log("listener GameBloc: $state");
           switch (state) {
 
+            case WaitResetState s:
+              dismissActivePopup = AlertsService().popup(context, colorScheme, message: s.message);
+              break;
+
             case ResetState _:
+              dismissActivePopup?.call();
               startPuzzle();
               break;
 
@@ -93,12 +100,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               break;
 
             case NoMorePuzzleState _:
-              await AlertsService().okDialog(
-                context,
-                title: "Congratulations!",
-                content: const Text(resetGameQuestion),
-                colorScheme: colorScheme,
-                callback: () {
+              AlertsService().gameNeedsResetDialog(context, colorScheme, callback: () {
                   final bloc = BlocProvider.of<GameBloc>(context);
                   bloc.add(ResetGameEvent());
                 }
@@ -108,10 +110,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
         },
         builder: (context, state) {
 
+          log("builder GameBloc: $state");
           if (state is GameState) {
             return _buildLayout(context, state);
           }
 
+          log("builder GameBloc: CircularProgressIndicator");
           return const Center(child: CircularProgressIndicator());
         }
       ),
@@ -194,21 +198,15 @@ class _PuzzlePageState extends State<PuzzlePage> {
       clipBehavior: Clip.none,
       children: [
         Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 2,),
-            Expanded(
-              child: _buildScorePanel(context, state)
+            _buildScorePanel(context, state),
+            FlipCard(
+              showFront: !state.isGameOver,
+              frontCard: _buildStatusPanel(context, state),
+              backCard: _buildGameOverPanel(context, state),
             ),
-            Expanded(
-              child: FlipCard(
-                showFront: !state.isGameOver,
-                frontCard: _buildStatusPanel(context, state),
-                backCard: _buildGameOverPanel(context, state),
-              ),
-            ),
-            const SizedBox(height: 10,),
           ],
         ),
 
@@ -252,7 +250,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 )
               ),
               TextSpan(
-                text: "${state.score.value}-${state.score.wins}-${state.score.losses}      ",
+                text: "${state.score.value}-${state.score.wins}-${state.score.losses}",
+              ),
+              const TextSpan(
+                text: "      ",
               ),
               TextSpan(
                 text: '\u{2726}',
@@ -276,19 +277,17 @@ class _PuzzlePageState extends State<PuzzlePage> {
       label: "${Constants.maxErrors - state.errorCount} attempts left",
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children:
         [
           ...Iterable<int>.generate(Constants.maxErrors).map((e)
             => FlipCard(
                 showFront: (e > (state.errorCount - 1)),
-                frontCard: Icon(Icons.favorite, size: 36, color: colorScheme.colorHeart),
-                backCard: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationX(math.pi),
-                  child: Icon(Icons.heart_broken, size: 36, color: colorScheme.colorHeartBroken)
+                frontCard: Icon(Icons.diamond, size: 32, color: colorScheme.colorHeart),
+                backCard: Transform.rotate(
+                  angle: math.pi + math.pi/2,
+                  child: Icon(Icons.diamond_outlined, size: 32, color: colorScheme.colorHeartBroken.withOpacity(0.75))
                 ),
-                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
               )),
         ],
       ),
@@ -317,39 +316,36 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ),
         ),
         const SizedBox(width: 20,),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: FocusTraversalOrder(
-            order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
-            child: Semantics(
-              button: true,
-              label: "Try the next puzzle",
-              excludeSemantics: true,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.backgroundTopButton,
-                  side: BorderSide(width: 2, color: colorScheme.textTopPanel),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  minimumSize: Size.zero,
-                ).copyWith(
-                  overlayColor: StateDependentColor(colorScheme.textTopButton),
-                ),
-                onPressed: () {
-                  startPuzzle();
-                },
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: Text(
-                      "Go Next",
-                      style: TextStyle(
-                        color: colorScheme.textTopButton,
-                        fontSize: titleFontSize,
-                      )
-                    ),
-                  ),
-                )
+        FocusTraversalOrder(
+          order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
+          child: Semantics(
+            button: true,
+            label: "Try the next puzzle",
+            excludeSemantics: true,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.backgroundTopButton,
+                side: BorderSide(width: 2, color: colorScheme.textTopPanel),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                minimumSize: Size.zero,
+              ).copyWith(
+                overlayColor: StateDependentColor(colorScheme.textTopButton),
               ),
+              onPressed: () {
+                startPuzzle();
+              },
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Text(
+                    "Go Next",
+                    style: TextStyle(
+                      color: colorScheme.textTopButton,
+                      fontSize: titleFontSize,
+                    )
+                  ),
+                ),
+              )
             ),
           ),
         )
@@ -477,7 +473,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         .join();
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(2.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -574,6 +570,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
             FocusTraversalOrder(
               order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
               child: ElevatedButton(
+                autofocus: true,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.backgroundInputButton,
                   side: BorderSide(width: 2, color: colorScheme.textInputPanel),

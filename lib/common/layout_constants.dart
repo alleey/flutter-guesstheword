@@ -12,7 +12,7 @@ class DialogLayoutConstants
     large: const Size(0.6, 0.6),
   );
 
-  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 25, vertical: 40);
+  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 25, vertical: 25);
   static const EdgeInsets insetPadding = EdgeInsets.symmetric(horizontal: 15, vertical: 20);
 
   static final layout = <String, ResponsiveValue<dynamic>>{
@@ -56,9 +56,9 @@ class AppLayoutConstants
   // linear keyboard
   static const String hintWidthPctKey = "app.hintWidthPct";
   static final hintWidthPct = ResponsiveValue.from(
-    small: 0.5,
-    medium: 0.4,
-    large: 0.3,
+    small: 0.4,
+    medium: 0.3,
+    large: 0.2,
   );
 
   static const String colorSchemePickerItemSizeKey = "app.colorSchemePickerItemSize";
