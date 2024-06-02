@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
+import 'common/custom_traversal_policy.dart';
 import 'common/game_color_scheme.dart';
-import 'common/utils.dart';
+import 'common/native.dart';
 import 'game.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
@@ -25,9 +25,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
   late String selectedTheme;
   late bool ready = false;
+
+  GameBloc get gameBloc => BlocProvider.of<GameBloc>(context);
+  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
 
   @override
   void initState() {
@@ -46,39 +48,58 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
 
     return FocusTraversalGroup(
-      policy: OrderedTraversalPolicy(),
+      policy: const CustomOrderedTraversalPolicy(),
       child: Scaffold(
           backgroundColor: SymbolButton.defaultColorBackground,
-          appBar: PreferredSize(
+
+          appBar: !ready ? null : PreferredSize(
             preferredSize: const Size.fromHeight(40.0),
             child: _buildAppBar(context),
           ),
+
           body: BlocListener<SettingsBloc, SettingsBlocState>(
 
-            listener: (BuildContext context, state) {
+            listener: (BuildContext context, state) async {
 
+              // Hack neded on Android TV for autofocus effects
+              await setTraditionalFocusHighlightStrategy();
               switch(state) {
                 case final SettingsReadBlocState s:
-                if (s.name == KnownSettingsNames.settingTheme) {
-                  setState(() {
-                    selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
-                  });
-                }
-                break;
+                  if (s.name == KnownSettingsNames.settingTheme) {
+                    setState(() {
+                      selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
+                    });
+                  }
+                  gameBloc.add(InitializeGameEvent());
+                  break;
               }
 
-              showAlert(context);
             },
-            child: ready ?
-              const PuzzlePage() :
-              const Center(child: CircularProgressIndicator()),
+            child: BlocListener<GameBloc, GameBlocState>(
+
+              listener: (BuildContext context, state) async {
+
+                switch(state) {
+                  case final InitializeGameCompleteState _:
+                  setState(() {
+                    ready = true;
+                    showFirstUsagePrompt(context);
+                  });
+                  break;
+                }
+              },
+              child: ready ? const PuzzlePage() : const Center(child: CircularProgressIndicator()),
           )
         ),
+      ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context) {
+    final colorScheme = GameColorSchemes.fromName(selectedTheme);
     return AppBar(
+      backgroundColor: colorScheme.backgroundTopPanel,
+      foregroundColor: colorScheme.textTopPanel,
       leading:
         FocusTraversalOrder(
           order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
@@ -88,8 +109,9 @@ class _HomePageState extends State<HomePage> {
             label: 'About the game',
             child: IconButton(
               icon: const Icon(Icons.description_outlined),
-              onPressed: () async {
-                await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -104,8 +126,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Open high scores',
             child: IconButton(
               icon: const Icon(Icons.bar_chart),
-              onPressed: () async {
-                await AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -118,13 +141,14 @@ class _HomePageState extends State<HomePage> {
             label: 'Reset game',
             child: IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () async {
-                await AlertsService().resetGameDialog(
-                    context,
-                    GameColorSchemes.fromName(selectedTheme),
-                    onAccept: () {
-                      BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
-                    }
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().resetGameDialog(
+                  context,
+                  GameColorSchemes.fromName(selectedTheme),
+                  onAccept: () {
+                    BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
+                  }
                 );
               },
             ),
@@ -138,8 +162,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Change color scheme',
             child: IconButton(
               icon: const Icon(Icons.palette_outlined),
-              onPressed: () async {
-                await AlertsService().colorSchemePicker(
+              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              onPressed: () {
+                AlertsService().colorSchemePicker(
                   context,
                   selectedTheme: selectedTheme,
                   onSelect: (newTheme) {
@@ -154,18 +179,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future showAlert(BuildContext context) async {
+  Future showFirstUsagePrompt(BuildContext context) async {
 
     final appDataService = AppDataService(dataService: globalDataService);
-
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
-      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
+      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
     }
-
-    setState(() {
-      ready = true;
-    });
   }
 }

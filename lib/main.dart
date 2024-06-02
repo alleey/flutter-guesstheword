@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,8 +16,6 @@ Future<void> main() async {
 
   await globalDataService.initialize();
   //await globalDataService.resetData();
-  await PuzzleService(dataService: globalDataService).importAll();
-
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -62,7 +58,7 @@ class MyApp extends StatelessWidget {
               title: 'Guess The Word',
               theme: ThemeData(
                 primarySwatch: Colors.blue,
-                fontFamily: 'BraahOne',
+                fontFamily: 'Lilita',
               ),
               home: const HomePage(),
             ),

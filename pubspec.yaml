@@ -64,3 +64,6 @@ flutter:
     - family: BraahOne
       fonts:
         - asset: assets/fonts/BraahOne/BraahOne-Regular.ttf
+    - family: Lilita
+      fonts:
+        - asset: assets/fonts/Lilita_One/LilitaOne-Regular.ttf

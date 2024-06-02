@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,13 +10,14 @@ import '../../common/utils.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
+import 'common.dart';
 
 class OkDialog extends StatefulWidget {
 
   const OkDialog({
     super.key,
     required this.title,
-    required this.content,
+    required this.builder,
     required this.colorScheme,
     this.onClose,
     this.okLabel = "Continue",
@@ -26,7 +29,7 @@ class OkDialog extends StatefulWidget {
 
   final GameColorScheme colorScheme;
   final String title;
-  final Widget content;
+  final ContentBuilder builder;
   final String okLabel;
   final double? width;
   final double? height;
@@ -116,33 +119,37 @@ class _OkDialogState extends State<OkDialog> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           header: true,
           container: true,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text.rich(
-              textAlign: TextAlign.center,
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: widget.title,
-                    style: TextStyle(
-                      color: scheme.backgroundPuzzleSymbolsFlipped,
-                      fontWeight: FontWeight.bold,
-                      fontSize: titleFontSize,
-                    )
-                  ),
-                ],
+          child: Container(
+            color: scheme.textPuzzleSymbolsFlipped.withOpacity(0.3),
+            padding: const EdgeInsets.only(bottom: 4, top: 10),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: widget.title,
+                      style: TextStyle(
+                        color: scheme.backgroundPuzzleSymbolsFlipped,
+                        fontWeight: FontWeight.bold,
+                        fontSize: titleFontSize,
+                      )
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        widget.content,
-        const Spacer(),
+        Expanded(
+          child: widget.builder(layout, widget.colorScheme)
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -161,16 +168,11 @@ class _OkDialogState extends State<OkDialog> {
                 Navigator.of(context, rootNavigator: true).pop();
                 widget.onClose?.call();
               },
-              // Is there any good method on planet earth to vertically center text inside elevated button
-              // without a padding hack?
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  widget.okLabel,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: bodyFontSize,
-                  ),
+              child: Text(
+                widget.okLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: bodyFontSize,
                 ),
               ),
             ),

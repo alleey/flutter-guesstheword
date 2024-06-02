@@ -19,10 +19,12 @@ class DataService {
 
   Future initialize() async {
 
-    await Hive.initFlutter();
+    await Hive.initFlutter("guesstheword-v${Constants.appDataVersion}");
     Hive.registerAdapter(ScoreAdapter());
     Hive.registerAdapter(PuzzleAdapter());
 
+    // on web for example the subdir is ignored, therefore need to put ver in filenames as well
+    // as a fallback.
     scoreBox = await Hive.openBox<Score>("score-v${Constants.appDataVersion}");
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<Map>('appData-v${Constants.appDataVersion}');

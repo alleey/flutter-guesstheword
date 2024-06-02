@@ -4,23 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/settings_bloc.dart';
 import '../../common/game_color_scheme.dart';
 import '../../common/layout_constants.dart';
-import '../../common/utils.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
 import 'common.dart';
 
-class YesNoDialog extends StatefulWidget {
+class PopupDialog extends StatefulWidget {
 
-  const YesNoDialog({
+  const PopupDialog({
     super.key,
     required this.title,
     required this.builder,
     required this.colorScheme,
-    required this.onAccept,
-    this.onReject,
-    this.yesLabel = "Yes",
-    this.noLabel = "No",
     this.width,
     this.height,
     this.padding = DialogLayoutConstants.padding,
@@ -30,20 +25,17 @@ class YesNoDialog extends StatefulWidget {
   final GameColorScheme colorScheme;
   final String title;
   final ContentBuilder builder;
-  final String yesLabel;
-  final String noLabel;
   final double? width;
   final double? height;
-  final VoidCallback onAccept;
-  final VoidCallback? onReject;
   final EdgeInsets padding;
   final EdgeInsets insetPadding;
 
   @override
-  State<YesNoDialog> createState() => _YesNoDialogState();
+  State<PopupDialog> createState() => _PopupDialogState();
 }
 
-class _YesNoDialogState extends State<YesNoDialog> {
+class _PopupDialogState extends State<PopupDialog> {
+
   late GameColorScheme activeColorScheme;
 
   @override
@@ -117,7 +109,6 @@ class _YesNoDialogState extends State<YesNoDialog> {
 
     final layout = ResponsiveLayoutProvider.layout(context);
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -152,55 +143,6 @@ class _YesNoDialogState extends State<YesNoDialog> {
         Expanded(
           child: widget.builder(layout, widget.colorScheme)
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: scheme.backgroundPuzzleSymbols,
-                foregroundColor: scheme.textPuzzleSymbols,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ).copyWith(
-                overlayColor: StateDependentColor(scheme.textPuzzleSymbols),
-              ),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(true);
-                widget.onAccept();
-              },
-              child: Text(
-                widget.yesLabel,
-                style: TextStyle(
-                  fontSize: bodyFontSize
-                ),
-              ),
-            ),
-            const SizedBox(width: 10,),
-            ElevatedButton(
-              autofocus: true,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
-                foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ).copyWith(
-                overlayColor: StateDependentColor(scheme.textPuzzleSymbolsFlipped),
-              ),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(false);
-                widget.onReject?.call();
-              },
-              child: Text(
-                widget.noLabel,
-                style: TextStyle(
-                  fontSize: bodyFontSize
-                ),
-              ),
-            ),
-          ],
-        )
       ],
     );
   }
