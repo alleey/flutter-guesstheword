@@ -7,13 +7,14 @@ import '../../common/layout_constants.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
+import 'common.dart';
 
 class PopupDialog extends StatefulWidget {
 
   const PopupDialog({
     super.key,
     required this.title,
-    required this.content,
+    required this.builder,
     required this.colorScheme,
     this.width,
     this.height,
@@ -23,7 +24,7 @@ class PopupDialog extends StatefulWidget {
 
   final GameColorScheme colorScheme;
   final String title;
-  final Widget content;
+  final ContentBuilder builder;
   final double? width;
   final double? height;
   final EdgeInsets padding;
@@ -139,7 +140,9 @@ class _PopupDialogState extends State<PopupDialog> {
             ),
           ),
         ),
-        Expanded(child: widget.content),
+        Expanded(
+          child: widget.builder(layout, widget.colorScheme)
+        ),
       ],
     );
   }

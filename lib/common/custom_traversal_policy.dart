@@ -163,6 +163,7 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
   List<_GroupFocusOrderNodeInfo> _sortNodes(FocusScopeNode scope) {
     final ordered = <_GroupFocusOrderNodeInfo>[];
     for (final node in scope.traversalDescendants.toList()) {
+      //_setDebugLabels(node);
       final order = _focusOrder(node);
       if (order != null) {
         ordered.add(_GroupFocusOrderNodeInfo.from(order, node));
@@ -174,11 +175,33 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
     return ordered;
   }
 
+  // FocusNode _setDebugLabels(FocusNode focusNode) {
+  //   if (focusNode.context != null) {
+  //     focusNode.debugLabel = _findTextInDescendants(focusNode.context!);
+  //   }
+  //   return focusNode;
+  // }
+
+
+  // String _findTextInDescendants(BuildContext context) {
+  //   String? text;
+  //   void visitor(Element element) {
+  //     if (element.widget is Text) {
+  //       text = (element.widget as Text).data;
+  //     }
+  //     if (text == null) {
+  //       element.visitChildElements(visitor);
+  //     }
+  //   }
+
+  //   context.visitChildElements(visitor);
+  //   return text ?? "";
+  // }
+
   GroupFocusOrder? _focusOrder(FocusNode node) => FocusTraversalOrder.maybeOf(node.context!) as GroupFocusOrder?;
   int _groupId(FocusNode node) => _focusOrder(node)?.groupId ?? -1;
   bool _isAbove(Rect a, Rect b) => a.bottom <= b.top;
   bool _isBelow(Rect a, Rect b) => a.top >= b.bottom;
-
 }
 
 class _GroupFocusOrderNodeInfo extends GroupFocusOrder {

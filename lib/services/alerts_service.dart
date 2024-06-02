@@ -5,6 +5,7 @@ import '../common/constants.dart';
 import '../common/game_color_scheme.dart';
 import '../common/layout_constants.dart';
 import '../widgets/color_scheme_picker.dart';
+import '../widgets/dialogs/common.dart';
 import '../widgets/dialogs/ok_dialog.dart';
 import '../widgets/dialogs/popup_dialog.dart';
 import '../widgets/dialogs/yesno_dialog.dart';
@@ -16,7 +17,7 @@ class AlertsService {
 
   Future<bool?> yesNoDialog(BuildContext context, {
     String? title,
-    Widget content = const SizedBox(),
+    required ContentBuilder builder,
     required GameColorScheme colorScheme,
     String yesLabel = "Yes",
     String noLabel = "No",
@@ -41,7 +42,7 @@ class AlertsService {
           title: title ?? "",
           yesLabel: yesLabel,
           noLabel: noLabel,
-          content: content,
+          builder: builder,
           width: MediaQuery.of(context).size.width * screenCoverPct.width,
           height: MediaQuery.of(context).size.height * screenCoverPct.height,
           onAccept: onAccept ?? () {},
@@ -53,7 +54,7 @@ class AlertsService {
 
   Future<dynamic> okDialog(BuildContext context, {
     String? title,
-    Widget content = const SizedBox(),
+    required ContentBuilder builder,
     required GameColorScheme colorScheme,
     String okLabel = "Continue",
     VoidCallback? callback
@@ -75,19 +76,18 @@ class AlertsService {
           colorScheme: colorScheme,
           title: title ?? "",
           okLabel: okLabel,
-          content: content,
+          builder: builder,
           width: MediaQuery.of(context).size.width * screenCoverPct.width,
           height: MediaQuery.of(context).size.height * screenCoverPct.height,
-          onClose: () {}
+          onClose: callback,
         );
       },
     );
   }
 
-  VoidCallback popupDialog(BuildContext context, {
+  VoidCallback popupDialog(BuildContext context, GameColorScheme colorScheme, {
     String? title,
-    Widget content = const SizedBox(),
-    required GameColorScheme colorScheme,
+    required ContentBuilder builder,
   }) {
     final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
     showGeneralDialog(
@@ -105,7 +105,7 @@ class AlertsService {
         return PopupDialog(
           colorScheme: colorScheme,
           title: title ?? "",
-          content: content,
+          builder: builder,
           width: MediaQuery.of(context).size.width * screenCoverPct.width,
           height: MediaQuery.of(context).size.height * screenCoverPct.height,
         );
@@ -120,88 +120,99 @@ class AlertsService {
     String title = "Processing ...",
     required String message,
   }) {
-    final layout = ResponsiveLayoutProvider.layout(context);
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
     return popupDialog(
       context,
-      colorScheme:  colorScheme,
+      colorScheme,
       title: title,
-      content: Center(
-        child: Semantics(
+      builder: (layout, scheme) {
+
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        return Semantics(
           container: true,
-          child: Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              children: [
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text.rich(
+                textAlign: TextAlign.center,
                 TextSpan(
-                  text: message,
-                  style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
-                    fontSize: bodyFontSize,
-                  )
+                  children: [
+                    TextSpan(
+                      text: message,
+                      style: TextStyle(
+                        color: colorScheme.textPuzzlePanel,
+                        fontSize: bodyFontSize,
+                      )
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 5),
+              LinearProgressIndicator(
+                color: colorScheme.textPuzzlePanel,
+                backgroundColor: colorScheme.backgroundInputPanel,
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) {
-    final layout = ResponsiveLayoutProvider.layout(context);
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
     return yesNoDialog(
       context,
       colorScheme:  colorScheme,
       title: "RESET GAME",
-      content: Semantics(
-        container: true,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text.rich(
-            textAlign: TextAlign.justify,
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
-                  style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
-                    fontSize: bodyFontSize,
-                  )
-                ),
-                TextSpan(
-                  text: "Would you like to reset the game?",
-                  style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
-                    fontWeight: FontWeight.bold,
-                    fontSize: titleFontSize,
-                  )
-                ),
-              ],
+      builder: (layout, scheme) {
+
+        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        return Semantics(
+          container: true,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text.rich(
+              textAlign: TextAlign.justify,
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
+                    style: TextStyle(
+                      color: colorScheme.textPuzzlePanel,
+                      fontSize: bodyFontSize,
+                    )
+                  ),
+                  TextSpan(
+                    text: "Would you like to reset the game?",
+                    style: TextStyle(
+                      color: colorScheme.textPuzzlePanel,
+                      fontWeight: FontWeight.bold,
+                      fontSize: titleFontSize,
+                    )
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
       onAccept:onAccept
     );
   }
 
-  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) {
-    final layout = ResponsiveLayoutProvider.layout(context);
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
-    return okDialog(
+  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) => okDialog(
       context,
       colorScheme: colorScheme,
       title: "Guess The Word",
       okLabel: "Close",
-      content:
-        Column(
+      builder: (layout, scheme) {
+
+        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -219,7 +230,7 @@ class AlertsService {
                       TextSpan(
                         text: globalDataService.version,
                         style: TextStyle(
-                          color: colorScheme.backgroundTopPanel,
+                          color: scheme.backgroundTopPanel,
                           fontSize: bodyFontSize,
                         )
                       ),
@@ -235,7 +246,7 @@ class AlertsService {
                 textAlign: TextAlign.justify,
                 TextSpan(
                   style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
+                    color: scheme.textPuzzlePanel,
                     fontSize: bodyFontSize,
                   ),
                   children: [
@@ -243,7 +254,7 @@ class AlertsService {
                       semanticsLabel: "Point 1.",
                       text: '\u{273D}  ',
                       style: TextStyle(
-                        color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                        color: scheme.backgroundPuzzleSymbolsFlipped,
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                       ),
@@ -262,7 +273,7 @@ class AlertsService {
                 textAlign: TextAlign.justify,
                 TextSpan(
                   style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
+                    color: scheme.textPuzzlePanel,
                     fontSize: bodyFontSize,
                   ),
                   children: [
@@ -270,7 +281,7 @@ class AlertsService {
                       text: '\u{2726}  ',
                       semanticsLabel: "Point 2.",
                       style: TextStyle(
-                        color: colorScheme.backgroundPuzzleSymbolsFlipped,
+                        color: scheme.backgroundPuzzleSymbolsFlipped,
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                       )
@@ -281,7 +292,7 @@ class AlertsService {
                     TextSpan(
                       text: "Hint tokens are carried forward even if you reset the game.",
                       style: TextStyle(
-                        color: colorScheme.backgroundTopPanel,
+                        color: scheme.backgroundTopPanel,
                         fontWeight: FontWeight.bold,
                       )
                     ),
@@ -289,25 +300,26 @@ class AlertsService {
                 ),
               ),
             ),
-        ]),
+        ]);
+      },
     );
-  }
 
   Future<dynamic> highScoresDialog(BuildContext context, GameColorScheme colorScheme) {
 
     final scoreService = ScoreService(dataService: globalDataService);
     final scores = scoreService.highScores();
-    final layout = ResponsiveLayoutProvider.layout(context);
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return okDialog(
       context,
       colorScheme: colorScheme,
       title: "HIGH SCORES",
       okLabel: "Close",
-      content:
-        scores.isEmpty ?
+      builder: (layout, scheme) {
+
+        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        return scores.isEmpty ?
           Center(
             child: Semantics(
               container: true,
@@ -318,7 +330,7 @@ class AlertsService {
                     TextSpan(
                       text: "No score has been recorded yet. Win some puzzles to record a score!",
                       style: TextStyle(
-                        color: colorScheme.textPuzzlePanel,
+                        color: scheme.textPuzzlePanel,
                         fontSize: titleFontSize,
                       )
                     ),
@@ -330,7 +342,7 @@ class AlertsService {
           DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: bodyFontSize,
-              color: colorScheme.textPuzzlePanel,
+              color: scheme.textPuzzlePanel,
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -395,7 +407,8 @@ class AlertsService {
                   ),
               ]),
             ),
-          ),
+          );
+      },
     );
   }
 
@@ -409,13 +422,12 @@ class AlertsService {
       colorScheme: colorScheme,
       title: "Pick a Theme",
       okLabel: "Close",
-      content: Padding(
+      builder: (layout, scheme) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
-      ),
+      )
     );
   }
-
 
   Future<dynamic> gameNeedsResetDialog(BuildContext context, GameColorScheme colorScheme, {
     required VoidCallback callback
@@ -423,8 +435,8 @@ class AlertsService {
     return okDialog(
       context,
       title: "Congratulations!",
-      content: const Text("You've finished all the puzzles. To keep playing the game must reset"),
       colorScheme: colorScheme,
+      builder: (layout, scheme) => const Text("You've finished all the puzzles. To keep playing the game must reset"),
       callback: callback,
     );
   }

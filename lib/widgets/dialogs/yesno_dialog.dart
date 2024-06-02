@@ -8,13 +8,14 @@ import '../../common/utils.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
+import 'common.dart';
 
 class YesNoDialog extends StatefulWidget {
 
   const YesNoDialog({
     super.key,
     required this.title,
-    required this.content,
+    required this.builder,
     required this.colorScheme,
     required this.onAccept,
     this.onReject,
@@ -28,7 +29,7 @@ class YesNoDialog extends StatefulWidget {
 
   final GameColorScheme colorScheme;
   final String title;
-  final Widget content;
+  final ContentBuilder builder;
   final String yesLabel;
   final String noLabel;
   final double? width;
@@ -148,7 +149,9 @@ class _YesNoDialogState extends State<YesNoDialog> {
             ),
           ),
         ),
-        Expanded(child: widget.content),
+        Expanded(
+          child: widget.builder(layout, widget.colorScheme)
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -166,15 +169,10 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 Navigator.of(context, rootNavigator: true).pop(true);
                 widget.onAccept();
               },
-              // Is there any good method on planet earth to vertically center text inside elevated button
-              // without a padding hack?
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  widget.yesLabel,
-                  style: TextStyle(
-                    fontSize: bodyFontSize
-                  ),
+              child: Text(
+                widget.yesLabel,
+                style: TextStyle(
+                  fontSize: bodyFontSize
                 ),
               ),
             ),
@@ -194,15 +192,10 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 Navigator.of(context, rootNavigator: true).pop(false);
                 widget.onReject?.call();
               },
-              // Is there any good method on planet earth to vertically center text inside elevated button
-              // without a padding hack?
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  widget.noLabel,
-                  style: TextStyle(
-                    fontSize: bodyFontSize
-                  ),
+              child: Text(
+                widget.noLabel,
+                style: TextStyle(
+                  fontSize: bodyFontSize
                 ),
               ),
             ),

@@ -75,11 +75,11 @@ class _PuzzlePageState extends State<PuzzlePage> {
           log("listener GameBloc: $state");
           switch (state) {
 
-            case WaitResetState s:
+            case ResetPendingState s:
               dismissActivePopup = AlertsService().popup(context, colorScheme, message: s.message);
               break;
 
-            case ResetState _:
+            case ResetCompleteState _:
               dismissActivePopup?.call();
               startPuzzle();
               break;
@@ -91,8 +91,14 @@ class _PuzzlePageState extends State<PuzzlePage> {
               }
               break;
 
-            case InputMatchState _:
-              audioService.play(!state.isGameOver ? "audio/match.mp3" : "audio/win.mp3");
+            case PuzzleCompleteState s:
+              if (s.isWin) {
+                audioService.play("audio/win.mp3");
+              }
+              break;
+
+            case InputMatchState s:
+              audioService.play("audio/match.mp3");
               break;
 
             case InputMismatchState _:
@@ -101,8 +107,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
             case NoMorePuzzleState _:
               AlertsService().gameNeedsResetDialog(context, colorScheme, callback: () {
-                  final bloc = BlocProvider.of<GameBloc>(context);
-                  bloc.add(ResetGameEvent());
+                  gameBloc.add(ResetGameEvent());
                 }
               );
               break;
@@ -115,7 +120,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
             return _buildLayout(context, state);
           }
 
-          log("builder GameBloc: CircularProgressIndicator");
           return const Center(child: CircularProgressIndicator());
         }
       ),
@@ -125,6 +129,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   Widget _buildLayout(BuildContext context, GameState state) {
     var squareSize = 6.0;
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -306,14 +311,55 @@ class _PuzzlePageState extends State<PuzzlePage> {
         Semantics(
           label: state.isWin ? "You won! ${state.winBonus} points earned" : 'Sorry, you lost!',
           excludeSemantics: true,
-          child: Text(
-            state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2717}',
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
-            ),
+
+          child: Text.rich(
+            TextSpan(
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.bold,
+                color: state.isWin ? colorScheme.colorSuccess : colorScheme.colorFailure,
+              ),
+              children: [
+                TextSpan(
+                  text: state.isWin ? "\u{2713} +${state.winBonus}" : '\u{2169}',
+                )
+              ]
+            )
           ),
+          //   child: Text.rich(
+          //   textAlign: TextAlign.center,
+          //   TextSpan(
+          //     style: TextStyle(
+          //       fontSize: titleFontSize,
+          //       color: colorScheme.textTopPanel,
+          //     ),
+          //     children: [
+          //       TextSpan(
+          //         text: '\u{273D}',
+          //         style: TextStyle(
+          //           color: colorScheme.colorIcons,
+          //           fontWeight: FontWeight.bold,
+          //         )
+          //       ),
+          //       TextSpan(
+          //         text: " +${state.winBonus}",
+          //       ),
+          //       if (state.hintBonus > 0)
+          //         TextSpan(
+          //           text: ' \u{2726}',
+          //           style: TextStyle(
+          //             color: colorScheme.colorIcons,
+          //             fontWeight: FontWeight.bold,
+          //           )
+          //         ),
+          //       if (state.hintBonus > 0)
+          //         TextSpan(
+          //           text: " +${state.hintBonus}",
+          //         ),
+          //     ],
+          //   ),
+          // )
+
         ),
         const SizedBox(width: 20,),
         FocusTraversalOrder(
@@ -334,17 +380,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
               onPressed: () {
                 startPuzzle();
               },
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Text(
-                    "Go Next",
-                    style: TextStyle(
-                      color: colorScheme.textTopButton,
-                      fontSize: titleFontSize,
-                    )
-                  ),
-                ),
+              child: Text(
+                "Go Next",
+                style: TextStyle(
+                  color: colorScheme.textTopButton,
+                  fontSize: titleFontSize,
+                )
               )
             ),
           ),
@@ -559,7 +600,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const TextSpan(text: ' \u{2193}',),
+                    const TextSpan(text: ' \u{2193}\n',),
                   ],
                 ),
               )

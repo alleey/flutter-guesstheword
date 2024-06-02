@@ -16,8 +16,6 @@ Future<void> main() async {
 
   await globalDataService.initialize();
   //await globalDataService.resetData();
-  await PuzzleService(dataService: globalDataService).importAll();
-
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -60,7 +58,7 @@ class MyApp extends StatelessWidget {
               title: 'Guess The Word',
               theme: ThemeData(
                 primarySwatch: Colors.blue,
-                fontFamily: 'BraahOne',
+                fontFamily: 'Lilita',
               ),
               home: const HomePage(),
             ),

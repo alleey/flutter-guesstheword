@@ -25,9 +25,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
   late String selectedTheme;
   late bool ready = false;
+
+  GameBloc get gameBloc => BlocProvider.of<GameBloc>(context);
+  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
 
   @override
   void initState() {
@@ -49,36 +51,47 @@ class _HomePageState extends State<HomePage> {
       policy: const CustomOrderedTraversalPolicy(),
       child: Scaffold(
           backgroundColor: SymbolButton.defaultColorBackground,
+
           appBar: !ready ? null : PreferredSize(
             preferredSize: const Size.fromHeight(40.0),
             child: _buildAppBar(context),
           ),
+
           body: BlocListener<SettingsBloc, SettingsBlocState>(
 
             listener: (BuildContext context, state) async {
 
               // Hack neded on Android TV for autofocus effects
               await setTraditionalFocusHighlightStrategy();
-
               switch(state) {
                 case final SettingsReadBlocState s:
-
-                if (s.name == KnownSettingsNames.settingTheme) {
-                  setState(() {
-                    selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
-                    ready = true;
-                    showFirstUsagePrompt(context);
-                  });
-                }
-                break;
+                  if (s.name == KnownSettingsNames.settingTheme) {
+                    setState(() {
+                      selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
+                    });
+                  }
+                  gameBloc.add(InitializeGameEvent());
+                  break;
               }
 
             },
-            child: ready ?
-              const PuzzlePage() :
-              const Center(child: CircularProgressIndicator()),
+            child: BlocListener<GameBloc, GameBlocState>(
+
+              listener: (BuildContext context, state) async {
+
+                switch(state) {
+                  case final InitializeGameCompleteState _:
+                  setState(() {
+                    ready = true;
+                    showFirstUsagePrompt(context);
+                  });
+                  break;
+                }
+              },
+              child: ready ? const PuzzlePage() : const Center(child: CircularProgressIndicator()),
           )
         ),
+      ),
     );
   }
 
@@ -172,7 +185,7 @@ class _HomePageState extends State<HomePage> {
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
-      AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
     }
   }
 }

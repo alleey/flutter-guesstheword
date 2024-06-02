@@ -17,6 +17,7 @@ import '../services/score_service.dart';
 
 abstract class GameBlocEvent {}
 
+class InitializeGameEvent extends GameBlocEvent {}
 class ResetGameEvent extends GameBlocEvent {}
 
 class StartPuzzleEvent extends GameBlocEvent {
@@ -43,26 +44,32 @@ class UserInputEvent extends GameBlocEvent {
 abstract class GameBlocState {}
 
 class InitialGameState extends GameBlocState {}
-class ResetState extends GameBlocState {}
 class NoMorePuzzleState extends GameBlocState {}
 class PuzzleStartState extends GameBlocState {}
-
-class InputMatchState extends GameBlocState {
-  final bool isGameOver;
-  InputMatchState({this.isGameOver = false});
+class PuzzleCompleteState extends GameBlocState {
+  final bool isWin;
+  final int winBonus;
+  final int hintBonus;
+  PuzzleCompleteState({required this.isWin, required this.winBonus, required this.hintBonus});
 }
-
+class InputMatchState extends GameBlocState {
+  final bool hintsChange;
+  InputMatchState({required this.hintsChange});
+}
 class InputMismatchState extends GameBlocState {
-  final bool isGameOver;
-  InputMismatchState({this.isGameOver = false});
+  InputMismatchState();
 }
 class WaitState extends GameBlocState {
   final String message;
   WaitState({required this.message});
 }
-class WaitResetState extends WaitState {
-  WaitResetState({required super.message});
+
+class ResetCompleteState extends GameBlocState {}
+class ResetPendingState extends WaitState {
+  ResetPendingState({required super.message});
 }
+
+class InitializeGameCompleteState extends GameBlocState {}
 
 enum Difficulty {
   easy,
@@ -94,6 +101,7 @@ class GameState extends GameBlocState {
     p.symbolSet = other.symbolSet;
     p.score = other.score;
     p.winBonus = other.winBonus;
+    p.hintBonus = other.hintBonus;
     p.lastInputError = other.lastInputError;
     return p;
   }
@@ -110,11 +118,12 @@ class GameState extends GameBlocState {
   late BitArray revealed;
   late BitArray whiteSpace;
 
+  late Score score;
   late int correctCount;
   late int errorCount;
   late int winBonus;
+  late int hintBonus;
   late bool lastInputError;
-  late Score score;
 
   bool get isWin => correctCount >= (puzzle.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
@@ -134,6 +143,7 @@ class GameState extends GameBlocState {
     correctCount = 0;
     errorCount = 0;
     winBonus = 0;
+    hintBonus = 0;
     lastInputError = false;
     used = BitArray(symbolSet.length);
     revealed = BitArray(puzzle.length);
@@ -197,8 +207,11 @@ class GameState extends GameBlocState {
     }
 
     final valueLower = puzzle.toLowerCase();
+    var oldHints = score.hintTokens;
+
     lastInputError = !valueLower.contains(symbol);
     winBonus = 0;
+    hintBonus = 0;
 
     if (!lastInputError) {
 
@@ -206,6 +219,7 @@ class GameState extends GameBlocState {
 
       if (hintRequest) {
         score = score.consumeToken();
+        oldHints = score.hintTokens;
         log("consumed a hint token: ${score.hintTokens} remaining");
       }
 
@@ -215,6 +229,8 @@ class GameState extends GameBlocState {
         winBonus = valueLower.length * (Constants.maxErrors - errorCount);
         score = score.bump(winBonus);
       }
+
+      hintBonus = (score.hintTokens - oldHints);
     } else {
 
       error(symbol);
@@ -228,6 +244,8 @@ class GameState extends GameBlocState {
     log("correct: $correctCount");
     log("errors: $errorCount");
     log("score: $score");
+    log("winBonus: $winBonus");
+    log("hintBonus: $hintBonus");
 
     return true;
   }
@@ -247,16 +265,22 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
   GameBloc() : super(InitialGameState())
   {
+    on<InitializeGameEvent>((event, emit) async {
+
+      await puzzleService.importAll();
+      emit(InitializeGameCompleteState());
+    });
+
     on<ResetGameEvent>((event, emit) async {
 
-      emit(WaitResetState(message: "Please wait while the game is reset"));
+      emit(ResetPendingState(message: "Please wait while the game is reset"));
 
       await appDataService.resetData();
       await puzzleService.resetData();
       await scoreService.resetData();
       canGoNext = true;
 
-      emit(ResetState());
+      emit(ResetCompleteState());
     });
 
     on<StartPuzzleEvent>((event, emit) async {
@@ -280,7 +304,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         puzzle: p.$2.value,
       );
       gameState.score = scoreService.get();
-      //gameState.score = gameState.score.bump(5000);
+      gameState.score = gameState.score.bump(5000);
 
       log("score: ${gameState.score}");
       emit(PuzzleStartState());
@@ -298,9 +322,11 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         canGoNext = gameState.isGameOver;
 
         log("score: ${gameState.score}");
-        emit(gameState.lastInputError ?
-          InputMismatchState(isGameOver: gameState.isGameOver) :
-          InputMatchState(isGameOver: gameState.isGameOver));
+        if (gameState.isGameOver) {
+          emit(PuzzleCompleteState(isWin: gameState.isWin, winBonus: gameState.winBonus, hintBonus: gameState.hintBonus));
+        } else {
+          emit(gameState.lastInputError ? InputMismatchState() : InputMatchState(hintsChange: gameState.hintBonus != 0));
+        }
         emit(GameState.clone(gameState));
       }
     });
@@ -325,7 +351,11 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       canGoNext = gameState.isGameOver;
 
       log("score: ${gameState.score}");
-      emit(InputMatchState(isGameOver: gameState.isGameOver));
+      if (gameState.isGameOver) {
+        emit(PuzzleCompleteState(isWin: gameState.isWin, winBonus: gameState.winBonus, hintBonus: gameState.hintBonus));
+      } else {
+        emit(InputMatchState(hintsChange: gameState.hintBonus != 0));
+      }
       emit(GameState.clone(gameState));
     });
 

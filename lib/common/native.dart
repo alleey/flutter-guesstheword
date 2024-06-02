@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,7 +17,7 @@ class NativeChannel {
   }
 }
 
-bool _highlightModeSet = !Platform.isAndroid;
+bool _highlightModeSet = kIsWeb || !Platform.isAndroid;
 
 Future<void> setTraditionalFocusHighlightStrategy() async {
   if (!_highlightModeSet) {

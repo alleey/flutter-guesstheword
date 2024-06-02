@@ -19,13 +19,13 @@ class DataService {
 
   Future initialize() async {
 
-    await Hive.initFlutter();
+    await Hive.initFlutter("guessteword-v${Constants.appDataVersion}");
     Hive.registerAdapter(ScoreAdapter());
     Hive.registerAdapter(PuzzleAdapter());
 
-    scoreBox = await Hive.openBox<Score>("score-v${Constants.appDataVersion}");
-    puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
-    appDataBox = await Hive.openBox<Map>('appData-v${Constants.appDataVersion}');
+    scoreBox = await Hive.openBox<Score>("score");
+    puzzleBox = await Hive.openBox<Puzzle>("puzzles");
+    appDataBox = await Hive.openBox<Map>('appData');
 
     version = await getVersion();
   }

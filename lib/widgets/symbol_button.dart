@@ -59,13 +59,10 @@ class SymbolButton extends StatelessWidget {
           onPressed: () {
             onSelect.call(text);
           },
-          child: Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: Text(
-              text,
-              style: TextStyle(
-                color: foregroundColor,
-              ),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: foregroundColor,
             ),
           ),
         )
