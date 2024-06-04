@@ -126,7 +126,7 @@ class _OkDialogState extends State<OkDialog> {
           container: true,
           child: Container(
             color: scheme.textPuzzleSymbolsFlipped.withOpacity(0.3),
-            padding: const EdgeInsets.only(bottom: 4, top: 10),
+            padding: const EdgeInsets.only(bottom: 4, top: 6),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text.rich(
@@ -165,8 +165,8 @@ class _OkDialogState extends State<OkDialog> {
                 overlayColor: StateDependentColor(scheme.textPuzzleSymbols),
               ),
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
                 widget.onClose?.call();
+                Navigator.of(context, rootNavigator: true).pop();
               },
               child: Text(
                 widget.okLabel,

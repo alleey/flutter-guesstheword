@@ -166,8 +166,8 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 overlayColor: StateDependentColor(scheme.textPuzzleSymbols),
               ),
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(true);
                 widget.onAccept();
+                Navigator.of(context, rootNavigator: true).pop(true);
               },
               child: Text(
                 widget.yesLabel,
@@ -189,8 +189,8 @@ class _YesNoDialogState extends State<YesNoDialog> {
                 overlayColor: StateDependentColor(scheme.textPuzzleSymbolsFlipped),
               ),
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(false);
                 widget.onReject?.call();
+                Navigator.of(context, rootNavigator: true).pop(false);
               },
               child: Text(
                 widget.noLabel,

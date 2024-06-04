@@ -58,7 +58,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     return BlocListener<SettingsBloc, SettingsBlocState>(
       listener: (BuildContext context, state) {
 
-        log("listener SettingsBlocState: $state");
+        log("PuzzlePage> listener SettingsBlocState: $state");
         switch(state) {
           case final SettingsReadBlocState s:
           if (s.name == KnownSettingsNames.settingTheme) {
@@ -72,7 +72,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: BlocConsumer<GameBloc, GameBlocState>(
         listener: (context, state) async {
 
-          log("listener GameBloc: $state");
+          log("PuzzlePage> listener GameBloc: $state");
           switch (state) {
 
             case ResetPendingState s:
@@ -115,7 +115,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         },
         builder: (context, state) {
 
-          log("builder GameBloc: $state");
+          log("PuzzlePage> builder GameBloc: $state");
           if (state is GameState) {
             return _buildLayout(context, state);
           }
@@ -616,7 +616,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   backgroundColor: colorScheme.backgroundInputButton,
                   side: BorderSide(width: 2, color: colorScheme.textInputPanel),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  alignment: Alignment.bottomCenter,
                 ).copyWith(
                   overlayColor: StateDependentColor(colorScheme.textInputPanel),
                 ),

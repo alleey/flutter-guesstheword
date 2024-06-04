@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,8 +63,8 @@ class _HomePageState extends State<HomePage> {
 
             listener: (BuildContext context, state) async {
 
+              log("HomePage> listener SettingsBloc: $state");
               // Hack neded on Android TV for autofocus effects
-              await setTraditionalFocusHighlightStrategy();
               switch(state) {
                 case final SettingsReadBlocState s:
                   if (s.name == KnownSettingsNames.settingTheme) {
@@ -70,15 +72,19 @@ class _HomePageState extends State<HomePage> {
                       selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
                     });
                   }
-                  gameBloc.add(InitializeGameEvent());
+
+                  if (!ready) {
+                    await setTraditionalFocusHighlightStrategy();
+                    gameBloc.add(InitializeGameEvent());
+                  }
                   break;
               }
-
             },
             child: BlocListener<GameBloc, GameBlocState>(
 
               listener: (BuildContext context, state) async {
 
+                log("HomePage> listener GameBloc: $state");
                 switch(state) {
                   case final InitializeGameCompleteState _:
                   setState(() {
@@ -110,8 +116,8 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.description_outlined),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
-              onPressed: () {
-                AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+              onPressed: () async {
+                await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -127,8 +133,8 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.bar_chart),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
-              onPressed: () {
-                AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
+              onPressed: () async {
+                await AlertsService().highScoresDialog(context, GameColorSchemes.fromName(selectedTheme));
               },
             ),
           ),
@@ -142,8 +148,8 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.refresh),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
-              onPressed: () {
-                AlertsService().resetGameDialog(
+              onPressed: () async {
+                await AlertsService().resetGameDialog(
                   context,
                   GameColorSchemes.fromName(selectedTheme),
                   onAccept: () {
@@ -163,8 +169,8 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.palette_outlined),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
-              onPressed: () {
-                AlertsService().colorSchemePicker(
+              onPressed: () async {
+                await AlertsService().colorSchemePicker(
                   context,
                   selectedTheme: selectedTheme,
                   onSelect: (newTheme) {
