@@ -12,7 +12,7 @@ class DialogLayoutConstants
     large: const Size(0.6, 0.6),
   );
 
-  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 25, vertical: 25);
+  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 10, vertical: 10);
   static const EdgeInsets insetPadding = EdgeInsets.symmetric(horizontal: 15, vertical: 20);
 
   static final layout = <String, ResponsiveValue<dynamic>>{

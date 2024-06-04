@@ -212,95 +212,113 @@ class AlertsService {
         final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
+        return SingleChildScrollView(
+          child: Column(
+            children: [
 
-            Align(
-              alignment: Alignment.center,
-              child: Semantics(
-                label: "Game version is ${globalDataService.version}",
+              Align(
+                alignment: Alignment.center,
+                child: Semantics(
+                  label: "Game version is ${globalDataService.version}",
+                  container: true,
+                  excludeSemantics: true,
+                  child: Text.rich(
+                    textAlign: TextAlign.center,
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: globalDataService.version,
+                          style: TextStyle(
+                            color: scheme.backgroundTopPanel,
+                            fontSize: bodyFontSize,
+                          )
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              Semantics(
                 container: true,
-                excludeSemantics: true,
                 child: Text.rich(
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.justify,
                   TextSpan(
+                    style: TextStyle(
+                      color: scheme.textPuzzlePanel,
+                      fontSize: bodyFontSize,
+                    ),
+                    children: const [
+                      TextSpan(
+                        text: "Start by finding the most likely letters. When available a hint token can reveral a random letter.",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              Semantics(
+                container: true,
+                child: Text.rich(
+                  textAlign: TextAlign.justify,
+                  TextSpan(
+                    style: TextStyle(
+                      color: scheme.textPuzzlePanel,
+                      fontSize: bodyFontSize,
+                    ),
                     children: [
                       TextSpan(
-                        text: globalDataService.version,
+                        semanticsLabel: "Point 1.",
+                        text: '\u{273D}  ',
+                        style: TextStyle(
+                          color: scheme.backgroundPuzzleSymbolsFlipped,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: "Score is calculated as the number of lives multiplied by the length of the puzzle.",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              Semantics(
+                container: true,
+                child: Text.rich(
+                  textAlign: TextAlign.justify,
+                  TextSpan(
+                    style: TextStyle(
+                      color: scheme.textPuzzlePanel,
+                      fontSize: bodyFontSize,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '\u{2726}  ',
+                        semanticsLabel: "Point 2.",
+                        style: TextStyle(
+                          color: scheme.backgroundPuzzleSymbolsFlipped,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                        )
+                      ),
+                      const TextSpan(
+                        text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
+                      ),
+                      TextSpan(
+                        text: "Hint tokens are carried forward even if you reset the game.",
                         style: TextStyle(
                           color: scheme.backgroundTopPanel,
-                          fontSize: bodyFontSize,
+                          fontWeight: FontWeight.bold,
                         )
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-
-            Semantics(
-              container: true,
-              child: Text.rich(
-                textAlign: TextAlign.justify,
-                TextSpan(
-                  style: TextStyle(
-                    color: scheme.textPuzzlePanel,
-                    fontSize: bodyFontSize,
-                  ),
-                  children: [
-                    TextSpan(
-                      semanticsLabel: "Point 1.",
-                      text: '\u{273D}  ',
-                      style: TextStyle(
-                        color: scheme.backgroundPuzzleSymbolsFlipped,
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: "Score is calculated as the number of lives multiplied by the length of the puzzle.",
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            Semantics(
-              container: true,
-              child: Text.rich(
-                textAlign: TextAlign.justify,
-                TextSpan(
-                  style: TextStyle(
-                    color: scheme.textPuzzlePanel,
-                    fontSize: bodyFontSize,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: '\u{2726}  ',
-                      semanticsLabel: "Point 2.",
-                      style: TextStyle(
-                        color: scheme.backgroundPuzzleSymbolsFlipped,
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                      )
-                    ),
-                    const TextSpan(
-                      text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
-                    ),
-                    TextSpan(
-                      text: "Hint tokens are carried forward even if you reset the game.",
-                      style: TextStyle(
-                        color: scheme.backgroundTopPanel,
-                        fontWeight: FontWeight.bold,
-                      )
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ]);
+          ]),
+        );
       },
     );
 
