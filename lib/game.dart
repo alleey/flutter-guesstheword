@@ -21,6 +21,7 @@ import 'widgets/common/blink_effect.dart';
 import 'widgets/common/flip_card.dart';
 import 'widgets/common/party_popper_effect.dart';
 import 'widgets/common/responsive_layout.dart';
+import 'widgets/loading_indicator.dart';
 import 'widgets/symbol_pad.dart';
 
 
@@ -35,11 +36,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   final appDataService = AppDataService(dataService: globalDataService);
   final audioService = AudioService();
-  late GameColorScheme colorScheme;
-  late VoidCallback? dismissActivePopup;
 
-  GameBloc get gameBloc => BlocProvider.of<GameBloc>(context);
-  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
+  late GameColorScheme colorScheme;
+  GameState? gameState;
+  VoidCallback? dismissActivePopup;
 
   @override
   void initState() {
@@ -50,79 +50,92 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   void startPuzzle() {
     //bloc.add(ResetGameEvent());
-    gameBloc.add(StartPuzzleEvent());
+    context.gameBloc.add(StartPuzzleEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SettingsBloc, SettingsBlocState>(
-      listener: (BuildContext context, state) {
+    return MultiBlocListener(
+      listeners: [
 
-        log("PuzzlePage> listener SettingsBlocState: $state");
-        switch(state) {
-          case final SettingsReadBlocState s:
-          if (s.name == KnownSettingsNames.settingTheme) {
-            setState(() {
-              colorScheme = GameColorSchemes.fromName(s.value);
-            });
+        BlocListener<SettingsBloc, SettingsBlocState>(
+          listener: (BuildContext context, state) {
+
+            log("PuzzlePage> listener SettingsBlocState: $state");
+            switch(state) {
+              case final SettingsReadBlocState s:
+              if (s.name == KnownSettingsNames.settingTheme) {
+                setState(() {
+                  colorScheme = GameColorSchemes.fromName(s.value);
+                });
+              }
+              break;
+            }
           }
-          break;
-        }
-      },
-      child: BlocConsumer<GameBloc, GameBlocState>(
-        listener: (context, state) async {
+        ),
 
-          log("PuzzlePage> listener GameBloc: $state");
-          switch (state) {
+        BlocListener<GameBloc, GameBlocState>(
+          listener: (context, state) async {
 
-            case ResetPendingState s:
-              dismissActivePopup = AlertsService().popup(context, colorScheme, message: s.message);
-              break;
+            log("PuzzlePage> listener GameBloc: $state");
+            switch (state) {
 
-            case ResetCompleteState _:
-              dismissActivePopup?.call();
-              startPuzzle();
-              break;
+              case ResetPendingState s:
+                dismissActivePopup = AlertsService().popup(context, colorScheme, message: s.message);
+                break;
 
-            case PuzzleStartState _:
-              audioService.play("audio/start.mp3");
-              if (Constants.enableInitialReveal) {
-                gameBloc.add(RequestHintEvent());
-              }
-              break;
+              case ResetCompleteState _:
+                dismissActivePopup?.call();
+                startPuzzle();
+                break;
 
-            case PuzzleCompleteState s:
-              if (s.isWin) {
-                audioService.play("audio/win.mp3");
-              }
-              break;
-
-            case InputMatchState s:
-              audioService.play("audio/match.mp3");
-              break;
-
-            case InputMismatchState _:
-              audioService.play("audio/mismatch.mp3");
-              break;
-
-            case NoMorePuzzleState _:
-              AlertsService().gameNeedsResetDialog(context, colorScheme, callback: () {
-                  gameBloc.add(ResetGameEvent());
+              case PuzzleStartState _:
+                audioService.play("audio/start.mp3");
+                if (Constants.enableInitialReveal) {
+                  context.gameBloc.add(RequestHintEvent());
                 }
-              );
-              break;
-          }
-        },
-        builder: (context, state) {
+                break;
 
-          log("PuzzlePage> builder GameBloc: $state");
-          if (state is GameState) {
-            return _buildLayout(context, state);
+              case PuzzleCompleteState s:
+                if (s.isWin) {
+                  audioService.play("audio/win.mp3");
+                }
+                break;
+
+              case InputMatchState s:
+                audioService.play("audio/match.mp3");
+                break;
+
+              case InputMismatchState _:
+                audioService.play("audio/mismatch.mp3");
+                break;
+
+              case NoMorePuzzleState _:
+                AlertsService().gameNeedsResetDialog(context,
+                  colorScheme,
+                  callback: () => context.gameBloc.add(ResetGameEvent())
+                );
+                break;
+              case GameState state:
+                setState(() {
+                  gameState = state;
+                });
+                break;
+
+            }
+          }
+        )
+      ],
+      child: Builder(
+        builder: (context) {
+
+          if (gameState == null) {
+            return LoadingIndicator(colorScheme: colorScheme, message: "almost there ...");
           }
 
-          return const Center(child: CircularProgressIndicator());
+          return _buildLayout(context, gameState!);
         }
-      ),
+      )
     );
   }
 
@@ -196,7 +209,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildTopPanel(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final hintWidthPct = layout.get<double>(AppLayoutConstants.hintWidthPctKey);
 
     return Stack(
@@ -231,7 +244,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildScorePanel(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
     return Semantics(
@@ -301,7 +314,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
     return Row(
@@ -396,7 +409,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildHintsOption(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return BlinkEffect (
@@ -416,7 +429,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               overlayColor: StateDependentColor(colorScheme.textHintButton),
             ),
             onPressed: () {
-              gameBloc.add(UseHintTokenEvent());
+              context.gameBloc.add(UseHintTokenEvent());
             },
             child: Padding(
               padding: const EdgeInsets.only(top: 5),
@@ -436,7 +449,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildPuzzlePanel(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
 
@@ -502,7 +515,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildInputPanel(BuildContext context, GameState state) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
@@ -554,7 +567,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 runSpacing: 3,
                 buttonSize: buttonSize,
                 onSelect: (c, flipped) {
-                  if (!flipped) gameBloc.add(UserInputEvent(c));
+                  if (!flipped) context.gameBloc.add(UserInputEvent(c));
                 },
                 symbolDecorator: (widget, index, isFront, frontLabel, backLabel) {
 

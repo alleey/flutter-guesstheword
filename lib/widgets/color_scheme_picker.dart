@@ -36,7 +36,7 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
   @override
   Widget build(BuildContext context) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final itemSize = layout.get<Size>(AppLayoutConstants.colorSchemePickerItemSizeKey);
 
     return Wrap(

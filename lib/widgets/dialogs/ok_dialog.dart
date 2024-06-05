@@ -114,7 +114,7 @@ class _OkDialogState extends State<OkDialog> {
 
   Widget _buildContents(BuildContext context, GameColorScheme scheme) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 

@@ -1,4 +1,5 @@
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../services/app_data_service.dart';
@@ -52,3 +53,8 @@ class SettingsBloc extends Bloc<SettingsBlocEvent, SettingsBlocState>
     });
   }
 }
+
+extension GameBlocContextExtensions on BuildContext {
+  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(this);
+}
+
