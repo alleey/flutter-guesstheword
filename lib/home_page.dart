@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   late bool gameInitialized = false;
   late bool androidTvFixApplied = false;
   late bool dialogShown = false;
-  late String selectedTheme = "default";
+  late String selectedTheme = GameColorSchemes.defaultSchemeName;
 
   @override
   void initState() {

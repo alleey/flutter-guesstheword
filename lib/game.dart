@@ -18,6 +18,7 @@ import 'services/audio_service.dart';
 import 'services/data_service.dart';
 import 'widgets/common/alternating_color_squares.dart';
 import 'widgets/common/blink_effect.dart';
+import 'widgets/common/bump_effect.dart';
 import 'widgets/common/flip_card.dart';
 import 'widgets/common/party_popper_effect.dart';
 import 'widgets/common/responsive_layout.dart';
@@ -44,12 +45,9 @@ class _PuzzlePageState extends State<PuzzlePage> {
   @override
   void initState() {
     super.initState();
-    colorScheme = GameColorSchemes.fromName(appDataService.getSetting(KnownSettingsNames.settingTheme) ?? "default");
-    startPuzzle();
-  }
-
-  void startPuzzle() {
-    //bloc.add(ResetGameEvent());
+    colorScheme = GameColorSchemes.fromName(
+      appDataService.getSetting(KnownSettingsNames.settingTheme) ?? GameColorSchemes.defaultSchemeName
+    );
     context.gameBloc.add(StartPuzzleEvent());
   }
 
@@ -86,7 +84,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
               case ResetCompleteState _:
                 dismissActivePopup?.call();
-                startPuzzle();
+                context.gameBloc.add(StartPuzzleEvent());
                 break;
 
               case PuzzleStartState _:
@@ -99,6 +97,8 @@ class _PuzzlePageState extends State<PuzzlePage> {
               case PuzzleCompleteState s:
                 if (s.isWin) {
                   audioService.play("audio/win.mp3");
+                } else {
+                  audioService.play("audio/lost.mp3");
                 }
                 break;
 
@@ -107,7 +107,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 break;
 
               case InputMismatchState _:
-                audioService.play("audio/mismatch.mp3");
+                audioService.play("audio/fail.mp3");
                 break;
 
               case NoMorePuzzleState _:
@@ -220,6 +220,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildScorePanel(context, state),
+            const SizedBox(height: 5),
             FlipCard(
               showFront: !state.isGameOver,
               frontCard: _buildStatusPanel(context, state),
@@ -302,11 +303,17 @@ class _PuzzlePageState extends State<PuzzlePage> {
             => FlipCard(
                 showFront: (e > (state.errorCount - 1)),
                 frontCard: Icon(Icons.diamond, size: 32, color: colorScheme.colorHeart),
-                backCard: Transform.rotate(
-                  angle: math.pi + math.pi/2,
-                  child: Icon(Icons.diamond_outlined, size: 32, color: colorScheme.colorHeartBroken.withOpacity(0.75))
+                backCard: BumpEffect(
+                  autostart: (e == (state.errorCount - 1) && state.lastInputError),
+                  particleColor: colorScheme.colorHeart,
+                  builder: (context, fire) => SizedBox(
+                    width: 32, height: 32,
+                    child: Icon(Icons.diamond_outlined, size: 24, color: colorScheme.colorHeartBroken.withOpacity(0.75))
+                  ),
                 ),
+                transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
               )),
+
         ],
       ),
     );
@@ -386,12 +393,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 backgroundColor: colorScheme.backgroundTopButton,
                 side: BorderSide(width: 2, color: colorScheme.textTopPanel),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
               ).copyWith(
                 overlayColor: StateDependentColor(colorScheme.textTopButton),
               ),
               onPressed: () {
-                startPuzzle();
+                context.gameBloc.add(StartPuzzleEvent());
               },
               child: Text(
                 "Go Next",
@@ -629,6 +636,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   backgroundColor: colorScheme.backgroundInputButton,
                   side: BorderSide(width: 2, color: colorScheme.textInputPanel),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 ).copyWith(
                   overlayColor: StateDependentColor(colorScheme.textInputPanel),
                 ),
