@@ -13,7 +13,7 @@ import 'game.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'services/data_service.dart';
-import 'widgets/symbol_button.dart';
+import 'widgets/loading_indicator.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -27,17 +27,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  late String selectedTheme;
-  late bool ready = false;
-
-  GameBloc get gameBloc => BlocProvider.of<GameBloc>(context);
-  SettingsBloc get settingsBloc => BlocProvider.of<SettingsBloc>(context);
+  late bool settingInitialized = false;
+  late bool gameInitialized = false;
+  late bool androidTvFixApplied = false;
+  late bool dialogShown = false;
+  late String selectedTheme = GameColorSchemes.defaultSchemeName;
 
   @override
   void initState() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme));
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    context.settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme));
+    context.gameBloc.add(InitializeGameEvent());
   }
 
   @override
@@ -51,54 +52,82 @@ class _HomePageState extends State<HomePage> {
 
     return FocusTraversalGroup(
       policy: const CustomOrderedTraversalPolicy(),
-      child: Scaffold(
-          backgroundColor: SymbolButton.defaultColorBackground,
-
-          appBar: !ready ? null : PreferredSize(
-            preferredSize: const Size.fromHeight(40.0),
-            child: _buildAppBar(context),
-          ),
-
-          body: BlocListener<SettingsBloc, SettingsBlocState>(
-
-            listener: (BuildContext context, state) async {
-
-              log("HomePage> listener SettingsBloc: $state");
-              // Hack neded on Android TV for autofocus effects
-              switch(state) {
-                case final SettingsReadBlocState s:
-                  if (s.name == KnownSettingsNames.settingTheme) {
-                    setState(() {
-                      selectedTheme = s.value ?? GameColorSchemes.defaultSchemeName;
-                    });
-                  }
-
-                  if (!ready) {
-                    await setTraditionalFocusHighlightStrategy();
-                    gameBloc.add(InitializeGameEvent());
-                  }
-                  break;
-              }
-            },
-            child: BlocListener<GameBloc, GameBlocState>(
-
+      child: MultiBlocListener(
+          listeners: [
+            BlocListener<SettingsBloc, SettingsBlocState>(
               listener: (BuildContext context, state) async {
 
-                log("HomePage> listener GameBloc: $state");
-                switch(state) {
-                  case final InitializeGameCompleteState _:
-                  setState(() {
-                    ready = true;
-                    showFirstUsagePrompt(context);
-                  });
-                  break;
+                log("HomePage> listener SettingsBloc: $state");
+                if(state is SettingsReadBlocState) {
+                  if (state.name == KnownSettingsNames.settingTheme) {
+                    setState(() {
+                      settingInitialized = true;
+                      selectedTheme = state.value ?? GameColorSchemes.defaultSchemeName;
+                    });
+                  }
                 }
-              },
-              child: ready ? const PuzzlePage() : const Center(child: CircularProgressIndicator()),
-          )
-        ),
+              }
+            ),
+            BlocListener<GameBloc, GameBlocState>(
+              listener: (BuildContext context, state) async {
+                log("HomePage> listener GameBloc: $state");
+                if (state is InitializeGameCompleteState) {
+                  setState(() {
+                    gameInitialized = true;
+                  });
+                }
+              }
+            ),
+          ],
+          child: Builder(
+            builder: (context) {
+
+              final colorScheme = GameColorSchemes.fromName(selectedTheme);
+
+              return Scaffold(
+                backgroundColor: colorScheme.backgroundPuzzlePanel,
+                appBar: !dialogShown ? null : PreferredSize(
+                  preferredSize: const Size.fromHeight(40.0),
+                  child: _buildAppBar(context),
+                ),
+
+                body: _buildLayout(colorScheme),
+              );
+
+            }
+          ),
       ),
     );
+  }
+
+  Widget _buildLayout(GameColorScheme colorScheme) {
+
+    if (!(settingInitialized && gameInitialized)) {
+      return LoadingIndicator(colorScheme: colorScheme);
+    }
+
+    if (!dialogShown) {
+      WidgetsBinding.instance.addPostFrameCallback((d) async {
+        if (!androidTvFixApplied) {
+          // Hack neded on Android TV for autofocus effects
+          await setTraditionalFocusHighlightStrategy();
+          androidTvFixApplied = true;
+        }
+        await showFirstUsagePrompt();
+        setState(() {
+          dialogShown = true;
+        });
+      });
+    }
+
+    if (!dialogShown) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: LoadingIndicator(colorScheme: colorScheme),
+      );
+    }
+
+    return const PuzzlePage();
   }
 
   AppBar _buildAppBar(BuildContext context) {
@@ -153,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   GameColorSchemes.fromName(selectedTheme),
                   onAccept: () {
-                    BlocProvider.of<GameBloc>(context).add(ResetGameEvent());
+                    context.gameBloc.add(ResetGameEvent());
                   }
                 );
               },
@@ -174,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   selectedTheme: selectedTheme,
                   onSelect: (newTheme) {
-                    settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingTheme, value: newTheme, reload: true));
+                    context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingTheme, value: newTheme, reload: true));
                   }
                 );
               },
@@ -185,13 +214,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future showFirstUsagePrompt(BuildContext context) async {
+  Future showFirstUsagePrompt() async {
 
     final appDataService = AppDataService(dataService: globalDataService);
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
-      await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+      if (mounted) {
+        await AlertsService().helpDialog(context, GameColorSchemes.fromName(selectedTheme));
+      }
     }
   }
 }

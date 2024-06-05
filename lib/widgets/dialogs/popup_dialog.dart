@@ -107,7 +107,7 @@ class _PopupDialogState extends State<PopupDialog> {
 
   Widget _buildContents(BuildContext context, GameColorScheme scheme) {
 
-    final layout = ResponsiveLayoutProvider.layout(context);
+    final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
     return Column(

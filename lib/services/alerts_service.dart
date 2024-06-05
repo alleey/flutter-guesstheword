@@ -24,7 +24,7 @@ class AlertsService {
     VoidCallback? onAccept,
     VoidCallback? onReject,
   }) {
-    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     return showGeneralDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
@@ -59,7 +59,7 @@ class AlertsService {
     String okLabel = "Continue",
     VoidCallback? callback
   }) {
-    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     return showGeneralDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
@@ -89,7 +89,7 @@ class AlertsService {
     String? title,
     required ContentBuilder builder,
   }) {
-    final screenCoverPct = ResponsiveLayoutProvider.layout(context).get<Size>(DialogLayoutConstants.screenCoverPctKey);
+    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     showGeneralDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),
@@ -214,6 +214,7 @@ class AlertsService {
 
         return SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
               Align(
@@ -227,7 +228,7 @@ class AlertsService {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: globalDataService.version,
+                          text: "Version ${globalDataService.version}",
                           style: TextStyle(
                             color: scheme.backgroundTopPanel,
                             fontSize: bodyFontSize,
@@ -242,7 +243,7 @@ class AlertsService {
               Semantics(
                 container: true,
                 child: Text.rich(
-                  textAlign: TextAlign.justify,
+                  textAlign: TextAlign.left,
                   TextSpan(
                     style: TextStyle(
                       color: scheme.textPuzzlePanel,
@@ -250,7 +251,7 @@ class AlertsService {
                     ),
                     children: const [
                       TextSpan(
-                        text: "Start by finding the most likely letters. When available a hint token can reveral a random letter.",
+                        text: "Find all letters of the word to win the game. Start with the most likely letters. When available, using a hint token can reveral a random letter.",
                       ),
                     ],
                   ),
@@ -260,7 +261,7 @@ class AlertsService {
               Semantics(
                 container: true,
                 child: Text.rich(
-                  textAlign: TextAlign.justify,
+                  textAlign: TextAlign.left,
                   TextSpan(
                     style: TextStyle(
                       color: scheme.textPuzzlePanel,
@@ -268,8 +269,8 @@ class AlertsService {
                     ),
                     children: [
                       TextSpan(
-                        semanticsLabel: "Point 1.",
-                        text: '\u{273D}  ',
+                        semanticsLabel: "Rule 1.",
+                        text: '\u{273D}',
                         style: TextStyle(
                           color: scheme.backgroundPuzzleSymbolsFlipped,
                           fontSize: titleFontSize,
@@ -287,7 +288,7 @@ class AlertsService {
               Semantics(
                 container: true,
                 child: Text.rich(
-                  textAlign: TextAlign.justify,
+                  textAlign: TextAlign.left,
                   TextSpan(
                     style: TextStyle(
                       color: scheme.textPuzzlePanel,
@@ -295,8 +296,8 @@ class AlertsService {
                     ),
                     children: [
                       TextSpan(
-                        text: '\u{2726}  ',
-                        semanticsLabel: "Point 2.",
+                        text: '\u{2726}',
+                        semanticsLabel: "Rule 2.",
                         style: TextStyle(
                           color: scheme.backgroundPuzzleSymbolsFlipped,
                           fontSize: titleFontSize,

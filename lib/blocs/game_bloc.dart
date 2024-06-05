@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:bit_array/bit_array.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/constants.dart';
@@ -376,4 +377,8 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       ));
     });
   }
+}
+
+extension GameBlocContextExtensions on BuildContext {
+  GameBloc get gameBloc => BlocProvider.of<GameBloc>(this);
 }

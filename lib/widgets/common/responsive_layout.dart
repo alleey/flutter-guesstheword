@@ -136,3 +136,7 @@ class ResponsiveLayoutProvider extends InheritedWidget {
 
 ////////////////////////////
 
+extension ResponsiveLayoutProviderExtensions on BuildContext {
+  ResponsiveLayoutProvider get layoutProvider => ResponsiveLayoutProvider.of(this);
+  ResponsiveLayout get layout => ResponsiveLayoutProvider.layout(this);
+}
