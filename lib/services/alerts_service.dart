@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../blocs/settings_bloc.dart';
 import '../common/app_color_scheme.dart';
 import '../common/constants.dart';
 import '../common/layout_constants.dart';
@@ -13,6 +14,7 @@ import '../widgets/color_scheme_picker.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/dialogs/common.dart';
 import '../widgets/localized_text.dart';
+import 'app_data_service.dart';
 import 'data_service.dart';
 import 'score_service.dart';
 
@@ -83,7 +85,7 @@ class AlertsService {
         ButtonDialogAction(
           context: context,
           schemeNotifier: schemeNotifier,
-          isDefault: false,
+          isDefault: true,
           onAction: (close) {
             close(null);
             onReject?.call();
@@ -222,7 +224,7 @@ class AlertsService {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text.rich(
-              textAlign: TextAlign.justify,
+              textAlign: TextAlign.start,
               TextSpan(
                 children: [
                   TextSpan(
@@ -268,6 +270,7 @@ class AlertsService {
 
         final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+        final dataService = DataService();
 
         return ValueListenableBuilder<AppColorScheme>(
           valueListenable: schemeNotifier,
@@ -280,7 +283,7 @@ class AlertsService {
                   Align(
                     alignment: Alignment.center,
                     child: Semantics(
-                      label: "Game version is ${globalDataService.version}",
+                      label: "Game version is ${dataService.version}",
                       container: true,
                       excludeSemantics: true,
                       child: Text.rich(
@@ -288,7 +291,7 @@ class AlertsService {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: context.localizations.translate("dlg_help_version", placeholders: {"version": globalDataService.version}),
+                              text: context.localizations.translate("dlg_help_version", placeholders: {"version": dataService.version}),
                               style: TextStyle(
                                 color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
                                 fontSize: bodyFontSize,
@@ -387,7 +390,7 @@ class AlertsService {
 
   Future<dynamic> highScoresDialog(BuildContext context, AppColorScheme colorScheme) {
 
-    final scoreService = ScoreService(dataService: globalDataService);
+    final scoreService = ScoreService();
     final scores = scoreService.highScores();
 
     return okDialog(
@@ -405,10 +408,9 @@ class AlertsService {
         ),
       okLabel: context.localizations.translate("dlg_scores_ok"),
       contents: (layout, schemeCahnge) {
-        final titleFontSize =
-            layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-        final bodyFontSize =
-            layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
         return ValueListenableBuilder<AppColorScheme>(
           valueListenable: schemeCahnge,
@@ -439,67 +441,67 @@ class AlertsService {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(children: [
-                      Semantics(
-                        label:
-                            "Below is the list of top scores, games won and lost",
-                        excludeSemantics: true,
-                        container: true,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                context.localizations
-                                    .translate("dlg_scores_score"),
-                                textAlign: TextAlign.start,
-                              ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Semantics(
+                            label: "Below is the list of top scores, games won and lost",
+                            excludeSemantics: true,
+                            container: true,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    context.localizations.translate("dlg_scores_score"),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    context.localizations.translate("dlg_scores_won"),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    context.localizations.translate("dlg_scores_lost"),
+                                    textAlign: TextAlign.end,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              child: Text(
-                                context.localizations
-                                    .translate("dlg_scores_won"),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                context.localizations
-                                    .translate("dlg_scores_lost"),
-                                textAlign: TextAlign.end,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ...scores.mapIndexed((i, e) {
+                            return Semantics(
+                              label:
+                                  "Item ${i + 1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
+                              container: true,
+                              excludeSemantics: true,
+                              child: Row(children: [
+                                Expanded(
+                                  child: Text(
+                                    "${e.value}",
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "${e.wins}",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "${e.losses}",
+                                    textAlign: TextAlign.end,
+                                  ),
+                                ),
+                              ]),
+                            );
+                          }),
+                        ]
                       ),
-                      ...scores.mapIndexed((i, e) {
-                        return Semantics(
-                          label:
-                              "Item ${i + 1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
-                          container: true,
-                          excludeSemantics: true,
-                          child: Row(children: [
-                            Expanded(
-                              child: Text(
-                                "${e.value}",
-                                textAlign: TextAlign.start,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${e.wins}",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${e.losses}",
-                                textAlign: TextAlign.end,
-                              ),
-                            ),
-                          ]),
-                        );
-                      }),
-                    ]),
+                    ),
                   ),
                 ),
         );
@@ -563,7 +565,7 @@ class AlertsService {
                     Semantics(
                       container: true,
                       child: Text.rich(
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         TextSpan(
                           style: TextStyle(
                             color: scheme.textPuzzlePanel,
@@ -577,55 +579,90 @@ class AlertsService {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
-                    const SizedBox(height: 10),
-                    Semantics(
-                      container: true,
-                      child: Text.rich(
-                        textAlign: TextAlign.center,
-                        TextSpan(
-                          style: TextStyle(
-                            color: scheme.textPuzzlePanel,
-                            fontSize: bodyFontSize,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: context.localizations.translate("dlg_settings_chooselanguage"),
+                    const SizedBox(height: 2),
+                    ColorSchemePicker(
+                      alignment: WrapAlignment.start,
+                      selectedTheme: selectedTheme, onSelect: onSelect
+                    ),
+
+
+                    const SizedBox(height: 2),
+                  if (Constants.locales.length > 1)
+                    ...[
+                      Semantics(
+                        container: true,
+                        child: Text.rich(
+                          textAlign: TextAlign.start,
+                          TextSpan(
+                            style: TextStyle(
+                              color: scheme.textPuzzlePanel,
+                              fontSize: bodyFontSize,
                             ),
-                          ],
+                            children: [
+                              TextSpan(
+                                text: context.localizations.translate("dlg_settings_chooselanguage"),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: SegmentedButton(
-                        style: SegmentedButton.styleFrom(
-                          foregroundColor: scheme.textPuzzlePanel,
-                          backgroundColor: scheme.backgroundPuzzlePanel,
-                          selectedForegroundColor: scheme.backgroundPuzzlePanel,
-                          selectedBackgroundColor: scheme.textPuzzlePanel,
+                      const SizedBox(height: 2),
+                      DropdownButton<String>(
+                        isDense: true,
+                        style: TextStyle(
+                          color: scheme.textPuzzlePanel,
+                          fontSize: bodyFontSize,
                         ),
-                        segments: Constants.locales.map((locale) {
-                          return ButtonSegment<String>(
-                            label: Text(
+                        dropdownColor: scheme.backgroundPuzzlePanel,
+                        value: localProvider.value.languageCode,
+                        onChanged: (selected) {
+                          context.changeLanguage(selected!);
+                          context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected));
+                        },
+                        items: Constants.locales.map<DropdownMenuItem<String>>((locale) {
+                          return DropdownMenuItem<String>(
+                            value: locale,
+                            child: Text(
                               context.localizations.translate("app_lang_$locale"),
                               style: TextStyle(
                                 fontSize: bodyFontSize,
                               ),
                             ),
-                            value: locale
                           );
-
                         }).toList(),
-                        selected: <String>{localProvider.value.languageCode},
-                        onSelectionChanged: (selected) {
-                          log("changing language $selected");
-                          context.changeLanguage(selected.first);
-                        },
                       ),
-                    )
+                    ]
+
+                    // Directionality(
+                    //   textDirection: TextDirection.ltr,
+                    //   child: SegmentedButton(
+                    //     style: SegmentedButton.styleFrom(
+                    //       foregroundColor: scheme.textPuzzlePanel,
+                    //       backgroundColor: scheme.backgroundPuzzlePanel,
+                    //       selectedForegroundColor: scheme.backgroundPuzzlePanel,
+                    //       selectedBackgroundColor: scheme.textPuzzlePanel,
+                    //     ),
+                    //     showSelectedIcon: false,
+                    //     segments: Constants.locales.map((locale) {
+                    //       return ButtonSegment<String>(
+                    //         label: Text(
+                    //           context.localizations.translate("app_lang_$locale"),
+                    //           style: TextStyle(
+                    //             fontSize: bodyFontSize,
+                    //           ),
+                    //         ),
+                    //         value: locale
+                    //       );
+
+                    //     }).toList(),
+                    //     selected: <String>{localProvider.value.languageCode},
+                    //     onSelectionChanged: (selected) {
+
+                    //       context.changeLanguage(selected.first);
+                    //       context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected.first));
+                    //     },
+                    //   ),
+                    // )
                   ],
                 ),
               ),

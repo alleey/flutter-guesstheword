@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:guess_the_word/services/app_data_service.dart';
 import 'package:provider/provider.dart';
 
 import 'blocs/game_bloc.dart';
@@ -20,12 +21,15 @@ import 'widgets/common/responsive_layout.dart';
 
 Future<void> main() async {
 
-  await globalDataService.initialize();
-  //await globalDataService.resetData();
   WidgetsFlutterBinding.ensureInitialized();
+
+  await DataService().initialize();
+  //await globalDataService.resetData();
+
+  final locale = AppDataService().getSetting(KnownSettingsNames.settingLocale, "en");
   runApp(
     ChangeNotifierProvider(
-      create: (context) => LocaleProvider(const Locale('en')),
+      create: (context) => LocaleProvider(Locale(locale)),
       child: const MyApp(),
     ),
   );

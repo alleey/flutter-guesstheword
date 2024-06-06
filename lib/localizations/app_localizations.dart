@@ -19,22 +19,35 @@ class AppLocalizations {
 
   Future<bool> load() async {
 
-    final jsonString = await rootBundle.loadString(
-      'assets/l10n/app_${locale.languageCode}.arb',
-    );
-
-    final jsonMap = json.decode(jsonString);
-
     _localizedStrings.clear();
-    jsonMap.forEach((key, value) {
-      if (!key.toString().startsWith("@")) {
-        _localizedStrings[key.toString()] = value?.toString() ?? '';
+    await _loadSpecific("en");
+
+    if (locale.languageCode != "en") {
+      try {
+        await _loadSpecific(locale.languageCode);
       }
-      //log("locale $key -> $value");
-    });
+      catch (_) {}
+    }
 
     return true;
   }
+
+Future<void> _loadSpecific(String languageCode) async {
+  try {
+    final localeJsonString = await rootBundle.loadString('assets/l10n/app_$languageCode.arb');
+    if (localeJsonString.isNotEmpty) {
+      final localeJsonMap = json.decode(localeJsonString);
+      localeJsonMap.forEach((key, value) {
+        if (!key.toString().startsWith("@")) {
+          _localizedStrings[key.toString()] = value?.toString() ?? '';
+        }
+      });
+    }
+  } catch (e) {
+    log('Failed to load ARB file for language code: $languageCode, error: $e');
+    rethrow;
+  }
+}
 
   String translate(String key, {Map<String, dynamic>? placeholders}) {
     var translatedString = _localizedStrings[key] ?? '';

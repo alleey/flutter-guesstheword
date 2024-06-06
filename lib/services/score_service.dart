@@ -5,19 +5,17 @@ import '../models/score.dart';
 import 'data_service.dart';
 
 class ScoreService {
-  final DataService dataService;
+  final _dataService = DataService();
 
-  ScoreService({required this.dataService});
+  int get instanceId => _dataService.instanceId;
 
-  Future resetData() async {
+  Future resetData(int newInstanceId) async {
     final current = get();
-    await put(Score(instance: _randomId, hintTokens: current.hintTokens));
+    await put(Score(instance: newInstanceId, hintTokens: current.hintTokens));
   }
 
-  int get _randomId => DateTime.now().microsecondsSinceEpoch;
-
-  Score get() => dataService.scoreBox.get("current", defaultValue: Score(instance: _randomId))!;
-  Score highest(int index) => dataService.scoreBox.get("high.$index", defaultValue: Score(instance: 0))!;
+  Score get() => _dataService.scoreBox.get("current", defaultValue: Score(instance: instanceId))!;
+  Score highest(int index) => _dataService.scoreBox.get("high.$index", defaultValue: Score(instance: 0))!;
 
   List<Score> highScores() {
     return Iterable<int>.generate(Constants.maxScoreHistory)
@@ -30,7 +28,7 @@ class ScoreService {
 
     log("save score: $value");
 
-    await dataService.scoreBox.put("current", value);
+    await _dataService.scoreBox.put("current", value);
 
     var highs = highScores();
     // Remove this score instance if present (achieves update effect)
@@ -40,8 +38,10 @@ class ScoreService {
 
     int index = 0;
     for(final element in highs.take(Constants.maxScoreHistory)) {
-      await dataService.scoreBox.put("high.$index", element);
+      await _dataService.scoreBox.put("high.$index", element);
       index++;
     }
+
+    await _dataService.scoreBox.flush();
   }
 }

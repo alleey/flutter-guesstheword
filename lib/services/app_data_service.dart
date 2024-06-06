@@ -4,48 +4,47 @@ class KnownSettingsNames
 {
   static const String firstUse = "firstUse";
   static const String settingTheme = "theme";
+  static const String settingLocale = "locale";
 }
 
 class AppDataService {
-  final DataService dataService;
+  final _dataService = DataService();
 
-  AppDataService({required this.dataService});
+  AppDataService();
 
-  Future resetData() async {
-    await dataService.appDataBox.clear();
+  int get instanceId => _dataService.instanceId;
+
+  Future<int> resetData() async {
+    await _dataService.appDataBox.clear();
+    return await _dataService.ensureInstanceId();
   }
 
   bool? getFlag(String key) {
-    final flags = getObject("flags");
-    if (!flags.containsKey(key)) {
-      return null;
-    }
-    return flags[key];
+    return get<bool?>("flags.$key", null);
   }
 
   Future putFlag(String key, bool value) async {
-    final flags = getObject("flags");
-    flags[key] = value;
-    await dataService.appDataBox.put("flags", flags);
+    await put("flags.$key", value);
   }
 
-  String? getSetting(String key) {
-    final flags = getObject("strings");
-    if (!flags.containsKey(key)) {
-      return null;
+  T getSetting<T>(String key, T defaultValue) {
+    return get<T>("settings.$key", defaultValue);
+  }
+
+  Future putSetting<T>(String key, T value) async {
+    await put("settings.$key", value);
+  }
+
+  T get<T>(String key, T defaultValue) {
+    final value = _dataService.appDataBox.get(key);
+    if (value == null) {
+      return defaultValue;
     }
-    return flags[key];
+    return value as T;
   }
 
-  Future putSetting(String key, String value) async {
-    final flags = getObject("strings");
-    flags[key] = value;
-    await dataService.appDataBox.put("strings", flags);
+  Future put<T>(String key, T value) async {
+    await _dataService.appDataBox.put(key, value);
+    await _dataService.appDataBox.flush();
   }
-
-  Map<dynamic, dynamic> getObject(String key) =>
-    dataService.appDataBox.get(key, defaultValue: {})!;
-
-  Future putObject(String key, Map<dynamic, dynamic> value) async =>
-    await dataService.appDataBox.put(key, value);
 }

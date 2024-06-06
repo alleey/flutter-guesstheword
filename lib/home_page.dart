@@ -231,7 +231,7 @@ class _HomePageState extends State<HomePage> {
 
   Future showFirstUsagePrompt() async {
 
-    final appDataService = AppDataService(dataService: globalDataService);
+    final appDataService = AppDataService();
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);

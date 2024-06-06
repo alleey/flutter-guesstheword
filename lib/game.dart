@@ -7,16 +7,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
+import 'common/app_color_scheme.dart';
 import 'common/constants.dart';
 import 'common/custom_traversal_policy.dart';
-import 'common/app_color_scheme.dart';
 import 'common/layout_constants.dart';
 import 'common/utils.dart';
 import 'localizations/app_localizations.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'services/audio_service.dart';
-import 'services/data_service.dart';
 import 'widgets/common/alternating_color_squares.dart';
 import 'widgets/common/blink_effect.dart';
 import 'widgets/common/bump_effect.dart';
@@ -36,7 +35,7 @@ class PuzzlePage extends StatefulWidget {
 
 class _PuzzlePageState extends State<PuzzlePage> {
 
-  final _appDataService = AppDataService(dataService: globalDataService);
+  final _appDataService = AppDataService();
   final _audioService = AudioService();
   final _errorEffectsDone = BitArray(Constants.maxErrors);
 
@@ -48,7 +47,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   void initState() {
     super.initState();
     _colorScheme = AppColorSchemes.fromName(
-      _appDataService.getSetting(KnownSettingsNames.settingTheme) ?? AppColorSchemes.defaultSchemeName
+      _appDataService.getSetting(KnownSettingsNames.settingTheme, AppColorSchemes.defaultSchemeName)
     );
     context.gameBloc.add(StartPuzzleEvent());
   }
