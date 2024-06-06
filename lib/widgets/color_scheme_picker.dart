@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-import '../common/game_color_scheme.dart';
+import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
 import 'common/responsive_layout.dart';
 
@@ -43,7 +43,7 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
       alignment: WrapAlignment.center,
         runSpacing: 3,
         spacing: 3,
-        children: GameColorSchemes.all.mapIndexed((index, e) =>
+        children: AppColorSchemes.all.mapIndexed((index, e) =>
           Semantics(
             label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
             button: true,

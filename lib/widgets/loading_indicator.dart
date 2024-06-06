@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../common/game_color_scheme.dart';
+import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
 import 'common/responsive_layout.dart';
 
@@ -13,7 +13,7 @@ class LoadingIndicator extends StatelessWidget {
   });
 
   final String message;
-  final GameColorScheme colorScheme;
+  final AppColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {

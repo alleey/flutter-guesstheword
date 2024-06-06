@@ -2,15 +2,15 @@ import 'package:audioplayers/audioplayers.dart';
 
 class AudioService {
 
-  final player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+  final _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
 
   Future<AudioPlayer> play(String fileName) async {
-    await player.release();
-    await player.play(AssetSource(fileName));
-    return player;
+    await _player.release();
+    await _player.play(AssetSource(fileName));
+    return _player;
   }
 
   Future<void> dispose() async {
-    player.dispose();
+    _player.dispose();
   }
 }

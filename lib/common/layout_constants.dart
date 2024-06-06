@@ -12,16 +12,36 @@ class DialogLayoutConstants
     large: const Size(0.6, 0.6),
   );
 
-  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 10, vertical: 10);
-  static const EdgeInsets insetPadding = EdgeInsets.symmetric(horizontal: 15, vertical: 20);
+  static const String paddingKey = "dlg.padding";
+  static final padding = ResponsiveValue.from(
+    small: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    medium: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+    large: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+  );
+
+  static const String insetPaddingKey = "dlg.insetPadding";
+  static final insetPadding = ResponsiveValue.from(
+    small: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    medium: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+    large: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+  );
 
   static final layout = <String, ResponsiveValue<dynamic>>{
     screenCoverPctKey: screenCoverPct,
+    paddingKey: padding,
+    insetPaddingKey: insetPadding,
   };
 }
 
 class AppLayoutConstants
 {
+  static const String appbarHeightKey = "app.appbarHeight";
+  static final appbarHeight = ResponsiveValue<double>.from(
+    small: 34,
+    medium: 46,
+    large: 60,
+  );
+
   static const String titleFontSizeKey = "app.titleFontSize";
   static final titleFontSize = ResponsiveValue<double>.from(
     small: 18,
@@ -69,6 +89,7 @@ class AppLayoutConstants
   );
 
   static final layout = <String, ResponsiveValue<dynamic>>{
+    appbarHeightKey: appbarHeight,
     titleFontSizeKey: titleFontSize,
     bodyFontSizeKey: bodyFontSize,
     symbolButtonSizeKey: symbolButtonSize,

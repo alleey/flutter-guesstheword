@@ -12,7 +12,7 @@ import 'data_service.dart';
 
 class PuzzleService {
   final DataService dataService;
-  final random = math.Random();
+  final _random = math.Random();
 
   PuzzleService({required this.dataService});
 
@@ -26,7 +26,7 @@ class PuzzleService {
       return null;
     }
 
-    final index = random.nextInt(dataService.puzzleBox.length);
+    final index = _random.nextInt(dataService.puzzleBox.length);
     final puzzle = dataService.puzzleBox.getAt(index)!;
     return (index, puzzle);
   }
@@ -61,7 +61,7 @@ class PuzzleService {
       log("$fileName already imported");
       return;
     }
-    log("$fileName imported");
+    //log("$fileName imported");
 
     final data = jsonDecode(await rootBundle.loadString(fileName));
     final String hint = data["hint"];

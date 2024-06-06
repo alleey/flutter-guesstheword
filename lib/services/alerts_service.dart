@@ -1,130 +1,167 @@
+import 'dart:developer';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../common/app_color_scheme.dart';
 import '../common/constants.dart';
-import '../common/game_color_scheme.dart';
 import '../common/layout_constants.dart';
+import '../localizations/app_localizations.dart';
+import '../localizations/locale_provider.dart';
 import '../widgets/color_scheme_picker.dart';
+import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/dialogs/common.dart';
-import '../widgets/dialogs/ok_dialog.dart';
-import '../widgets/dialogs/popup_dialog.dart';
-import '../widgets/dialogs/yesno_dialog.dart';
-import '../widgets/common/responsive_layout.dart';
+import '../widgets/localized_text.dart';
 import 'data_service.dart';
 import 'score_service.dart';
 
+
 class AlertsService {
 
+  Future<T?> actionDialog<T>(
+    BuildContext context, {
+    required ContentBuilder title,
+    required AppColorScheme colorScheme,
+    required ContentBuilder contents,
+    required ActionBuilder actions,
+  }) {
+    return showGeneralDialog<T>(
+        context: context,
+        barrierColor: Colors.black.withOpacity(0.7),
+        barrierDismissible: false,
+        transitionDuration: const Duration(milliseconds: 250),
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          return ScaleTransition(
+            scale: animation,
+            child: child,
+          );
+        },
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return Consumer<LocaleProvider>(
+            builder: (BuildContext context, LocaleProvider value, Widget? child) {
+
+              return AppDialog(
+                colorScheme: colorScheme,
+                title: title,
+                actions: actions,
+                contents: contents,
+              );
+            }
+          );
+        }
+      );
+  }
+
   Future<bool?> yesNoDialog(BuildContext context, {
-    String? title,
-    required ContentBuilder builder,
-    required GameColorScheme colorScheme,
+    required ContentBuilder title,
+    required ContentBuilder contents,
+    required AppColorScheme colorScheme,
     String yesLabel = "Yes",
     String noLabel = "No",
     VoidCallback? onAccept,
     VoidCallback? onReject,
   }) {
-    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
-    return showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      barrierDismissible: false,
-      transitionDuration: const Duration(milliseconds: 250),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation,
-          child: child,
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return YesNoDialog(
-          colorScheme: colorScheme,
-          title: title ?? "",
-          yesLabel: yesLabel,
-          noLabel: noLabel,
-          builder: builder,
-          width: MediaQuery.of(context).size.width * screenCoverPct.width,
-          height: MediaQuery.of(context).size.height * screenCoverPct.height,
-          onAccept: onAccept ?? () {},
-          onReject: onReject,
-        );
-      }
+    return actionDialog(
+      context,
+      title: title,
+      colorScheme: colorScheme,
+      contents: contents,
+      actions: (layout, schemeNotifier) => [
+        ButtonDialogAction(
+          context: context,
+          schemeNotifier: schemeNotifier,
+          isDefault: false,
+          onAction: (close) {
+            close(null);
+            onAccept?.call();
+          },
+          builder: (layout, cs) {
+            return Text(yesLabel, textAlign: TextAlign.center);
+          }
+        ),
+        ButtonDialogAction(
+          context: context,
+          schemeNotifier: schemeNotifier,
+          isDefault: false,
+          onAction: (close) {
+            close(null);
+            onReject?.call();
+          },
+          builder: (layout, cs) {
+            return Text(noLabel, textAlign: TextAlign.center);
+          }
+        )
+      ],
     );
   }
 
   Future<dynamic> okDialog(BuildContext context, {
-    String? title,
-    required ContentBuilder builder,
-    required GameColorScheme colorScheme,
+    required ContentBuilder title,
+    required ContentBuilder contents,
+    required AppColorScheme colorScheme,
     String okLabel = "Continue",
     VoidCallback? callback
   }) {
-    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
-    return showGeneralDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      barrierDismissible: false,
-      transitionDuration: const Duration(milliseconds: 250),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation,
-          child: child,
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return OkDialog(
-          colorScheme: colorScheme,
-          title: title ?? "",
-          okLabel: okLabel,
-          builder: builder,
-          width: MediaQuery.of(context).size.width * screenCoverPct.width,
-          height: MediaQuery.of(context).size.height * screenCoverPct.height,
-          onClose: callback,
-        );
-      },
+    return actionDialog(
+      context,
+      title: title,
+      colorScheme: colorScheme,
+      contents: contents,
+      actions: (layout, schemeNotifier) => [
+        ButtonDialogAction(
+          context: context,
+          schemeNotifier: schemeNotifier,
+          isDefault: true,
+          onAction: (close) {
+            close(null);
+            callback?.call();
+          },
+          builder: (layout, cs) {
+            return Text(okLabel, textAlign: TextAlign.center);
+          }
+        )
+      ],
     );
   }
 
-  VoidCallback popupDialog(BuildContext context, GameColorScheme colorScheme, {
-    String? title,
-    required ContentBuilder builder,
+  VoidCallback popupDialog(BuildContext context, AppColorScheme colorScheme, {
+    required ContentBuilder title,
+    required ContentBuilder contents,
   }) {
-    final screenCoverPct = context.layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
-    showGeneralDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      barrierDismissible: false,
-      transitionDuration: const Duration(milliseconds: 250),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation,
-          child: child,
-        );
-      },
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return PopupDialog(
-          colorScheme: colorScheme,
-          title: title ?? "",
-          builder: builder,
-          width: MediaQuery.of(context).size.width * screenCoverPct.width,
-          height: MediaQuery.of(context).size.height * screenCoverPct.height,
-        );
-      },
+    actionDialog(
+      context,
+      title: title,
+      colorScheme: colorScheme,
+      contents: contents,
+      actions: (_,__) => []
     );
     return () => Navigator.of(context, rootNavigator: true).pop();
   }
 
   // Returns a function that can be used to dismiss the popup.
   //
-  VoidCallback popup(BuildContext context, GameColorScheme colorScheme, {
-    String title = "Processing ...",
+  VoidCallback popup(BuildContext context, AppColorScheme colorScheme, {
+    required String title,
     required String message,
   }) {
     return popupDialog(
       context,
       colorScheme,
-      title: title,
-      builder: (layout, scheme) {
+      title: (layout, schemeNotifier) {
+        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        return Consumer<LocaleProvider>(
+          builder: (context, value, child) => Text(
+            title,
+            style: TextStyle(
+              color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+              fontWeight: FontWeight.bold,
+              fontSize: titleFontSize,
+            ),
+          ),
+        );
+      },
+      contents: (layout, scheme) {
 
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
@@ -159,12 +196,23 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> resetGameDialog(BuildContext context, GameColorScheme colorScheme, {required VoidCallback onAccept}) {
+  Future<dynamic> resetGameDialog(BuildContext context, AppColorScheme colorScheme, {required VoidCallback onAccept}) {
     return yesNoDialog(
       context,
       colorScheme:  colorScheme,
-      title: "RESET GAME",
-      builder: (layout, scheme) {
+      title: (layout, schemeNotifier) =>
+        LocalizedText(
+          textId: "dlg_reset_title",
+          schemeNotifier: schemeNotifier,
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      yesLabel: context.localizations.translate("dlg_reset_yes"),
+      noLabel: context.localizations.translate("dlg_reset_no"),
+      contents: (layout, scheme) {
 
         final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
@@ -178,14 +226,14 @@ class AlertsService {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: "Resetting the game will reset all puzzles already finished. High scores will be preserved\n\n",
+                    text: "${context.localizations.translate('dlg_reset_intro')}\n\n",
                     style: TextStyle(
                       color: colorScheme.textPuzzlePanel,
                       fontSize: bodyFontSize,
                     )
                   ),
                   TextSpan(
-                    text: "Would you like to reset the game?",
+                    text: context.localizations.translate('dlg_reset_question'),
                     style: TextStyle(
                       color: colorScheme.textPuzzlePanel,
                       fontWeight: FontWeight.bold,
@@ -202,128 +250,142 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> helpDialog(BuildContext context, GameColorScheme colorScheme) => okDialog(
+  Future<dynamic> helpDialog(BuildContext context, AppColorScheme colorScheme) => okDialog(
       context,
       colorScheme: colorScheme,
-      title: "Guess The Word",
-      okLabel: "Close",
-      builder: (layout, scheme) {
+      title: (layout, schemeNotifier) =>
+        LocalizedText(
+          textId: "dlg_help_title",
+          schemeNotifier: schemeNotifier,
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      okLabel: context.localizations.translate("dlg_help_ok"),
+      contents: (layout, schemeNotifier) {
 
         final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        return ValueListenableBuilder<AppColorScheme>(
+          valueListenable: schemeNotifier,
+          builder: (context, scheme, child) {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-              Align(
-                alignment: Alignment.center,
-                child: Semantics(
-                  label: "Game version is ${globalDataService.version}",
-                  container: true,
-                  excludeSemantics: true,
-                  child: Text.rich(
-                    textAlign: TextAlign.center,
-                    TextSpan(
-                      children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Semantics(
+                      label: "Game version is ${globalDataService.version}",
+                      container: true,
+                      excludeSemantics: true,
+                      child: Text.rich(
+                        textAlign: TextAlign.center,
                         TextSpan(
-                          text: "Version ${globalDataService.version}",
-                          style: TextStyle(
-                            color: scheme.backgroundTopPanel,
-                            fontSize: bodyFontSize,
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              Semantics(
-                container: true,
-                child: Text.rich(
-                  textAlign: TextAlign.left,
-                  TextSpan(
-                    style: TextStyle(
-                      color: scheme.textPuzzlePanel,
-                      fontSize: bodyFontSize,
-                    ),
-                    children: const [
-                      TextSpan(
-                        text: "Find all letters of the word to win the game. Start with the most likely letters. When available, using a hint token can reveral a random letter.",
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Semantics(
-                container: true,
-                child: Text.rich(
-                  textAlign: TextAlign.left,
-                  TextSpan(
-                    style: TextStyle(
-                      color: scheme.textPuzzlePanel,
-                      fontSize: bodyFontSize,
-                    ),
-                    children: [
-                      TextSpan(
-                        semanticsLabel: "Rule 1.",
-                        text: '\u{273D}',
-                        style: TextStyle(
-                          color: scheme.backgroundPuzzleSymbolsFlipped,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
+                          children: [
+                            TextSpan(
+                              text: context.localizations.translate("dlg_help_version", placeholders: {"version": globalDataService.version}),
+                              style: TextStyle(
+                                color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
+                                fontSize: bodyFontSize,
+                              )
+                            ),
+                          ],
                         ),
                       ),
-                      const TextSpan(
-                        text: "Score is calculated as the number of lives multiplied by the length of the puzzle.",
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Semantics(
-                container: true,
-                child: Text.rich(
-                  textAlign: TextAlign.left,
-                  TextSpan(
-                    style: TextStyle(
-                      color: scheme.textPuzzlePanel,
-                      fontSize: bodyFontSize,
                     ),
-                    children: [
-                      TextSpan(
-                        text: '\u{2726}',
-                        semanticsLabel: "Rule 2.",
-                        style: TextStyle(
-                          color: scheme.backgroundPuzzleSymbolsFlipped,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
-                        )
-                      ),
-                      const TextSpan(
-                        text: "A hint token is awarded for every ${Constants.scoreBumpForHintBonus} points earned. ",
-                      ),
-                      TextSpan(
-                        text: "Hint tokens are carried forward even if you reset the game.",
-                        style: TextStyle(
-                          color: scheme.backgroundTopPanel,
-                          fontWeight: FontWeight.bold,
-                        )
-                      ),
-                    ],
                   ),
-                ),
-              ),
-          ]),
+
+                  Semantics(
+                    container: true,
+                    child: Text.rich(
+                      textAlign: TextAlign.start,
+                      TextSpan(
+                        style: TextStyle(
+                          color: scheme.textPuzzlePanel,
+                          fontSize: bodyFontSize,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: context.localizations.translate("dlg_help_intro"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Semantics(
+                    container: true,
+                    child: Text.rich(
+                      textAlign: TextAlign.start,
+                      TextSpan(
+                        style: TextStyle(
+                          color: scheme.textPuzzlePanel,
+                          fontSize: bodyFontSize,
+                        ),
+                        children: [
+                          TextSpan(
+                            semanticsLabel: "Rule 1.",
+                            text: '\u{273D} ',
+                            style: TextStyle(
+                              color: scheme.backgroundPuzzleSymbolsFlipped,
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: context.localizations.translate("dlg_help_rule1"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Semantics(
+                    container: true,
+                    child: Text.rich(
+                      textAlign: TextAlign.start,
+                      TextSpan(
+                        style: TextStyle(
+                          color: scheme.textPuzzlePanel,
+                          fontSize: bodyFontSize,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '\u{2726} ',
+                            semanticsLabel: "Rule 2.",
+                            style: TextStyle(
+                              color: scheme.backgroundPuzzleSymbolsFlipped,
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.bold,
+                            )
+                          ),
+                          TextSpan(
+                            text: context.localizations.translate("dlg_help_rule2", placeholders: {"scoreBumpForHintBonus": Constants.scoreBumpForHintBonus}),
+                          ),
+                          TextSpan(
+                            text: context.localizations.translate("dlg_help_rule2_1"),
+                            style: TextStyle(
+                              color: scheme.backgroundPuzzleSymbolsFlipped,
+                              fontWeight: FontWeight.bold,
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ]),
+            );
+          },
         );
       },
     );
 
-  Future<dynamic> highScoresDialog(BuildContext context, GameColorScheme colorScheme) {
+  Future<dynamic> highScoresDialog(BuildContext context, AppColorScheme colorScheme) {
 
     final scoreService = ScoreService(dataService: globalDataService);
     final scores = scoreService.highScores();
@@ -331,80 +393,95 @@ class AlertsService {
     return okDialog(
       context,
       colorScheme: colorScheme,
-      title: "HIGH SCORES",
-      okLabel: "Close",
-      builder: (layout, scheme) {
+      title: (layout, schemeNotifier) =>
+        LocalizedText(
+          textId: "dlg_scores_title",
+          schemeNotifier: schemeNotifier,
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      okLabel: context.localizations.translate("dlg_scores_ok"),
+      contents: (layout, schemeCahnge) {
+        final titleFontSize =
+            layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+        final bodyFontSize =
+            layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
-        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
-        return scores.isEmpty ?
-          Center(
-            child: Semantics(
-              container: true,
-              child: Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "No score has been recorded yet. Win some puzzles to record a score!",
-                      style: TextStyle(
-                        color: scheme.textPuzzlePanel,
-                        fontSize: titleFontSize,
-                      )
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ) :
-          DefaultTextStyle.merge(
-            style: TextStyle(
-              fontSize: bodyFontSize,
-              color: scheme.textPuzzlePanel,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children:[
-                  Semantics(
-                    label: "Below is the list of top scores, games won and lost",
-                    excludeSemantics: true,
+        return ValueListenableBuilder<AppColorScheme>(
+          valueListenable: schemeCahnge,
+          builder: (context, scheme, child) => scores.isEmpty
+              ? Center(
+                  child: Semantics(
                     container: true,
-                    child: const Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Score',
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            'Won',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            'Lost',
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ],
+                    child: Text.rich(
+                      textAlign: TextAlign.center,
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                              text: context.localizations
+                                  .translate("dlg_scores_norecord"),
+                              style: TextStyle(
+                                color: scheme.textPuzzlePanel,
+                                fontSize: titleFontSize,
+                              )),
+                        ],
+                      ),
                     ),
                   ),
-                  ...scores.mapIndexed((i, e) {
-                      return Semantics(
-                        label: "Item ${i+1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
-                        container: true,
+                )
+              : DefaultTextStyle.merge(
+                  style: TextStyle(
+                    fontSize: bodyFontSize,
+                    color: scheme.textPuzzlePanel,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(children: [
+                      Semantics(
+                        label:
+                            "Below is the list of top scores, games won and lost",
                         excludeSemantics: true,
+                        container: true,
                         child: Row(
                           children: [
                             Expanded(
                               child: Text(
+                                context.localizations
+                                    .translate("dlg_scores_score"),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                context.localizations
+                                    .translate("dlg_scores_won"),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                context.localizations
+                                    .translate("dlg_scores_lost"),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ...scores.mapIndexed((i, e) {
+                        return Semantics(
+                          label:
+                              "Item ${i + 1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
+                          container: true,
+                          excludeSemantics: true,
+                          child: Row(children: [
+                            Expanded(
+                              child: Text(
                                 "${e.value}",
-                                textAlign: TextAlign.left,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                             Expanded(
@@ -416,46 +493,167 @@ class AlertsService {
                             Expanded(
                               child: Text(
                                 "${e.losses}",
-                                textAlign: TextAlign.right,
+                                textAlign: TextAlign.end,
                               ),
                             ),
-                          ]
-                        ),
-                      );
-                    }
+                          ]),
+                        );
+                      }),
+                    ]),
                   ),
-              ]),
-            ),
-          );
+                ),
+        );
       },
     );
   }
 
-  Future<dynamic> colorSchemePicker(BuildContext context, {
+  Future<dynamic> settingsDialog(BuildContext context, {
     required String selectedTheme,
     required ColorSchemeSelectionCallback onSelect
   }) {
-    final colorScheme = GameColorSchemes.fromName(selectedTheme);
-    return okDialog(
+
+    final colorScheme = AppColorSchemes.fromName(selectedTheme);
+
+    return actionDialog(
       context,
       colorScheme: colorScheme,
-      title: "Pick a Theme",
-      okLabel: "Close",
-      builder: (layout, scheme) => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
-      )
+      title: (layout, schemeNotifier) =>
+        LocalizedText(
+          textId: "dlg_settings_title",
+          schemeNotifier: schemeNotifier,
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      actions: (layout, schemeNotifier) => [
+
+        ButtonDialogAction(
+          context: context,
+          schemeNotifier: schemeNotifier,
+          isDefault: true,
+          onAction: (close) {
+            close(null);
+          },
+          builder: (layout, cs) {
+            return Consumer<LocaleProvider>(
+              builder: (context, value, child) => Text(
+                context.localizations.translate("dlg_settings_ok"),
+                textAlign: TextAlign.center
+              ),
+            );
+          }
+        )
+      ],
+      contents: (layout, schemeNotifier) {
+
+        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+        return ValueListenableBuilder<AppColorScheme>(
+          valueListenable: schemeNotifier,
+          builder: (context, scheme, child) {
+
+            return Consumer<LocaleProvider>(
+              builder: (context, localProvider, child) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      container: true,
+                      child: Text.rich(
+                        textAlign: TextAlign.center,
+                        TextSpan(
+                          style: TextStyle(
+                            color: scheme.textPuzzlePanel,
+                            fontSize: bodyFontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: context.localizations.translate("dlg_settings_selecttheme"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ColorSchemePicker(selectedTheme: selectedTheme, onSelect: onSelect,),
+                    const SizedBox(height: 10),
+                    Semantics(
+                      container: true,
+                      child: Text.rich(
+                        textAlign: TextAlign.center,
+                        TextSpan(
+                          style: TextStyle(
+                            color: scheme.textPuzzlePanel,
+                            fontSize: bodyFontSize,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: context.localizations.translate("dlg_settings_chooselanguage"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: SegmentedButton(
+                        style: SegmentedButton.styleFrom(
+                          foregroundColor: scheme.textPuzzlePanel,
+                          backgroundColor: scheme.backgroundPuzzlePanel,
+                          selectedForegroundColor: scheme.backgroundPuzzlePanel,
+                          selectedBackgroundColor: scheme.textPuzzlePanel,
+                        ),
+                        segments: Constants.locales.map((locale) {
+                          return ButtonSegment<String>(
+                            label: Text(
+                              context.localizations.translate("app_lang_$locale"),
+                              style: TextStyle(
+                                fontSize: bodyFontSize,
+                              ),
+                            ),
+                            value: locale
+                          );
+
+                        }).toList(),
+                        selected: <String>{localProvider.value.languageCode},
+                        onSelectionChanged: (selected) {
+                          log("changing language $selected");
+                          context.changeLanguage(selected.first);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
     );
   }
 
-  Future<dynamic> gameNeedsResetDialog(BuildContext context, GameColorScheme colorScheme, {
+  Future<dynamic> gameNeedsResetDialog(BuildContext context, AppColorScheme colorScheme, {
     required VoidCallback callback
   }) {
     return okDialog(
       context,
-      title: "Congratulations!",
+      title: (layout, schemeNotifier) =>
+        LocalizedText(
+          textId: "dlg_needreset_title",
+          schemeNotifier: schemeNotifier,
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      okLabel: context.localizations.translate("dlg_needreset_ok"),
       colorScheme: colorScheme,
-      builder: (layout, scheme) => const Text("You've finished all the puzzles. To keep playing the game must reset"),
+      contents: (layout, scheme) => Text(context.localizations.translate("dlg_needreset_message")),
       callback: callback,
     );
   }

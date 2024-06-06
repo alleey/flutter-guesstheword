@@ -61,13 +61,13 @@ class InputMismatchState extends GameBlocState {
   InputMismatchState();
 }
 class WaitState extends GameBlocState {
-  final String message;
-  WaitState({required this.message});
+  final String messageKey;
+  WaitState({required this.messageKey});
 }
 
 class ResetCompleteState extends GameBlocState {}
 class ResetPendingState extends WaitState {
-  ResetPendingState({required super.message});
+  ResetPendingState({required super.messageKey});
 }
 
 class InitializeGameCompleteState extends GameBlocState {}
@@ -274,7 +274,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
 
     on<ResetGameEvent>((event, emit) async {
 
-      emit(ResetPendingState(message: "Please wait while the game is reset"));
+      emit(ResetPendingState(messageKey: "dlg_popup_wait_reset"));
 
       await appDataService.resetData();
       await puzzleService.resetData();
