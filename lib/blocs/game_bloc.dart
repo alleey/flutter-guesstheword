@@ -8,12 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../common/constants.dart';
 import '../common/histogram.dart';
-import '../models/score.dart';
-import '../models/statistics.dart';
+import '../models/player_stats.dart';
 import '../services/app_data_service.dart';
 import '../services/puzzle_service.dart';
 import '../services/score_service.dart';
-import '../services/stats_service.dart';
 
 ////////////////////////////////////////////
 
@@ -101,8 +99,8 @@ class GameState extends GameBlocState {
     p.correctCount = other.correctCount;
     p.errorCount = other.errorCount;
     p.symbolSet = other.symbolSet;
-    p.score = other.score;
-    p.statistics = other.statistics;
+    p.playerStats = other.playerStats;
+    p.sessionStats = other.sessionStats;
     p.winBonus = other.winBonus;
     p.hintBonus = other.hintBonus;
     p.hintUsed = other.hintUsed;
@@ -122,8 +120,8 @@ class GameState extends GameBlocState {
   late BitArray revealed;
   late BitArray whiteSpace;
 
-  late Score score;
-  late StatisticsCollection statistics;
+  late PlayerStatistics playerStats;
+  late PlayerStatistics sessionStats;
   late int correctCount;
   late int errorCount;
   late int winBonus;
@@ -134,7 +132,7 @@ class GameState extends GameBlocState {
   bool get isWin => correctCount >= (puzzle.length - whiteSpace.cardinality);
   bool get isLoss => errorCount >= Constants.maxErrors;
   bool get isGameOver => isWin || isLoss;
-  bool get isHelpAvailable => score.hintTokens > 0;
+  bool get isHelpAvailable => playerStats.hintTokens > 0;
   bool get hasErrors => errorCount > 0;
   bool get hasCorrect => correctCount > 0;
 
@@ -218,7 +216,7 @@ class GameState extends GameBlocState {
     }
 
     final valueLower = puzzle.toLowerCase();
-    var oldHints = score.hintTokens;
+    var oldHints = playerStats.hintTokens;
 
     lastInputError = !valueLower.contains(symbol);
     winBonus = 0;
@@ -229,43 +227,51 @@ class GameState extends GameBlocState {
       reveal(symbol);
 
       if (hintRequest) {
-        score = score.consumeToken();
-        oldHints = score.hintTokens;
+        playerStats = playerStats.consumeToken();
+        oldHints = playerStats.hintTokens;
         hintUsed ++;
-        log("consumed a hint token: ${score.hintTokens} remaining");
+        log("consumed a hint token: ${playerStats.hintTokens} remaining");
       }
 
       if (isWin) {
         // Calculate score based on length of puzzle and number of error
         // longer puzzles and fewer errors get more score
         winBonus = valueLower.length * (Constants.maxErrors - errorCount);
-        score = score.bump(winBonus);
+        playerStats = playerStats.bump(winBonus);
+        sessionStats = sessionStats.bump(winBonus);
       }
 
-      hintBonus = (score.hintTokens - oldHints);
+      hintBonus = (playerStats.hintTokens - oldHints);
     } else {
 
       error(symbol);
       if (isLoss) {
         revealed.setAll();
-        score = score.failed();
       }
     }
 
     if (isGameOver) {
-      statistics.update(
+      playerStats = playerStats.updateStats(
         category: hint,
         win: isWin,
         correctInputs: correctCount,
         mismatchedInputs: errorCount,
         hintsUsed: hintUsed
       );
-      log("statistics: $statistics");
+      sessionStats = sessionStats.updateStats(
+        category: hint,
+        win: isWin,
+        correctInputs: correctCount,
+        mismatchedInputs: errorCount,
+        hintsUsed: hintUsed
+      );
     }
 
     log("revealed: ${revealed.toBinaryString()}");
     log("correct: $correctCount");
     log("errors: $errorCount");
+    log("playerStats: $playerStats");
+    log("sessionStats: $sessionStats");
     log("winBonus: $winBonus");
     log("hintBonus: $hintBonus");
 
@@ -280,11 +286,10 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
   final _appDataService = AppDataService();
   final _puzzleService = PuzzleService();
   final _scoreService = ScoreService();
-  final _statsService = StatisticsService();
   final _random = math.Random();
 
-  late GameState _gameState;
-  late bool _canGoNext = true;
+  GameState? _gameState;
+  bool _canGoNext = true;
 
   GameBloc() : super(InitialGameState())
   {
@@ -301,7 +306,6 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       final newInstanceId = await _appDataService.resetData();
       await _puzzleService.resetData(newInstanceId);
       await _scoreService.resetData(newInstanceId);
-      await _statsService.resetData(newInstanceId);
 
       _canGoNext = true;
 
@@ -323,48 +327,57 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         return;
       }
 
+      final previousGameStats = _gameState?.sessionStats;
+
       _gameState = GameState(
         puzzleId: p.$1,
         hint: p.$2.hint,
         puzzle: p.$2.value,
       );
-      _gameState.score = _scoreService.get();
-      _gameState.statistics = _statsService.get();
-      //gameState.score = gameState.score.bump(5000);
 
-      log("score: ${_gameState.score}");
+      final state = _ensureGameState();
+      state.playerStats = _scoreService.load();
+      state.sessionStats = previousGameStats ?? PlayerStatistics(hintTokens: state.playerStats.hintTokens);
+
+      // debug mode
+      state.playerStats = state.playerStats.grantTokens(100);
+
+      log("score: ${state.playerStats}");
       emit(PuzzleStartState());
-      emit(GameState.clone(_gameState));
+      emit(GameState.clone(state));
     });
 
     on<UserInputEvent>((event, emit) async {
 
-      if (_gameState.update(event.symbol.toLowerCase(), event.hintRequest)) {
+      final state = _ensureGameState();
 
-        await _scoreService.put(_gameState.score);
-        if (_gameState.isGameOver) {
-          await _puzzleService.delete(_gameState.puzzleId);
+      if (state.update(event.symbol.toLowerCase(), event.hintRequest)) {
+
+        await _scoreService.save(state.playerStats);
+        if (state.isGameOver) {
+          await _puzzleService.delete(state.puzzleId);
         }
-        _canGoNext = _gameState.isGameOver;
+        _canGoNext = state.isGameOver;
 
-        log("score: ${_gameState.score}");
-        if (_gameState.isGameOver) {
-          emit(PuzzleCompleteState(isWin: _gameState.isWin, winBonus: _gameState.winBonus, hintBonus: _gameState.hintBonus));
+        log("score: ${state.playerStats}");
+        if (state.isGameOver) {
+          emit(PuzzleCompleteState(isWin: state.isWin, winBonus: state.winBonus, hintBonus: state.hintBonus));
         } else {
-          emit(_gameState.lastInputError ? InputMismatchState() : InputMatchState(hintsChange: _gameState.hintBonus != 0));
+          emit(state.lastInputError ? InputMismatchState() : InputMatchState(hintsChange: state.hintBonus != 0));
         }
-        emit(GameState.clone(_gameState));
+        emit(GameState.clone(state));
       }
     });
 
     on<RequestHintEvent>((event, emit) async {
 
-      final histogram = _gameState.histogramOfUnrevealed();
+      final state = _ensureGameState();
+      final histogram = state.histogramOfUnrevealed();
       if (histogram.isEmpty) {
         return;
       }
 
-      var reveal = switch(_gameState.difficulty) {
+      var reveal = switch(state.difficulty) {
         Difficulty.easy => Constants.revealEasy,
         Difficulty.medium => Constants.revealMedium,
         Difficulty.hard => Constants.revealHard,
@@ -373,21 +386,22 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       final leastOccuring = histogram.keysLeastOrder();
       int revealed = 0;
       for(var i =0; i < math.min(reveal, leastOccuring.length); i++) {
-        revealed += _gameState.reveal(leastOccuring[i]);
+        revealed += state.reveal(leastOccuring[i]);
       }
 
-      log("score: ${_gameState.score}");
+      log("score: ${state.playerStats}");
 
       if (revealed > 0) {
-        emit(InputMatchState(hintsChange: _gameState.hintBonus != 0));
-        emit(GameState.clone(_gameState));
+        emit(InputMatchState(hintsChange: state.hintBonus != 0));
+        emit(GameState.clone(state));
       }
     });
 
 
     on<UseHintTokenEvent>((event, emit) async {
 
-      final histogram = _gameState.histogramOfUnrevealed();
+      final state = _ensureGameState();
+      final histogram = state.histogramOfUnrevealed();
       if (histogram.isEmpty) {
         return;
       }
@@ -400,6 +414,11 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
         hintRequest: true
       ));
     });
+  }
+
+  GameState _ensureGameState() {
+      if (_gameState == null) throw Exception("GameState is null");
+      return _gameState!;
   }
 }
 

@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -42,10 +44,9 @@ class SettingsBloc extends Bloc<SettingsBlocEvent, SettingsBlocState>
   SettingsBloc() : super(InitialSettingsBlocEvent())
   {
     on<ReadSettingEvent>((event, emit) async {
-      emit(SettingsReadBlocState(
-        name: event.name,
-        value: _appDataService.getSetting(event.name, event.defaultValue)
-      ));
+      final value = _appDataService.getSetting(event.name, event.defaultValue);
+      log("ReadSettingEvent -> ${event.name} = $value");
+      emit(SettingsReadBlocState(name: event.name, value: value));
     });
 
     on<WriteSettingEvent>((event, emit) async {

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import '../../blocs/settings_bloc.dart';
 import '../../common/app_color_scheme.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
-import '../../localizations/locale_provider.dart';
 import '../../services/app_data_service.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
@@ -125,8 +123,6 @@ class _AppDialogState extends State<AppDialog> {
 
     final layout = context.layout;
 
-    log("dialog locale ${context.locale}");
-
     return ValueListenableBuilder<AppColorScheme>(
       valueListenable: activeColorScheme,
       builder: (context, scheme, child) {
@@ -181,7 +177,6 @@ class _AppDialogState extends State<AppDialog> {
 class ButtonDialogAction extends DialogAction {
   const ButtonDialogAction({
     super.key,
-    required super.context,
     required super.schemeNotifier,
     required super.builder,
     required this.isDefault,

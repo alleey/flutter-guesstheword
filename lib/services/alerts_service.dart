@@ -1,22 +1,19 @@
-import 'dart:developer';
-
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../blocs/settings_bloc.dart';
 import '../common/app_color_scheme.dart';
-import '../common/constants.dart';
 import '../common/layout_constants.dart';
 import '../localizations/app_localizations.dart';
 import '../localizations/locale_provider.dart';
-import '../widgets/color_scheme_picker.dart';
+import '../models/player_stats.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/dialogs/common.dart';
+import '../widgets/loading_indicator.dart';
 import '../widgets/localized_text.dart';
-import 'app_data_service.dart';
-import 'data_service.dart';
-import 'score_service.dart';
+import '../widgets/pages/how_to_play_page.dart';
+import '../widgets/pages/high_scores_list_page.dart';
+import '../widgets/pages/player_stats_page.dart';
+import '../widgets/pages/settings_page.dart';
 
 
 class AlertsService {
@@ -71,7 +68,6 @@ class AlertsService {
       contents: contents,
       actions: (layout, schemeNotifier) => [
         ButtonDialogAction(
-          context: context,
           schemeNotifier: schemeNotifier,
           isDefault: false,
           onAction: (close) {
@@ -83,7 +79,6 @@ class AlertsService {
           }
         ),
         ButtonDialogAction(
-          context: context,
           schemeNotifier: schemeNotifier,
           isDefault: true,
           onAction: (close) {
@@ -112,7 +107,6 @@ class AlertsService {
       contents: contents,
       actions: (layout, schemeNotifier) => [
         ButtonDialogAction(
-          context: context,
           schemeNotifier: schemeNotifier,
           isDefault: true,
           onAction: (close) {
@@ -165,33 +159,13 @@ class AlertsService {
       },
       contents: (layout, scheme) {
 
-        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
         return Semantics(
           container: true,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: message,
-                      style: TextStyle(
-                        color: colorScheme.textPuzzlePanel,
-                        fontSize: bodyFontSize,
-                      )
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 5),
-              LinearProgressIndicator(
-                color: colorScheme.textPuzzlePanel,
-                backgroundColor: colorScheme.backgroundInputPanel,
-              ),
-            ],
+          child: Center(
+            child: LoadingIndicator(
+              message: message,
+              colorScheme: colorScheme,
+            ),
           ),
         );
       },
@@ -205,7 +179,6 @@ class AlertsService {
       title: (layout, schemeNotifier) =>
         LocalizedText(
           textId: "dlg_reset_title",
-          schemeNotifier: schemeNotifier,
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,
@@ -252,269 +225,129 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> helpDialog(BuildContext context, AppColorScheme colorScheme) => okDialog(
+  Future<dynamic> helpDialog(BuildContext context, AppColorScheme colorScheme) {
+    return actionDialog(
       context,
       colorScheme: colorScheme,
       title: (layout, schemeNotifier) =>
         LocalizedText(
           textId: "dlg_help_title",
-          schemeNotifier: schemeNotifier,
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,
             fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
           ),
         ),
-      okLabel: context.localizations.translate("dlg_help_ok"),
-      contents: (layout, schemeNotifier) {
-
-        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-        final dataService = DataService();
-
-        return ValueListenableBuilder<AppColorScheme>(
+      contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
           valueListenable: schemeNotifier,
           builder: (context, scheme, child) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  Align(
-                    alignment: Alignment.center,
-                    child: Semantics(
-                      label: "Game version is ${dataService.version}",
-                      container: true,
-                      excludeSemantics: true,
-                      child: Text.rich(
-                        textAlign: TextAlign.center,
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: context.localizations.translate("dlg_help_version", placeholders: {"version": dataService.version}),
-                              style: TextStyle(
-                                color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
-                                fontSize: bodyFontSize,
-                              )
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Semantics(
-                    container: true,
-                    child: Text.rich(
-                      textAlign: TextAlign.start,
-                      TextSpan(
-                        style: TextStyle(
-                          color: scheme.textPuzzlePanel,
-                          fontSize: bodyFontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: context.localizations.translate("dlg_help_intro"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Semantics(
-                    container: true,
-                    child: Text.rich(
-                      textAlign: TextAlign.start,
-                      TextSpan(
-                        style: TextStyle(
-                          color: scheme.textPuzzlePanel,
-                          fontSize: bodyFontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            semanticsLabel: "Rule 1.",
-                            text: '\u{273D} ',
-                            style: TextStyle(
-                              color: scheme.backgroundPuzzleSymbolsFlipped,
-                              fontSize: titleFontSize,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: context.localizations.translate("dlg_help_rule1"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Semantics(
-                    container: true,
-                    child: Text.rich(
-                      textAlign: TextAlign.start,
-                      TextSpan(
-                        style: TextStyle(
-                          color: scheme.textPuzzlePanel,
-                          fontSize: bodyFontSize,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '\u{2726} ',
-                            semanticsLabel: "Rule 2.",
-                            style: TextStyle(
-                              color: scheme.backgroundPuzzleSymbolsFlipped,
-                              fontSize: titleFontSize,
-                              fontWeight: FontWeight.bold,
-                            )
-                          ),
-                          TextSpan(
-                            text: context.localizations.translate("dlg_help_rule2", placeholders: {"scoreBumpForHintBonus": Constants.scoreBumpForHintBonus}),
-                          ),
-                          TextSpan(
-                            text: context.localizations.translate("dlg_help_rule2_1"),
-                            style: TextStyle(
-                              color: scheme.backgroundPuzzleSymbolsFlipped,
-                              fontWeight: FontWeight.bold,
-                            )
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ]),
-            );
+            return HowToPlayPage(colorScheme: scheme);
           },
-        );
-      },
+        ),
+      actions: (layout, schemeNotifier) => [
+
+        ButtonDialogAction(
+          schemeNotifier: schemeNotifier,
+          isDefault: true,
+          onAction: (close) {
+            close(null);
+          },
+          builder: (layout, cs) {
+            return Consumer<LocaleProvider>(
+              builder: (context, value, child) => Text(
+                context.localizations.translate("dlg_help_ok"),
+                textAlign: TextAlign.center
+              ),
+            );
+          }
+        )
+      ],
     );
+  }
 
   Future<dynamic> highScoresDialog(BuildContext context, AppColorScheme colorScheme) {
 
-    final scoreService = ScoreService();
-    final scores = scoreService.highScores();
-
-    return okDialog(
+    return actionDialog(
       context,
       colorScheme: colorScheme,
       title: (layout, schemeNotifier) =>
         LocalizedText(
           textId: "dlg_scores_title",
-          schemeNotifier: schemeNotifier,
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,
             fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
           ),
         ),
-      okLabel: context.localizations.translate("dlg_scores_ok"),
-      contents: (layout, schemeCahnge) {
+      contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
+          valueListenable: schemeNotifier,
+          builder: (context, scheme, child) {
+            return HighScoresListPage(colorScheme: scheme);
+          }
+        ),
+      actions: (layout, schemeNotifier) => [
 
-        final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
-        return ValueListenableBuilder<AppColorScheme>(
-          valueListenable: schemeCahnge,
-          builder: (context, scheme, child) => scores.isEmpty
-              ? Center(
-                  child: Semantics(
-                    container: true,
-                    child: Text.rich(
-                      textAlign: TextAlign.center,
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                              text: context.localizations
-                                  .translate("dlg_scores_norecord"),
-                              style: TextStyle(
-                                color: scheme.textPuzzlePanel,
-                                fontSize: titleFontSize,
-                              )),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : DefaultTextStyle.merge(
-                  style: TextStyle(
-                    fontSize: bodyFontSize,
-                    color: scheme.textPuzzlePanel,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Semantics(
-                            label: "Below is the list of top scores, games won and lost",
-                            excludeSemantics: true,
-                            container: true,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    context.localizations.translate("dlg_scores_score"),
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    context.localizations.translate("dlg_scores_won"),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    context.localizations.translate("dlg_scores_lost"),
-                                    textAlign: TextAlign.end,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ...scores.mapIndexed((i, e) {
-                            return Semantics(
-                              label:
-                                  "Item ${i + 1}. Score is ${e.value}, ${e.wins} wins and ${e.losses} losses.",
-                              container: true,
-                              excludeSemantics: true,
-                              child: Row(children: [
-                                Expanded(
-                                  child: Text(
-                                    "${e.value}",
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "${e.wins}",
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "${e.losses}",
-                                    textAlign: TextAlign.end,
-                                  ),
-                                ),
-                              ]),
-                            );
-                          }),
-                        ]
-                      ),
-                    ),
-                  ),
-                ),
-        );
-      },
+        ButtonDialogAction(
+          schemeNotifier: schemeNotifier,
+          isDefault: true,
+          onAction: (close) {
+            close(null);
+          },
+          builder: (layout, cs) {
+            return Consumer<LocaleProvider>(
+              builder: (context, value, child) => Text(
+                context.localizations.translate("dlg_scores_ok"),
+                textAlign: TextAlign.center
+              ),
+            );
+          }
+        )
+      ],
     );
   }
 
-  Future<dynamic> settingsDialog(BuildContext context, {
-    required String selectedTheme,
-    required ColorSchemeSelectionCallback onSelect
-  }) {
+  Future<dynamic> statsDialog(BuildContext context, AppColorScheme colorScheme, PlayerStatistics stats) {
 
-    final colorScheme = AppColorSchemes.fromName(selectedTheme);
+    return actionDialog(
+      context,
+      colorScheme: colorScheme,
+      title: (layout, schemeNotifier) =>
+        Text(
+          "Current Score: ${stats.score}-${stats.total.wins}-${stats.total.losses}",
+          style: TextStyle(
+            color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
+            fontWeight: FontWeight.bold,
+            fontSize: layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+          ),
+        ),
+      contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
+          valueListenable: schemeNotifier,
+          builder: (context, scheme, child) {
+            return PlayerStatisticsPage(colorScheme: scheme, statistics: stats);
+          }
+        ),
+      actions: (layout, schemeNotifier) => [
+
+        ButtonDialogAction(
+          schemeNotifier: schemeNotifier,
+          isDefault: true,
+          onAction: (close) {
+            close(null);
+          },
+          builder: (layout, cs) {
+            return Consumer<LocaleProvider>(
+              builder: (context, value, child) => Text(
+                context.localizations.translate("dlg_playerstats_ok"),
+                textAlign: TextAlign.center
+              ),
+            );
+          }
+        )
+      ],
+    );
+  }
+
+  Future<dynamic> settingsDialog(BuildContext context, AppColorScheme colorScheme) {
 
     return actionDialog(
       context,
@@ -522,7 +355,6 @@ class AlertsService {
       title: (layout, schemeNotifier) =>
         LocalizedText(
           textId: "dlg_settings_title",
-          schemeNotifier: schemeNotifier,
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,
@@ -532,7 +364,6 @@ class AlertsService {
       actions: (layout, schemeNotifier) => [
 
         ButtonDialogAction(
-          context: context,
           schemeNotifier: schemeNotifier,
           isDefault: true,
           onAction: (close) {
@@ -548,128 +379,10 @@ class AlertsService {
           }
         )
       ],
-      contents: (layout, schemeNotifier) {
-
-        final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
-        return ValueListenableBuilder<AppColorScheme>(
+      contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
           valueListenable: schemeNotifier,
-          builder: (context, scheme, child) {
-
-            return Consumer<LocaleProvider>(
-              builder: (context, localProvider, child) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Semantics(
-                      container: true,
-                      child: Text.rich(
-                        textAlign: TextAlign.start,
-                        TextSpan(
-                          style: TextStyle(
-                            color: scheme.textPuzzlePanel,
-                            fontSize: bodyFontSize,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: context.localizations.translate("dlg_settings_selecttheme"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    ColorSchemePicker(
-                      alignment: WrapAlignment.start,
-                      selectedTheme: selectedTheme, onSelect: onSelect
-                    ),
-
-
-                    const SizedBox(height: 2),
-                  if (Constants.locales.length > 1)
-                    ...[
-                      Semantics(
-                        container: true,
-                        child: Text.rich(
-                          textAlign: TextAlign.start,
-                          TextSpan(
-                            style: TextStyle(
-                              color: scheme.textPuzzlePanel,
-                              fontSize: bodyFontSize,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: context.localizations.translate("dlg_settings_chooselanguage"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      DropdownButton<String>(
-                        isDense: true,
-                        style: TextStyle(
-                          color: scheme.textPuzzlePanel,
-                          fontSize: bodyFontSize,
-                        ),
-                        dropdownColor: scheme.backgroundPuzzlePanel,
-                        value: localProvider.value.languageCode,
-                        onChanged: (selected) {
-                          context.changeLanguage(selected!);
-                          context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected));
-                        },
-                        items: Constants.locales.map<DropdownMenuItem<String>>((locale) {
-                          return DropdownMenuItem<String>(
-                            value: locale,
-                            child: Text(
-                              context.localizations.translate("app_lang_$locale"),
-                              style: TextStyle(
-                                fontSize: bodyFontSize,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ]
-
-                    // Directionality(
-                    //   textDirection: TextDirection.ltr,
-                    //   child: SegmentedButton(
-                    //     style: SegmentedButton.styleFrom(
-                    //       foregroundColor: scheme.textPuzzlePanel,
-                    //       backgroundColor: scheme.backgroundPuzzlePanel,
-                    //       selectedForegroundColor: scheme.backgroundPuzzlePanel,
-                    //       selectedBackgroundColor: scheme.textPuzzlePanel,
-                    //     ),
-                    //     showSelectedIcon: false,
-                    //     segments: Constants.locales.map((locale) {
-                    //       return ButtonSegment<String>(
-                    //         label: Text(
-                    //           context.localizations.translate("app_lang_$locale"),
-                    //           style: TextStyle(
-                    //             fontSize: bodyFontSize,
-                    //           ),
-                    //         ),
-                    //         value: locale
-                    //       );
-
-                    //     }).toList(),
-                    //     selected: <String>{localProvider.value.languageCode},
-                    //     onSelectionChanged: (selected) {
-
-                    //       context.changeLanguage(selected.first);
-                    //       context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected.first));
-                    //     },
-                    //   ),
-                    // )
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      }
+          builder: (context, scheme, child) => SettingsPage(colorScheme: scheme),
+        )
     );
   }
 
@@ -681,7 +394,6 @@ class AlertsService {
       title: (layout, schemeNotifier) =>
         LocalizedText(
           textId: "dlg_needreset_title",
-          schemeNotifier: schemeNotifier,
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,

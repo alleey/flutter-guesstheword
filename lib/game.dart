@@ -256,44 +256,53 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final stats = state.playerStats;
 
-    return Semantics(
-      excludeSemantics: true,
-      label: "Score is ${state.score.value}, ${state.score.wins} wins and ${state.score.losses} losses. You have ${state.score.hintTokens} available hints.",
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text.rich(
-          textAlign: TextAlign.center,
-          TextSpan(
-            style: TextStyle(
-              fontSize: titleFontSize,
-              color: _colorScheme.textTopPanel,
+    return InkWell(
+      onLongPress: () {
+        AlertsService().statsDialog(context, _colorScheme, state.playerStats);
+      },
+      onDoubleTap: () {
+        AlertsService().statsDialog(context, _colorScheme, state.playerStats);
+      },
+      child: Semantics(
+        excludeSemantics: true,
+        label: "Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses. You have ${stats.hintTokens} available hints.",
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text.rich(
+            textAlign: TextAlign.center,
+            TextSpan(
+              style: TextStyle(
+                fontSize: titleFontSize,
+                color: _colorScheme.textTopPanel,
+              ),
+              children: [
+                TextSpan(
+                  text: '\u{273D}',
+                  style: TextStyle(
+                    color: _colorScheme.colorIcons,
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
+                TextSpan(
+                  text: "${stats.score}-${stats.total.wins}-${stats.total.losses}",
+                ),
+                const TextSpan(
+                  text: "      ",
+                ),
+                TextSpan(
+                  text: '\u{2726}',
+                  style: TextStyle(
+                    color: _colorScheme.colorIcons,
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
+                TextSpan(
+                  text: "${stats.hintTokens}",
+                ),
+              ],
             ),
-            children: [
-              TextSpan(
-                text: '\u{273D}',
-                style: TextStyle(
-                  color: _colorScheme.colorIcons,
-                  fontWeight: FontWeight.bold,
-                )
-              ),
-              TextSpan(
-                text: "${state.score.value}-${state.score.wins}-${state.score.losses}",
-              ),
-              const TextSpan(
-                text: "      ",
-              ),
-              TextSpan(
-                text: '\u{2726}',
-                style: TextStyle(
-                  color: _colorScheme.colorIcons,
-                  fontWeight: FontWeight.bold,
-                )
-              ),
-              TextSpan(
-                text: "${state.score.hintTokens}",
-              ),
-            ],
           ),
         ),
       ),

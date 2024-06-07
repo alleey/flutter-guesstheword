@@ -20,8 +20,7 @@ sealed class AppColorSchemes {
   };
 
   static Iterable<MapEntry<String, AppColorScheme>> get all => _schemes.entries;
-  static AppColorScheme fromName(String? name) =>
-    _schemes.containsKey(name ?? defaultSchemeName) ? _schemes[name]! : AppColorScheme.defaultScheme();
+  static AppColorScheme fromName(String? name) => _schemes[name ?? defaultSchemeName] ?? AppColorScheme.defaultScheme();
 }
 
 ////////////////////////////////////////////

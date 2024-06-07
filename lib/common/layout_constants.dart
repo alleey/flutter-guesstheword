@@ -7,15 +7,15 @@ class DialogLayoutConstants
   // the %age of screen size covered by the dialog
   static const String screenCoverPctKey = "dlg.screenCoverPct";
   static final screenCoverPct = ResponsiveValue.from(
-    small: const Size(0.8, 0.8),
+    small: const Size(0.9, 0.9),
     medium: const Size(0.8, 0.8),
-    large: const Size(0.6, 0.6),
+    large: const Size(0.7, 0.7),
   );
 
   static const String paddingKey = "dlg.padding";
   static final padding = ResponsiveValue.from(
-    small: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    medium: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+    small: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+    medium: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
     large: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
   );
 

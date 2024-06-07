@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:guess_the_word/services/app_data_service.dart';
 import 'package:provider/provider.dart';
 
 import 'blocs/game_bloc.dart';
@@ -16,6 +13,7 @@ import 'common/layout_constants.dart';
 import 'home_page.dart';
 import 'localizations/app_localizations.dart';
 import 'localizations/locale_provider.dart';
+import 'services/app_data_service.dart';
 import 'services/data_service.dart';
 import 'widgets/common/responsive_layout.dart';
 
@@ -68,8 +66,7 @@ class MyApp extends StatelessWidget {
             child: Consumer<LocaleProvider>(
               builder: (BuildContext context, LocaleProvider localeProvider, Widget? child) {
 
-                log("app locale set to ${localeProvider.value}");
-
+                //log("app locale set to ${localeProvider.value}");
                 return MaterialApp(
                   debugShowCheckedModeBanner: false,
                   localizationsDelegates: const [

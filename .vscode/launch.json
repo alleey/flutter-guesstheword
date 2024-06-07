@@ -7,7 +7,9 @@
         {
             "name": "guess_the_word",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": ["--web-port", "5555"],
+            "deviceId": "chrome"
         },
         {
             "name": "guess_the_word (profile mode)",

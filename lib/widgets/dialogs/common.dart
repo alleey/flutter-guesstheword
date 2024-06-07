@@ -17,12 +17,10 @@ typedef ActionBuilder = Iterable<DialogAction> Function(
 abstract class DialogAction extends StatelessWidget {
   const DialogAction({
     super.key,
-    required this.context,
     required this.schemeNotifier,
     required this.builder,
   });
 
-  final BuildContext context;
   final ValueNotifier<AppColorScheme> schemeNotifier;
   final ContentBuilder builder;
 }

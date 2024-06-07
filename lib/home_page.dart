@@ -14,7 +14,6 @@ import 'game.dart';
 import 'localizations/app_localizations.dart';
 import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
-import 'services/data_service.dart';
 import 'widgets/common/responsive_layout.dart';
 import 'widgets/loading_indicator.dart';
 
@@ -34,13 +33,13 @@ class _HomePageState extends State<HomePage> {
   late bool _gameInitialized = false;
   late bool _androidTvFixApplied = false;
   late bool _dialogShown = false;
-  late String _selectedTheme = AppColorSchemes.defaultSchemeName;
+  late AppColorScheme _colorScheme = AppColorScheme.defaultScheme();
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    context.settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme));
+    context.settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme, defaultValue: AppColorSchemes.defaultSchemeName));
     context.gameBloc.add(InitializeGameEvent());
   }
 
@@ -65,7 +64,7 @@ class _HomePageState extends State<HomePage> {
                   if (state.name == KnownSettingsNames.settingTheme) {
                     setState(() {
                       _settingInitialized = true;
-                      _selectedTheme = state.value ?? AppColorSchemes.defaultSchemeName;
+                      _colorScheme = AppColorSchemes.fromName(state.value);
                     });
                   }
                 }
@@ -85,17 +84,17 @@ class _HomePageState extends State<HomePage> {
           child: Builder(
             builder: (context) {
 
-              final colorScheme = AppColorSchemes.fromName(_selectedTheme);
               final appBarHeight = context.layout.get<double>(AppLayoutConstants.appbarHeightKey);
 
               return Scaffold(
-                backgroundColor: colorScheme.backgroundPuzzlePanel,
+                backgroundColor: _colorScheme.backgroundPuzzlePanel,
+
                 appBar: !_dialogShown ? null : PreferredSize(
                   preferredSize: Size.fromHeight(appBarHeight),
-                  child: _buildAppBar(context, appBarHeight),
+                  child: _buildAppBar(context, _colorScheme, appBarHeight),
                 ),
 
-                body: _buildLayout(context, colorScheme, appBarHeight),
+                body: _buildLayout(context, _colorScheme, appBarHeight),
               );
 
             }
@@ -123,7 +122,7 @@ class _HomePageState extends State<HomePage> {
           await setTraditionalFocusHighlightStrategy();
           _androidTvFixApplied = true;
         }
-        await showFirstUsagePrompt();
+        await showFirstUsagePrompt(colorScheme);
         setState(() {
           _dialogShown = true;
         });
@@ -141,8 +140,7 @@ class _HomePageState extends State<HomePage> {
     return const PuzzlePage();
   }
 
-  AppBar _buildAppBar(BuildContext context, double appBarHeight) {
-    final colorScheme = AppColorSchemes.fromName(_selectedTheme);
+  AppBar _buildAppBar(BuildContext context, AppColorScheme colorScheme, double appBarHeight) {
     return AppBar(
       backgroundColor: colorScheme.backgroundTopPanel,
       foregroundColor: colorScheme.textTopPanel,
@@ -158,7 +156,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.description_outlined),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().helpDialog(context, AppColorSchemes.fromName(_selectedTheme));
+                await AlertsService().helpDialog(context, colorScheme);
               },
             ),
           ),
@@ -176,7 +174,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.bar_chart),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().highScoresDialog(context, AppColorSchemes.fromName(_selectedTheme));
+                await AlertsService().highScoresDialog(context, colorScheme);
               },
             ),
           ),
@@ -192,9 +190,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.refresh),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().resetGameDialog(
-                  context,
-                  AppColorSchemes.fromName(_selectedTheme),
+                await AlertsService().resetGameDialog(context, colorScheme,
                   onAccept: () {
                     context.gameBloc.add(ResetGameEvent());
                   }
@@ -214,13 +210,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.palette_outlined),
               focusColor: colorScheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().settingsDialog(
-                  context,
-                  selectedTheme: _selectedTheme,
-                  onSelect: (newTheme) {
-                    context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingTheme, value: newTheme, reload: true));
-                  }
-                );
+                await AlertsService().settingsDialog(context, colorScheme);
               },
             ),
           ),
@@ -229,14 +219,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future showFirstUsagePrompt() async {
+  Future showFirstUsagePrompt(AppColorScheme colorScheme) async {
 
     final appDataService = AppDataService();
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
       if (mounted) {
-        await AlertsService().helpDialog(context, AppColorSchemes.fromName(_selectedTheme));
+        await AlertsService().helpDialog(context, colorScheme);
       }
     }
   }

@@ -6,8 +6,8 @@ void main() {
     test('Test update method', () {
       // Create a sample Statistics object
       final stats = Statistics(
-        totalWins: 5,
-        totalLosses: 3,
+        wins: 5,
+        losses: 3,
         correctInputs: 20,
         mismatchedInputs: 5,
         hintsUsed: 2,
@@ -22,8 +22,8 @@ void main() {
       );
 
       // Verify the updated statistics
-      expect(updatedStats.totalWins, 6);
-      expect(updatedStats.totalLosses, 3);
+      expect(updatedStats.wins, 6);
+      expect(updatedStats.losses, 3);
       expect(updatedStats.correctInputs, 30);
       expect(updatedStats.mismatchedInputs, 7);
       expect(updatedStats.hintsUsed, 3);
@@ -32,8 +32,8 @@ void main() {
     test('Test accuracy calculation', () {
       // Create a sample Statistics object
       final stats = Statistics(
-        totalWins: 5,
-        totalLosses: 3,
+        wins: 5,
+        losses: 3,
         correctInputs: 20,
         mismatchedInputs: 5,
         hintsUsed: 2,
@@ -45,31 +45,14 @@ void main() {
   });
 
   group('StatisticsMap', () {
-    test('Test getCategoryStatisticsExcludingOverall method', () {
-      // Create a sample StatisticsMap object
-      final statsMap = StatisticsCollection(
-        statisticsMap: {
-          'category1': Statistics(),
-          'category2': Statistics(),
-          'overall': Statistics(),
-        },
-      );
-
-      // Get category statistics excluding overall
-      final categoryStats = statsMap.getStatisticsExcludingOverall();
-
-      // Verify category statistics
-      expect(categoryStats.length, 2);
-      expect(categoryStats.containsKey('overall'), false);
-    });
 
     test('Test getCategoriesSortedByWinRate method', () {
       // Create a sample StatisticsMap object
-      final statsMap = StatisticsCollection(
+      final statsMap = CategoryStatistics(
         statisticsMap: {
-          'category1': Statistics(totalWins: 5, totalLosses: 5),
-          'category2': Statistics(totalWins: 3, totalLosses: 0),
-          'category3': Statistics(totalWins: 4, totalLosses: 2),
+          'category1': Statistics(wins: 5, losses: 5),
+          'category2': Statistics(wins: 3, losses: 0),
+          'category3': Statistics(wins: 4, losses: 2),
           'overall': Statistics(),
         },
       );
@@ -83,7 +66,7 @@ void main() {
 
     test('Test getCategoriesSortedByAccuracy method', () {
       // Create a sample StatisticsMap object
-      final statsMap = StatisticsCollection(
+      final statsMap = CategoryStatistics(
         statisticsMap: {
           'category1': Statistics(correctInputs: 20, mismatchedInputs: 5, hintsUsed: 0),
           'category2': Statistics(correctInputs: 20, mismatchedInputs: 7, hintsUsed: 0),

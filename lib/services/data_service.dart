@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 
 import '../common/constants.dart';
 import '../models/puzzle.dart';
-import '../models/score.dart';
 
 class DataService {
 
@@ -21,10 +20,9 @@ class DataService {
     return _instance;
   }
 
-  late Box<Score> scoreBox;
+  late Box<String> scoreBox;
   late Box<Puzzle> puzzleBox;
   late Box<dynamic> appDataBox;
-  late Box<dynamic> statsBox;
   late String version;
   late int instanceId;
 
@@ -35,15 +33,13 @@ class DataService {
     }
 
     await Hive.initFlutter("guesstheword-v${Constants.appDataVersion}");
-    Hive.registerAdapter(ScoreAdapter());
     Hive.registerAdapter(PuzzleAdapter());
 
     // on web for example the subdir is ignored, therefore need to put ver in filenames as well
     // as a fallback.
-    scoreBox = await Hive.openBox<Score>("score-v${Constants.appDataVersion}");
+    scoreBox = await Hive.openBox<String>("stats-v${Constants.appDataVersion}");
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<dynamic>('appdata-v${Constants.appDataVersion}');
-    statsBox = await Hive.openBox<dynamic>('stats-v${Constants.appDataVersion}');
 
     version = await getVersion();
     instanceId = await ensureInstanceId();

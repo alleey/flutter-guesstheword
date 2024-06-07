@@ -76,7 +76,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
-    log("new locale string loaded $locale");
+    //log("new locale string loaded $locale");
     final localizations = AppLocalizations(locale);
     await localizations.load();
     return localizations;

@@ -44,14 +44,12 @@ dependencies:
   url_launcher: ^6.2.6
   collection: ^1.18.0
   provider: ^6.1.2
-  json_annotation: ^4.9.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: any
   build_runner: ^2.1.0
   flutter_lints: any
-  json_serializable: ^6.8.0
 
 flutter:
   uses-material-design: true
