@@ -340,7 +340,7 @@ class GameBloc extends Bloc<GameBlocEvent, GameBlocState>
       state.sessionStats = previousGameStats ?? PlayerStatistics(hintTokens: state.playerStats.hintTokens);
 
       // debug mode
-      state.playerStats = state.playerStats.grantTokens(100);
+      // state.playerStats = state.playerStats.grantTokens(100);
 
       log("score: ${state.playerStats}");
       emit(PuzzleStartState());

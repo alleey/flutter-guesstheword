@@ -313,7 +313,7 @@ class AlertsService {
       colorScheme: colorScheme,
       title: (layout, schemeNotifier) =>
         Text(
-          "Current Score: ${stats.score}-${stats.total.wins}-${stats.total.losses}",
+          "Score: ${stats.score}-${stats.total.wins}-${stats.total.losses}",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
             fontWeight: FontWeight.bold,
