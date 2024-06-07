@@ -12,6 +12,7 @@ class BumpEffect extends StatelessWidget {
   final Duration duration;
   final ParticleSystemBuilder builder;
   final int numberOfParticles;
+  final VoidCallback? onComplete;
   late bool _autostart;
 
   BumpEffect({
@@ -21,6 +22,7 @@ class BumpEffect extends StatelessWidget {
     this.duration = const Duration(milliseconds: 300),
     this.numberOfParticles = 15,
     bool autostart = true,
+    this.onComplete,
   }) : _autostart = autostart;
 
   @override
@@ -39,6 +41,7 @@ class BumpEffect extends StatelessWidget {
       },
       generator: _createParticles,
       duration: duration,
+      onComplete: onComplete,
     );
   }
 

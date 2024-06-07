@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class Particle {
   Offset position;
@@ -26,12 +25,14 @@ class SimpleParticleSystem extends StatefulWidget {
   final ParticleGenerator generator;
   final ParticleSystemBuilder builder;
   final Duration duration;
+  final VoidCallback? onComplete;
 
   // ignore: use_key_in_widget_constructors
   const SimpleParticleSystem({
     required this.builder,
     required this.generator,
     this.duration = const Duration(milliseconds: 300),
+    this.onComplete,
   });
 
   @override
@@ -54,6 +55,7 @@ class _SimpleParticleSystemState extends State<SimpleParticleSystem> with Single
       if (status == AnimationStatus.completed) {
         setState(() {
           particles = [];
+          widget.onComplete?.call();
         });
       }
     });

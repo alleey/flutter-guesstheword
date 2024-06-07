@@ -4,29 +4,28 @@ import '../widgets/symbol_pad.dart';
 
 ////////////////////////////////////////////
 
-sealed class GameColorSchemes {
+sealed class AppColorSchemes {
 
   static const String defaultSchemeName = "default";
 
-  static final Map<String, GameColorScheme> _schemes = {
-    defaultSchemeName: GameColorScheme.defaultScheme(),
-    "1": GameColorScheme.theme1(),
-    "2": GameColorScheme.theme2(),
-    "3": GameColorScheme.theme3(),
-    "4": GameColorScheme.theme4(),
-    "5": GameColorScheme.theme5(),
-    "6": GameColorScheme.theme6(),
-    "7": GameColorScheme.theme7(),
+  static final Map<String, AppColorScheme> _schemes = {
+    defaultSchemeName: AppColorScheme.defaultScheme(),
+    "1": AppColorScheme.theme1(),
+    "2": AppColorScheme.theme2(),
+    "3": AppColorScheme.theme3(),
+    "4": AppColorScheme.theme4(),
+    "5": AppColorScheme.theme5(),
+    "6": AppColorScheme.theme6(),
+    "7": AppColorScheme.theme7(),
   };
 
-  static Iterable<MapEntry<String, GameColorScheme>> get all => _schemes.entries;
-  static GameColorScheme fromName(String? name) =>
-    _schemes.containsKey(name ?? defaultSchemeName) ? _schemes[name]! : GameColorScheme.defaultScheme();
+  static Iterable<MapEntry<String, AppColorScheme>> get all => _schemes.entries;
+  static AppColorScheme fromName(String? name) => _schemes[name ?? defaultSchemeName] ?? AppColorScheme.defaultScheme();
 }
 
 ////////////////////////////////////////////
 
-class GameColorScheme {
+class AppColorScheme {
   final Color backgroundTopPanel;
   final Color backgroundPuzzlePanel;
   final Color backgroundInputPanel;
@@ -57,7 +56,7 @@ class GameColorScheme {
   final Color textInputButton;
   final Color backgroundInputButton;
 
-  GameColorScheme({
+  AppColorScheme({
     required this.backgroundTopPanel,
     required this.backgroundPuzzlePanel,
     required this.backgroundInputPanel,
@@ -89,14 +88,14 @@ class GameColorScheme {
     this.backgroundInputButton = Colors.black,
   });
 
-  factory GameColorScheme.defaultScheme() {
+  factory AppColorScheme.defaultScheme() {
 
     var color1 = _fromHex("151515");
     var color2 = _fromHex("a91d3a");
     var color3 = _fromHex("c73659");
     var color4 = _fromHex("eeeeee");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -129,14 +128,14 @@ class GameColorScheme {
 
   }
 
-  factory GameColorScheme.theme1() {
+  factory AppColorScheme.theme1() {
 
     var color1 = _fromHex("114232");
     var color2 = _fromHex("87a922");
     var color3 = _fromHex("fcdc2a");
     var color4 = _fromHex("f7f6bb");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -167,14 +166,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme2() {
+  factory AppColorScheme.theme2() {
 
     var color1 = _fromHex("f5dad2");
     var color2 = _fromHex("fcffe0");
     var color3 = _fromHex("bacd92");
     var color4 = _fromHex("75a47f");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -205,14 +204,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme3() {
+  factory AppColorScheme.theme3() {
 
     var color1 = _fromHex("c40c0c");
     var color2 = _fromHex("ff6500");
     var color3 = _fromHex("ff8a08");
     var color4 = _fromHex("ffc100");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -245,14 +244,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme4() {
+  factory AppColorScheme.theme4() {
 
     var color1 = _fromHex("12372a");
     var color2 = _fromHex("436850");
     var color3 = _fromHex("adbc9f");
     var color4 = _fromHex("fbfada");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -283,14 +282,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme5() {
+  factory AppColorScheme.theme5() {
 
     var color1 = _fromHex("f8f4ec");
     var color2 = _fromHex("ff9bd2");
     var color3 = _fromHex("d63484");
     var color4 = _fromHex("402b3a");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -323,14 +322,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme6() {
+  factory AppColorScheme.theme6() {
 
     var color1 = _fromHex("dcf2f1");
     var color2 = _fromHex("7fc7d9");
     var color3 = _fromHex("365486");
     var color4 = _fromHex("0f1035");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,
@@ -363,14 +362,14 @@ class GameColorScheme {
     );
   }
 
-  factory GameColorScheme.theme7() {
+  factory AppColorScheme.theme7() {
 
     var color1 = _fromHex("32012F");
     var color2 = _fromHex("524C42");
     var color3 = _fromHex("E2DFD0");
     var color4 = _fromHex("F97300");
 
-    return GameColorScheme(
+    return AppColorScheme(
       backgroundTopPanel: color1,
       backgroundPuzzlePanel: color2,
       backgroundInputPanel: color3,

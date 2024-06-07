@@ -14,25 +14,25 @@ class BlinkEffect extends StatefulWidget {
 
 class _BlinkEffectState extends State<BlinkEffect> with SingleTickerProviderStateMixin {
 
-  late final AnimationController controller = AnimationController(
+  late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 2000),
     lowerBound: 0.6,
     vsync: this,
   )..repeat(reverse: true);
 
-  late final Animation<double> animation = CurvedAnimation(
-    parent: controller,
+  late final Animation<double> _animation = CurvedAnimation(
+    parent: _controller,
     curve: Curves.easeIn,
   );
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(opacity: animation, child: widget.child);
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 
   @override
   dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }

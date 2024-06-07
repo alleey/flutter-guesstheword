@@ -1,9 +1,10 @@
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../services/app_data_service.dart';
-import '../services/data_service.dart';
 
 ////////////////////////////////////////////
 
@@ -11,7 +12,8 @@ abstract class SettingsBlocEvent {}
 
 class ReadSettingEvent extends SettingsBlocEvent {
   final String name;
-  ReadSettingEvent({required this.name});
+  dynamic defaultValue;
+  ReadSettingEvent({required this.name, this.defaultValue});
 }
 
 class WriteSettingEvent extends SettingsBlocEvent {
@@ -37,16 +39,18 @@ class SettingsReadBlocState extends SettingsBlocState {
 
 class SettingsBloc extends Bloc<SettingsBlocEvent, SettingsBlocState>
 {
-  final appDataService = AppDataService(dataService: globalDataService);
+  final _appDataService = AppDataService();
 
   SettingsBloc() : super(InitialSettingsBlocEvent())
   {
     on<ReadSettingEvent>((event, emit) async {
-      emit(SettingsReadBlocState(name: event.name, value: appDataService.getSetting(event.name)));
+      final value = _appDataService.getSetting(event.name, event.defaultValue);
+      log("ReadSettingEvent -> ${event.name} = $value");
+      emit(SettingsReadBlocState(name: event.name, value: value));
     });
 
     on<WriteSettingEvent>((event, emit) async {
-      appDataService.putSetting(event.name, event.value);
+      _appDataService.putSetting(event.name, event.value);
       if (event.reload) {
         emit(SettingsReadBlocState(name: event.name, value: event.value));
       }

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-import '../common/game_color_scheme.dart';
+import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
 import 'common/responsive_layout.dart';
 
@@ -12,11 +12,14 @@ class ColorSchemePicker extends StatefulWidget {
 
   final String selectedTheme;
   final ColorSchemeSelectionCallback onSelect;
+  final WrapAlignment alignment;
 
   const ColorSchemePicker({
     super.key,
     required this.selectedTheme,
-    required this.onSelect
+    required this.onSelect,
+    this.alignment = WrapAlignment.center,
+
   });
 
   @override
@@ -40,10 +43,10 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
     final itemSize = layout.get<Size>(AppLayoutConstants.colorSchemePickerItemSizeKey);
 
     return Wrap(
-      alignment: WrapAlignment.center,
-        runSpacing: 3,
-        spacing: 3,
-        children: GameColorSchemes.all.mapIndexed((index, e) =>
+      alignment: widget.alignment,
+        runSpacing: 2,
+        spacing: 2,
+        children: AppColorSchemes.all.mapIndexed((index, e) =>
           Semantics(
             label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
             button: true,
