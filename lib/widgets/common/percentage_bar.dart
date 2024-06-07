@@ -10,6 +10,7 @@ class PercentageBar extends StatelessWidget {
     this.foregroundColor = Colors.white,
     this.borderColor,
     this.borderWidth = 0.0,
+    this.textStyle,
   });
 
   final double value;
@@ -18,6 +19,7 @@ class PercentageBar extends StatelessWidget {
   final Color foregroundColor;
   final Color? borderColor; // Optional border color
   final double borderWidth; // Optional border width
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,8 @@ class PercentageBar extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 "${(value * 100).toStringAsFixed(1)}%",
-                style: TextStyle(
+                textScaler: const TextScaler.linear(0.9),
+                style: textStyle ?? TextStyle(
                   color: foregroundColor,
                 ),
               ),

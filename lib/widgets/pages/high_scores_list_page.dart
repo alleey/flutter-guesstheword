@@ -103,9 +103,12 @@ class HighScoresListPage extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () => sortOrderNotifier.value = (PlayerStatisticsSortOrder.winrate, sortOrder.$2),
-                  child: Text(
-                    context.localizations.translate("dlg_scores_winrate"),
-                    textAlign: TextAlign.start,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      context.localizations.translate("dlg_scores_winrate"),
+                      textAlign: TextAlign.start,
+                    ),
                   ),
                 ),
                 if (sortOrder.$1 == PlayerStatisticsSortOrder.winrate)
@@ -125,9 +128,12 @@ class HighScoresListPage extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () => sortOrderNotifier.value = (PlayerStatisticsSortOrder.accuracy, sortOrder.$2),
-                  child: Text(
-                    context.localizations.translate("dlg_scores_accuracy"),
-                    textAlign: TextAlign.start,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      context.localizations.translate("dlg_scores_accuracy"),
+                      textAlign: TextAlign.start,
+                    ),
                   ),
                 ),
                 if (sortOrder.$1 == PlayerStatisticsSortOrder.accuracy)

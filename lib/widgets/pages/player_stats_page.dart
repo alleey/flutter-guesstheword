@@ -79,11 +79,10 @@ class PlayerStatisticsPage extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-               child:
-               Container(
+               child: Container(
                   decoration: BoxDecoration(
                     color: scheme.textPuzzlePanel,
-                    borderRadius: BorderRadius.circular(6),
+                    //borderRadius: BorderRadius.circular(3),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   child: Column(
@@ -92,6 +91,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                         context.localizations.translate("dlg_playerstats_winrate"),
                         textAlign: TextAlign.center,
                       ),
+                      Divider(color: scheme.backgroundPuzzleSymbols, height: 1, indent: 15, endIndent: 15,),
                       Text(
                         "${(score.total.winRate * 100).toStringAsFixed(1)}%",
                         textAlign: TextAlign.center,
@@ -100,12 +100,12 @@ class PlayerStatisticsPage extends StatelessWidget {
                   )
                 ),
               ),
-              VerticalDivider(color: scheme.backgroundPuzzleSymbols, width: 1),
+              VerticalDivider(color: scheme.backgroundPuzzleSymbols, width: 1, indent: 15, endIndent: 15,),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     color: scheme.textPuzzlePanel,
-                    borderRadius: BorderRadius.circular(6),
+                    //borderRadius: BorderRadius.circular(3),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   child: Column(
@@ -114,6 +114,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                         context.localizations.translate("dlg_playerstats_accuracy"),
                         textAlign: TextAlign.center,
                       ),
+                      Divider(color: scheme.backgroundPuzzleSymbols, height: 1, indent: 15, endIndent: 15,),
                       Text(
                         "${(score.total.accuracy * 100).toStringAsFixed(1)}%",
                         textAlign: TextAlign.center,
@@ -137,14 +138,18 @@ class PlayerStatisticsPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Row(
               children: [
                 InkWell(
                   onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, sortOrder.$2),
-                  child: Text(
-                    context.localizations.translate("dlg_playerstats_category"),
-                    textAlign: TextAlign.start,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      context.localizations.translate("dlg_playerstats_category"),
+                      textAlign: TextAlign.start,
+                    ),
                   ),
                 ),
                 if (sortOrder.$1 == CategoryStatisticsSortOrder.name)
@@ -167,9 +172,12 @@ class PlayerStatisticsPage extends StatelessWidget {
                     children: [
                       InkWell(
                         onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, sortOrder.$2),
-                        child: Text(
-                          context.localizations.translate("dlg_playerstats_winrate"),
-                          textAlign: TextAlign.start,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            context.localizations.translate("dlg_playerstats_winrate"),
+                            textAlign: TextAlign.start,
+                          ),
                         ),
                       ),
                       if (sortOrder.$1 == CategoryStatisticsSortOrder.winrate)
@@ -189,9 +197,12 @@ class PlayerStatisticsPage extends StatelessWidget {
                     children: [
                       InkWell(
                         onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, sortOrder.$2),
-                        child: Text(
-                          context.localizations.translate("dlg_playerstats_accuracy"),
-                          textAlign: TextAlign.start,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            context.localizations.translate("dlg_playerstats_accuracy"),
+                            textAlign: TextAlign.start,
+                          ),
                         ),
                       ),
                       if (sortOrder.$1 == CategoryStatisticsSortOrder.accuracy)
@@ -236,7 +247,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,
