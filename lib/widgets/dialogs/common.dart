@@ -9,7 +9,7 @@ typedef ContentBuilder = Widget Function(
   ValueNotifier<AppColorScheme> colorScheme
 );
 
-typedef ActionBuilder = Iterable<DialogAction> Function(
+typedef ActionBuilder = Iterable<Widget> Function(
   ResponsiveLayout layout,
   ValueNotifier<AppColorScheme> colorScheme
 );

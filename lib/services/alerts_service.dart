@@ -14,7 +14,7 @@ import '../widgets/pages/how_to_play_page.dart';
 import '../widgets/pages/high_scores_list_page.dart';
 import '../widgets/pages/player_stats_page.dart';
 import '../widgets/pages/settings_page.dart';
-
+import 'score_service.dart';
 
 class AlertsService {
 
@@ -27,7 +27,7 @@ class AlertsService {
   }) {
     return showGeneralDialog<T>(
         context: context,
-        barrierColor: Colors.black.withOpacity(0.7),
+        barrierColor: Colors.black.withOpacity(0.8),
         barrierDismissible: false,
         transitionDuration: const Duration(milliseconds: 250),
         transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -67,27 +67,31 @@ class AlertsService {
       colorScheme: colorScheme,
       contents: contents,
       actions: (layout, schemeNotifier) => [
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: false,
-          onAction: (close) {
-            close(null);
-            onAccept?.call();
-          },
-          builder: (layout, cs) {
-            return Text(yesLabel, textAlign: TextAlign.center);
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: false,
+            onAction: (close) {
+              close(null);
+              onAccept?.call();
+            },
+            builder: (layout, cs) {
+              return Text(yesLabel, textAlign: TextAlign.center);
+            }
+          ),
         ),
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-            onReject?.call();
-          },
-          builder: (layout, cs) {
-            return Text(noLabel, textAlign: TextAlign.center);
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+              onReject?.call();
+            },
+            builder: (layout, cs) {
+              return Text(noLabel, textAlign: TextAlign.center);
+            }
+          ),
         )
       ],
     );
@@ -106,16 +110,18 @@ class AlertsService {
       colorScheme: colorScheme,
       contents: contents,
       actions: (layout, schemeNotifier) => [
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-            callback?.call();
-          },
-          builder: (layout, cs) {
-            return Text(okLabel, textAlign: TextAlign.center);
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+              callback?.call();
+            },
+            builder: (layout, cs) {
+              return Text(okLabel, textAlign: TextAlign.center);
+            }
+          ),
         )
       ],
     );
@@ -176,8 +182,7 @@ class AlertsService {
     return yesNoDialog(
       context,
       colorScheme:  colorScheme,
-      title: (layout, schemeNotifier) =>
-        LocalizedText(
+      title: (layout, schemeNotifier) => LocalizedText(
           textId: "dlg_reset_title",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
@@ -229,8 +234,7 @@ class AlertsService {
     return actionDialog(
       context,
       colorScheme: colorScheme,
-      title: (layout, schemeNotifier) =>
-        LocalizedText(
+      title: (layout, schemeNotifier) => LocalizedText(
           textId: "dlg_help_title",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
@@ -246,20 +250,22 @@ class AlertsService {
         ),
       actions: (layout, schemeNotifier) => [
 
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-          },
-          builder: (layout, cs) {
-            return Consumer<LocaleProvider>(
-              builder: (context, value, child) => Text(
-                context.localizations.translate("dlg_help_ok"),
-                textAlign: TextAlign.center
-              ),
-            );
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+            },
+            builder: (layout, cs) {
+              return Consumer<LocaleProvider>(
+                builder: (context, value, child) => Text(
+                  context.localizations.translate("dlg_help_ok"),
+                  textAlign: TextAlign.center
+                ),
+              );
+            }
+          ),
         )
       ],
     );
@@ -267,11 +273,11 @@ class AlertsService {
 
   Future<dynamic> highScoresDialog(BuildContext context, AppColorScheme colorScheme) {
 
+    final scoreService = ScoreService();
     return actionDialog(
       context,
       colorScheme: colorScheme,
-      title: (layout, schemeNotifier) =>
-        LocalizedText(
+      title: (layout, schemeNotifier) => LocalizedText(
           textId: "dlg_scores_title",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
@@ -282,25 +288,27 @@ class AlertsService {
       contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
           valueListenable: schemeNotifier,
           builder: (context, scheme, child) {
-            return HighScoresListPage(colorScheme: scheme);
+            return HighScoresListPage(colorScheme: scheme, statisticsList: scoreService.highScores());
           }
         ),
       actions: (layout, schemeNotifier) => [
 
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-          },
-          builder: (layout, cs) {
-            return Consumer<LocaleProvider>(
-              builder: (context, value, child) => Text(
-                context.localizations.translate("dlg_scores_ok"),
-                textAlign: TextAlign.center
-              ),
-            );
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+            },
+            builder: (layout, cs) {
+              return Consumer<LocaleProvider>(
+                builder: (context, value, child) => Text(
+                  context.localizations.translate("dlg_scores_ok"),
+                  textAlign: TextAlign.center
+                ),
+              );
+            }
+          ),
         )
       ],
     );
@@ -311,8 +319,7 @@ class AlertsService {
     return actionDialog(
       context,
       colorScheme: colorScheme,
-      title: (layout, schemeNotifier) =>
-        Text(
+      title: (layout, schemeNotifier) => Text(
           "Score: ${stats.score}-${stats.total.wins}-${stats.total.losses}",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
@@ -328,20 +335,22 @@ class AlertsService {
         ),
       actions: (layout, schemeNotifier) => [
 
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-          },
-          builder: (layout, cs) {
-            return Consumer<LocaleProvider>(
-              builder: (context, value, child) => Text(
-                context.localizations.translate("dlg_playerstats_ok"),
-                textAlign: TextAlign.center
-              ),
-            );
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+            },
+            builder: (layout, cs) {
+              return Consumer<LocaleProvider>(
+                builder: (context, value, child) => Text(
+                  context.localizations.translate("dlg_playerstats_ok"),
+                  textAlign: TextAlign.center
+                ),
+              );
+            }
+          ),
         )
       ],
     );
@@ -352,8 +361,7 @@ class AlertsService {
     return actionDialog(
       context,
       colorScheme: colorScheme,
-      title: (layout, schemeNotifier) =>
-        LocalizedText(
+      title: (layout, schemeNotifier) => LocalizedText(
           textId: "dlg_settings_title",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,
@@ -363,20 +371,22 @@ class AlertsService {
         ),
       actions: (layout, schemeNotifier) => [
 
-        ButtonDialogAction(
-          schemeNotifier: schemeNotifier,
-          isDefault: true,
-          onAction: (close) {
-            close(null);
-          },
-          builder: (layout, cs) {
-            return Consumer<LocaleProvider>(
-              builder: (context, value, child) => Text(
-                context.localizations.translate("dlg_settings_ok"),
-                textAlign: TextAlign.center
-              ),
-            );
-          }
+        Expanded(
+          child: ButtonDialogAction(
+            schemeNotifier: schemeNotifier,
+            isDefault: true,
+            onAction: (close) {
+              close(null);
+            },
+            builder: (layout, cs) {
+              return Consumer<LocaleProvider>(
+                builder: (context, value, child) => Text(
+                  context.localizations.translate("dlg_settings_ok"),
+                  textAlign: TextAlign.center
+                ),
+              );
+            }
+          ),
         )
       ],
       contents: (layout, schemeNotifier) => ValueListenableBuilder<AppColorScheme>(
@@ -391,8 +401,7 @@ class AlertsService {
   }) {
     return okDialog(
       context,
-      title: (layout, schemeNotifier) =>
-        LocalizedText(
+      title: (layout, schemeNotifier) => LocalizedText(
           textId: "dlg_needreset_title",
           style: TextStyle(
             color: schemeNotifier.value.backgroundPuzzleSymbolsFlipped,

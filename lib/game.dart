@@ -459,11 +459,17 @@ class _PuzzlePageState extends State<PuzzlePage> {
             },
             child: Padding(
               padding: const EdgeInsets.only(top: 5),
-              child: Text(
-                context.localizations.translate("game_puzzle_usehint"),
-                style: TextStyle(
-                  color: _colorScheme.textHintButton,
-                  fontSize: bodyFontSize
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    context.localizations.translate("game_puzzle_usehint"),
+                    style: TextStyle(
+                      color: _colorScheme.textHintButton,
+                      fontSize: bodyFontSize
+                    ),
+                  ),
                 ),
               ),
             ),

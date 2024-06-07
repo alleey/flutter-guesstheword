@@ -158,14 +158,7 @@ class _AppDialogState extends State<AppDialog> {
             if (buttons.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: buttons.mapIndexed((index, action) {
-
-                  return Padding(
-                    padding: EdgeInsets.only(left: index > 0 ? 10:0),
-                    child: action,
-                  );
-
-                }).toList(),
+                children: buttons.toList(),
               ),
           ],
         );
@@ -201,6 +194,8 @@ class ButtonDialogAction extends DialogAction {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
         ),
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
       ).copyWith(
         overlayColor: StateDependentColor(foregroundColor),
       ),

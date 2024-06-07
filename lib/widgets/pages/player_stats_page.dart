@@ -76,54 +76,51 @@ class PlayerStatisticsPage extends StatelessWidget {
             color: colorScheme.backgroundPuzzlePanel,
             fontWeight: FontWeight.bold,
           ),
-          child: Row(
-            children: [
-              Expanded(
-               child: Container(
-                  decoration: BoxDecoration(
-                    color: scheme.textPuzzlePanel,
-                    //borderRadius: BorderRadius.circular(3),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    children: [
-                      Text(
-                        context.localizations.translate("dlg_playerstats_winrate"),
-                        textAlign: TextAlign.center,
-                      ),
-                      Divider(color: scheme.backgroundPuzzleSymbols, height: 1, indent: 15, endIndent: 15,),
-                      Text(
-                        "${(score.total.winRate * 100).toStringAsFixed(1)}%",
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
+          child: Container(
+            decoration: BoxDecoration(
+              color: scheme.textPuzzlePanel,
+              //borderRadius: BorderRadius.circular(3),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                 child: Column(
+                   children: [
+                     FittedBox(
+                       fit: BoxFit.scaleDown,
+                       child: Text(
+                         context.localizations.translate("dlg_playerstats_winrate"),
+                         textAlign: TextAlign.center,
+                       ),
+                     ),
+                     Text(
+                       "${(score.total.winRate * 100).toStringAsFixed(1)}%",
+                       textAlign: TextAlign.center,
+                     ),
+                   ],
+                 ),
                 ),
-              ),
-              VerticalDivider(color: scheme.backgroundPuzzleSymbols, width: 1, indent: 15, endIndent: 15,),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: scheme.textPuzzlePanel,
-                    //borderRadius: BorderRadius.circular(3),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                Container(color: Colors.black, width: 1, height: 60),
+                Expanded(
                   child: Column(
                     children: [
-                      Text(
-                        context.localizations.translate("dlg_playerstats_accuracy"),
-                        textAlign: TextAlign.center,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          context.localizations.translate("dlg_playerstats_accuracy"),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      Divider(color: scheme.backgroundPuzzleSymbols, height: 1, indent: 15, endIndent: 15,),
                       Text(
                         "${(score.total.accuracy * 100).toStringAsFixed(1)}%",
                         textAlign: TextAlign.center,
                       ),
                     ],
-                  )
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -132,7 +129,7 @@ class PlayerStatisticsPage extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, AppColorScheme scheme, (CategoryStatisticsSortOrder, bool) sortOrder) {
     return Semantics(
-      label: "Below is the list of top scores, games won and lost",
+      label: "Below is the list of top scores, win rates and accuracies",
       excludeSemantics: true,
       container: true,
       child: Row(
@@ -149,6 +146,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                     child: Text(
                       context.localizations.translate("dlg_playerstats_category"),
                       textAlign: TextAlign.start,
+                      textScaler: const TextScaler.linear(0.9),
                     ),
                   ),
                 ),
@@ -164,6 +162,7 @@ class PlayerStatisticsPage extends StatelessWidget {
             ),
           ),
           Expanded(
+            flex: 1,
             child: Row(
               children: [
                 Expanded(
@@ -177,6 +176,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                           child: Text(
                             context.localizations.translate("dlg_playerstats_winrate"),
                             textAlign: TextAlign.start,
+                            textScaler: const TextScaler.linear(0.9),
                           ),
                         ),
                       ),
@@ -185,7 +185,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                           onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, !sortOrder.$2),
                           child: Icon(
                             sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: scheme.textPuzzlePanel, // Customize the color of the icon
+                            color: scheme.textPuzzlePanel,
                           ),
                         ),
                     ],
@@ -202,6 +202,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                           child: Text(
                             context.localizations.translate("dlg_playerstats_accuracy"),
                             textAlign: TextAlign.start,
+                            textScaler: const TextScaler.linear(0.9),
                           ),
                         ),
                       ),
@@ -227,7 +228,7 @@ class PlayerStatisticsPage extends StatelessWidget {
   Widget _buildStatsList(BuildContext context, AppColorScheme scheme, PlayerStatistics score, (CategoryStatisticsSortOrder, bool) sortOrder) {
 
     final layout = context.layout;
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final sorted = CategoryStatisticsSorter.sort(score.categoryStatistics, order: sortOrder.$1, ascending: sortOrder.$2);
 
     return SingleChildScrollView(
@@ -237,7 +238,7 @@ class PlayerStatisticsPage extends StatelessWidget {
         children: [
           ...sorted.mapIndexed((i, stats) {
             return Semantics(
-              label: "",
+              label: "Category ${stats.key}",
               container: true,
               excludeSemantics: true,
               child: Container(
@@ -255,13 +256,15 @@ class PlayerStatisticsPage extends StatelessWidget {
                             stats.key,
                             textAlign: TextAlign.start,
                             style: TextStyle(
-                              fontSize: titleFontSize,
+                              fontSize: bodyFontSize,
                               fontWeight: FontWeight.bold,
                             ),
+                            textScaler: const TextScaler.linear(0.9),
                           ),
                         ),
                       ),
                       Expanded(
+                        flex: 1,
                         child: Row(
                           children: [
                             Expanded(
@@ -269,7 +272,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                                 padding: const EdgeInsets.only(left: 5),
                                 child: PercentageBar(
                                   value: stats.value.winRate,
-                                  height: 25,
+                                  height: 20,
                                   foregroundColor: scheme.textPuzzleSymbolsFlipped,
                                   backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                                 ),
@@ -280,7 +283,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                                 padding: const EdgeInsets.only(left: 5),
                                 child: PercentageBar(
                                   value: stats.value.accuracy,
-                                  height: 25,
+                                  height: 20,
                                   foregroundColor: scheme.textPuzzleSymbolsFlipped,
                                   backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                                 ),

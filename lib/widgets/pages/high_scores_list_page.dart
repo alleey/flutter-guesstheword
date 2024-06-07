@@ -8,7 +8,6 @@ import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/player_stats.dart';
-import '../../services/score_service.dart';
 import '../common/percentage_bar.dart';
 import '../localized_text.dart';
 
@@ -17,11 +16,12 @@ class HighScoresListPage extends StatelessWidget {
   HighScoresListPage({
     super.key,
     required this.colorScheme,
+    required this.statisticsList,
 
   });
 
   final AppColorScheme colorScheme;
-  final scoreService = ScoreService();
+  final List<PlayerStatistics> statisticsList;
   final sortOrderNotifier = ValueNotifier<(PlayerStatisticsSortOrder, bool)>((PlayerStatisticsSortOrder.score, false));
 
   @override
@@ -29,7 +29,7 @@ class HighScoresListPage extends StatelessWidget {
 
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final scores = scoreService.highScores();
+    final scores = statisticsList;
 
     return scores.isEmpty ?
       _buildNoStats(context, colorScheme) :
@@ -45,14 +45,16 @@ class HighScoresListPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                const LocalizedText(
-                  textId: "dlg_scores_intro",
-                  placeholders: {"maxScoreHistory": Constants.maxScoreHistory},
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5),
+                  child: LocalizedText(
+                    textId: "dlg_scores_intro",
+                    placeholders: {"maxScoreHistory": Constants.maxScoreHistory},
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
 
                 _buildHeader(context, colorScheme, sortOrder),
 
@@ -84,6 +86,7 @@ class HighScoresListPage extends StatelessWidget {
                   child: Text(
                     context.localizations.translate("dlg_scores_score"),
                     textAlign: TextAlign.start,
+                    textScaler: const TextScaler.linear(0.9),
                   ),
                 ),
                 if (sortOrder.$1 == PlayerStatisticsSortOrder.score)
@@ -108,6 +111,7 @@ class HighScoresListPage extends StatelessWidget {
                     child: Text(
                       context.localizations.translate("dlg_scores_winrate"),
                       textAlign: TextAlign.start,
+                      textScaler: const TextScaler.linear(0.9),
                     ),
                   ),
                 ),
@@ -133,6 +137,7 @@ class HighScoresListPage extends StatelessWidget {
                     child: Text(
                       context.localizations.translate("dlg_scores_accuracy"),
                       textAlign: TextAlign.start,
+                      textScaler: const TextScaler.linear(0.9),
                     ),
                   ),
                 ),
@@ -160,7 +165,7 @@ class HighScoresListPage extends StatelessWidget {
   {
 
     final layout = context.layout;
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final sorted = PlayerStatisticsSorter.sort(scores, order: sortOrder. $1,ascending: sortOrder.$2);
 
     return SingleChildScrollView(
@@ -186,9 +191,10 @@ class HighScoresListPage extends StatelessWidget {
                           "${stats.score}-${stats.total.wins}-${stats.total.losses}",
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                            fontSize: titleFontSize,
+                            fontSize: bodyFontSize,
                             fontWeight: FontWeight.bold,
                           ),
+                          textScaler: const TextScaler.linear(0.9),
                         ),
                       ),
                       Expanded(
@@ -204,7 +210,7 @@ class HighScoresListPage extends StatelessWidget {
                                     padding: const EdgeInsets.only(left: 5),
                                     child: PercentageBar(
                                       value: stats.total.winRate,
-                                      height: 25,
+                                      height: 20,
                                       foregroundColor: scheme.textPuzzleSymbolsFlipped,
                                       backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                                     ),
@@ -215,7 +221,7 @@ class HighScoresListPage extends StatelessWidget {
                                     padding: const EdgeInsets.only(left: 5),
                                     child: PercentageBar(
                                       value: stats.total.accuracy,
-                                      height: 25,
+                                      height: 20,
                                       foregroundColor: scheme.textPuzzleSymbolsFlipped,
                                       backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
                                     ),

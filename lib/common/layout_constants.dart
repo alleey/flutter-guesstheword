@@ -76,9 +76,9 @@ class AppLayoutConstants
   // linear keyboard
   static const String hintWidthPctKey = "app.hintWidthPct";
   static final hintWidthPct = ResponsiveValue.from(
-    small: 0.4,
-    medium: 0.3,
-    large: 0.2,
+    small: 0.5,
+    medium: 0.4,
+    large: 0.3,
   );
 
   static const String colorSchemePickerItemSizeKey = "app.colorSchemePickerItemSize";
