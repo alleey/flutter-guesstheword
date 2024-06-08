@@ -44,7 +44,7 @@ class SymbolButton extends StatelessWidget {
         child: ElevatedButton(
           autofocus: autofocus,
           style: ElevatedButton.styleFrom(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
             minimumSize: Size.zero,

@@ -6,15 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
-import 'blocs/settings_bloc.dart';
 import 'common/app_color_scheme.dart';
 import 'common/constants.dart';
 import 'common/custom_traversal_policy.dart';
 import 'common/layout_constants.dart';
 import 'common/utils.dart';
 import 'localizations/app_localizations.dart';
+import 'models/app_settings.dart';
 import 'services/alerts_service.dart';
-import 'services/app_data_service.dart';
 import 'services/audio_service.dart';
 import 'widgets/common/alternating_color_squares.dart';
 import 'widgets/common/blink_effect.dart';
@@ -23,8 +22,8 @@ import 'widgets/common/flip_card.dart';
 import 'widgets/common/party_popper_effect.dart';
 import 'widgets/common/responsive_layout.dart';
 import 'widgets/loading_indicator.dart';
+import 'widgets/settings_aware_builder.dart';
 import 'widgets/symbol_pad.dart';
-
 
 class PuzzlePage extends StatefulWidget {
   const PuzzlePage({super.key});
@@ -35,20 +34,16 @@ class PuzzlePage extends StatefulWidget {
 
 class _PuzzlePageState extends State<PuzzlePage> {
 
-  final _appDataService = AppDataService();
   final _audioService = AudioService();
   final _errorEffectsDone = BitArray(Constants.maxErrors);
 
-  late AppColorScheme _colorScheme;
+  AppSettings _settings = AppSettings();
   GameState? _gameState;
   VoidCallback? _dismissActivePopup;
 
   @override
   void initState() {
     super.initState();
-    _colorScheme = AppColorSchemes.fromName(
-      _appDataService.getSetting(KnownSettingsNames.settingTheme, AppColorSchemes.defaultSchemeName)
-    );
     context.gameBloc.add(StartPuzzleEvent());
   }
 
@@ -56,22 +51,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-
-        BlocListener<SettingsBloc, SettingsBlocState>(
-          listener: (BuildContext context, state) {
-
-            log("PuzzlePage> listener SettingsBlocState: $state");
-            switch(state) {
-              case final SettingsReadBlocState s:
-              if (s.name == KnownSettingsNames.settingTheme) {
-                setState(() {
-                  _colorScheme = AppColorSchemes.fromName(s.value);
-                });
-              }
-              break;
-            }
-          }
-        ),
 
         BlocListener<GameBloc, GameBlocState>(
           listener: (context, state) async {
@@ -81,7 +60,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
               case ResetPendingState s:
                 _dismissActivePopup = AlertsService().popup(context,
-                  _colorScheme,
                   title: context.localizations.translate("dlg_popup_title"),
                   message: context.localizations.translate(s.messageKey)
                 );
@@ -108,7 +86,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 }
                 break;
 
-              case InputMatchState s:
+              case InputMatchState _:
                 _audioService.play("audio/match.mp3");
                 break;
 
@@ -118,38 +96,47 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
               case NoMorePuzzleState _:
                 AlertsService().gameNeedsResetDialog(context,
-                  _colorScheme,
                   callback: () => context.gameBloc.add(ResetGameEvent())
                 );
                 break;
+
               case GameState state:
                 setState(() {
                   _gameState = state;
                 });
                 break;
-
             }
           }
         )
       ],
-      child: Builder(
-        builder: (context) {
 
-          if (_gameState == null) {
-            return LoadingIndicator(
-              colorScheme: _colorScheme,
-              message: context.localizations.translate("game_loading")
-            );
+      child: SettingsAwareBuilder(
+        onSettingsAvailable: (settings) {
+          _settings = settings;
+          _audioService.mute(!settings.playSounds);
+        },
+        builder: (context, settingsProvider) => ValueListenableBuilder(
+          valueListenable: settingsProvider,
+          builder: (context, settings, child) {
+
+            if (_gameState == null) {
+              return LoadingIndicator(
+                message: context.localizations.translate("game_loading")
+              );
+            }
+
+            return _buildLayout(context, _gameState!);
+
           }
+        ),
+      ),
 
-          return _buildLayout(context, _gameState!);
-        }
-      )
     );
   }
 
   Widget _buildLayout(BuildContext context, GameState state) {
     var squareSize = 6.0;
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -159,9 +146,15 @@ class _PuzzlePageState extends State<PuzzlePage> {
           children: [
             Expanded(
               flex: 3,
-              child: Container(
-                color: _colorScheme.backgroundTopPanel,
-                child: _buildTopPanel(context, state)
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      color: scheme.backgroundTopPanel,
+                      child: _buildTopPanel(context, state)
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -170,15 +163,14 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 children: [
                   Positioned.fill(
                     child: Container(
-                      color: _colorScheme.backgroundPuzzlePanel,
+                      color: scheme.backgroundPuzzlePanel,
                       child: _buildPuzzlePanel(context, state)
                     ),
                   ),
                   Positioned(
-                    //top: -5,
                     child: AlternatingColorSquares(
-                      color1: _colorScheme.backgroundTopPanel,
-                      color2: _colorScheme.backgroundPuzzlePanel,
+                      color1: scheme.backgroundTopPanel,
+                      color2: scheme.backgroundPuzzlePanel,
                       squareSize: squareSize,
                     )
                   )
@@ -191,16 +183,25 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 children: [
                   Positioned.fill(
                     child: Container(
-                      color: _colorScheme.backgroundInputPanel,
+                      color: scheme.backgroundInputPanel,
                       child: _buildInputPanel(context, state)
                     ),
                   ),
                   Positioned(
-                    //top: -5,
                     child: AlternatingColorSquares(
-                      color1: _colorScheme.backgroundInputPanel,
-                      color2: _colorScheme.backgroundPuzzlePanel,
+                      color1: scheme.backgroundInputPanel,
+                      color2: scheme.backgroundPuzzlePanel,
                       squareSize: squareSize,
+                    )
+                  ),
+                  Positioned(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: AlternatingColorSquares(
+                        color1: scheme.backgroundPuzzlePanel,
+                        color2: scheme.backgroundInputPanel,
+                        squareSize: squareSize,
+                      ),
                     )
                   )
                 ]
@@ -228,6 +229,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 5),
             _buildScorePanel(context, state),
             const SizedBox(height: 5),
             FlipCard(
@@ -241,7 +243,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         if ( !state.isGameOver && state.isHelpAvailable)
           Positioned(
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: AlignmentDirectional.bottomCenter,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * hintWidthPct,
                 child: _buildHintsOption(context, state)
@@ -254,55 +256,48 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildScorePanel(BuildContext context, GameState state) {
 
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final stats = state.playerStats;
 
-    return InkWell(
-      onLongPress: () {
-        AlertsService().statsDialog(context, _colorScheme, state.playerStats);
-      },
-      onDoubleTap: () {
-        AlertsService().statsDialog(context, _colorScheme, state.playerStats);
-      },
-      child: Semantics(
-        excludeSemantics: true,
-        label: "Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses. You have ${stats.hintTokens} available hints.",
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              style: TextStyle(
-                fontSize: titleFontSize,
-                color: _colorScheme.textTopPanel,
-              ),
-              children: [
-                TextSpan(
-                  text: '\u{273D}',
-                  style: TextStyle(
-                    color: _colorScheme.colorIcons,
-                    fontWeight: FontWeight.bold,
-                  )
-                ),
-                TextSpan(
-                  text: "${stats.score}-${stats.total.wins}-${stats.total.losses}",
-                ),
-                const TextSpan(
-                  text: "      ",
-                ),
-                TextSpan(
-                  text: '\u{2726}',
-                  style: TextStyle(
-                    color: _colorScheme.colorIcons,
-                    fontWeight: FontWeight.bold,
-                  )
-                ),
-                TextSpan(
-                  text: "${stats.hintTokens}",
-                ),
-              ],
+    return Semantics(
+      excludeSemantics: true,
+      label: "Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses. You have ${stats.hintTokens} available hints.",
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text.rich(
+          textAlign: TextAlign.center,
+          TextSpan(
+            style: TextStyle(
+              fontSize: titleFontSize,
+              color: scheme.textTopPanel,
             ),
+            children: [
+              TextSpan(
+                text: '\u{273D}',
+                style: TextStyle(
+                  color: scheme.colorIcons,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              TextSpan(
+                text: "${stats.score}-${stats.total.wins}-${stats.total.losses}",
+              ),
+              const TextSpan(
+                text: "      ",
+              ),
+              TextSpan(
+                text: '\u{2726}',
+                style: TextStyle(
+                  color: scheme.colorIcons,
+                  fontWeight: FontWeight.bold,
+                )
+              ),
+              TextSpan(
+                text: "${stats.hintTokens}",
+              ),
+            ],
           ),
         ),
       ),
@@ -310,6 +305,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildStatusPanel(BuildContext context, GameState state) {
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     return Semantics(
       label: "${Constants.maxErrors - state.errorCount} attempts left",
       child: Row(
@@ -320,13 +316,13 @@ class _PuzzlePageState extends State<PuzzlePage> {
           ...Iterable<int>.generate(Constants.maxErrors).map((e)
             => FlipCard(
                 showFront: (e > (state.errorCount - 1)),
-                frontCard: Icon(Icons.diamond, size: 32, color: _colorScheme.colorHeart),
+                frontCard: Icon(Icons.diamond, size: 32, color: scheme.colorHeart),
                 backCard: BumpEffect(
                   autostart: (e == (state.errorCount - 1) && !_errorEffectsDone[e]),
-                  particleColor: _colorScheme.colorHeart,
+                  particleColor: scheme.colorHeart,
                   builder: (context, fire) => SizedBox(
                     width: 32, height: 32,
-                    child: Icon(Icons.diamond_outlined, size: 24, color: _colorScheme.colorHeartBroken.withOpacity(0.75))
+                    child: Icon(Icons.diamond_outlined, size: 24, color: scheme.colorHeartBroken.withOpacity(0.75))
                   ),
                   onComplete: () => _errorEffectsDone.setBit(e), // use bitset to make sure effect is played once
                 ),
@@ -340,6 +336,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
 
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
@@ -356,7 +353,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               style: TextStyle(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
-                color: state.isWin ? _colorScheme.colorSuccess : _colorScheme.colorFailure,
+                color: state.isWin ? scheme.colorSuccess : scheme.colorFailure,
               ),
               children: [
                 TextSpan(
@@ -409,12 +406,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
             excludeSemantics: true,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _colorScheme.backgroundTopButton,
-                side: BorderSide(width: 2, color: _colorScheme.textTopPanel),
+                backgroundColor: scheme.backgroundTopButton,
+                side: BorderSide(width: 2, color: scheme.textTopPanel),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
               ).copyWith(
-                overlayColor: StateDependentColor(_colorScheme.textTopButton),
+                overlayColor: StateDependentColor(scheme.textTopButton),
               ),
               onPressed: () {
                 context.gameBloc.add(StartPuzzleEvent());
@@ -422,7 +419,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
               child: Text(
                 context.localizations.translate("game_top_gonext"),
                 style: TextStyle(
-                  color: _colorScheme.textTopButton,
+                  color: scheme.textTopButton,
                   fontSize: titleFontSize,
                 )
               )
@@ -435,46 +432,54 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildHintsOption(BuildContext context, GameState state) {
 
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
-    return BlinkEffect (
-      child: FocusTraversalOrder(
-        order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
-        child: Semantics(
-          label: "Use a hint",
-          button: true,
-          excludeSemantics: true,
+    return FocusTraversalOrder(
+      order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+      child: Semantics(
+        label: "Use a hint",
+        button: true,
+        excludeSemantics: true,
+        child: BlinkEffect(
           child: ElevatedButton (
             style: ElevatedButton.styleFrom(
-              backgroundColor: _colorScheme.backgroundHintButton,
+              backgroundColor: scheme.backgroundHintButton,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               padding: EdgeInsets.zero,
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
             ).copyWith(
-              overlayColor: StateDependentColor(_colorScheme.textHintButton),
+              overlayColor: StateDependentColor(scheme.textHintButton),
             ),
             onPressed: () {
               context.gameBloc.add(UseHintTokenEvent());
             },
             child: Padding(
               padding: const EdgeInsets.only(top: 5),
-              child: Text(
-                context.localizations.translate("game_puzzle_usehint"),
-                style: TextStyle(
-                  color: _colorScheme.textHintButton,
-                  fontSize: bodyFontSize
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    context.localizations.translate("game_puzzle_usehint"),
+                    style: TextStyle(
+                      color: scheme.textHintButton,
+                      fontSize: bodyFontSize
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      )
+      ),
     );
   }
 
   Widget _buildPuzzlePanel(BuildContext context, GameState state) {
 
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
@@ -500,7 +505,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   style: TextStyle(
                     fontSize: titleFontSize,
                     fontWeight: FontWeight.bold,
-                    color: _colorScheme.textPuzzlePanel,
+                    color: scheme.textPuzzlePanel,
                     ),
                   ),
               ),
@@ -514,10 +519,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   backSymbols: state.puzzle.toUpperCase(),
                   flipped: state.revealed,
                   whiteSpace: state.whiteSpace,
-                  foregroundColor: _colorScheme.textPuzzleSymbols,
-                  backgroundColor: _colorScheme.backgroundPuzzleSymbols,
-                  foregroundColorFlipped: _colorScheme.textPuzzleSymbolsFlipped,
-                  backgroundColorFlipped: _colorScheme.backgroundPuzzleSymbolsFlipped,
+                  foregroundColor: scheme.textPuzzleSymbols,
+                  backgroundColor: scheme.backgroundPuzzleSymbols,
+                  foregroundColorFlipped: scheme.textPuzzleSymbolsFlipped,
+                  backgroundColorFlipped: scheme.backgroundPuzzleSymbolsFlipped,
                   spacing: 3,
                   runSpacing: 3,
                   alignment: WrapAlignment.start,
@@ -547,6 +552,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildInputPanel(BuildContext context, GameState state) {
 
+    final scheme = AppColorSchemes.fromName(_settings.theme);
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
@@ -578,7 +584,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                     style: TextStyle(
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
-                        color: _colorScheme.textInputPanel,
+                        color: scheme.textInputPanel,
                       ),
                     ),
                 ),
@@ -596,10 +602,10 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   frontSymbols: state.symbolSet.toUpperCase(),
                   backSymbols: tried,
                   flipped: state.used,
-                  foregroundColor: _colorScheme.textInputSymbols,
-                  backgroundColor: _colorScheme.backgroundInputSymbols,
-                  foregroundColorFlipped: _colorScheme.textInputSymbolsFlipped,
-                  backgroundColorFlipped: _colorScheme.backgroundInputSymbolsFlipped,
+                  foregroundColor: scheme.textInputSymbols,
+                  backgroundColor: scheme.backgroundInputSymbols,
+                  foregroundColorFlipped: scheme.textInputSymbolsFlipped,
+                  backgroundColorFlipped: scheme.backgroundInputSymbolsFlipped,
                   spacing: 3,
                   runSpacing: 3,
                   buttonSize: buttonSize,
@@ -641,7 +647,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                 TextSpan(
                   style: TextStyle(
                     fontSize: bodyFontSize,
-                    color: _colorScheme.textInputPanel,
+                    color: scheme.textInputPanel,
                   ),
                   children: [
                     TextSpan(
@@ -662,16 +668,16 @@ class _PuzzlePageState extends State<PuzzlePage> {
           // Google button
           if (state.isGameOver)
             FocusTraversalOrder(
-              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 3),
               child: ElevatedButton(
                 autofocus: true,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _colorScheme.backgroundInputButton,
-                  side: BorderSide(width: 2, color: _colorScheme.textInputPanel),
+                  backgroundColor: scheme.backgroundInputButton,
+                  side: BorderSide(width: 2, color: scheme.textInputPanel),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 ).copyWith(
-                  overlayColor: StateDependentColor(_colorScheme.textInputPanel),
+                  overlayColor: StateDependentColor(scheme.textInputPanel),
                 ),
                 onPressed: () async {
                   final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
@@ -681,7 +687,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
                   'Google',
                   style: TextStyle(
                     fontSize: bodyFontSize,
-                    color: _colorScheme.textInputButton,
+                    color: scheme.textInputButton,
                   ),
                 ),
               ),

@@ -1,15 +1,13 @@
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../blocs/settings_bloc.dart';
 import '../../common/app_color_scheme.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
-import '../../services/app_data_service.dart';
+import '../../models/app_settings.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
+import '../settings_aware_builder.dart';
 import 'common.dart';
 
 class AppDialog extends StatefulWidget {
@@ -18,7 +16,6 @@ class AppDialog extends StatefulWidget {
     super.key,
     required this.title,
     required this.contents,
-    required this.colorScheme,
     required this.actions,
     this.width,
     this.height,
@@ -26,7 +23,6 @@ class AppDialog extends StatefulWidget {
     this.insetPadding,
   });
 
-  final AppColorScheme colorScheme;
   final ContentBuilder title;
   final ContentBuilder contents;
   final ActionBuilder actions;
@@ -41,135 +37,123 @@ class AppDialog extends StatefulWidget {
 
 class _AppDialogState extends State<AppDialog> {
 
-  late ValueNotifier<AppColorScheme> activeColorScheme;
-
-  @override
-  void initState() {
-    super.initState();
-    activeColorScheme = ValueNotifier<AppColorScheme>(widget.colorScheme);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SettingsBloc, SettingsBlocState>(
-      listener: (BuildContext context, state) {
-        switch(state) {
-          case final SettingsReadBlocState s:
-            if (state.name == KnownSettingsNames.settingTheme) {
-              activeColorScheme.value = AppColorSchemes.fromName(state.value);
-            }
-          break;
-        }
+    return SettingsAwareBuilder(
+      builder: (context, settingsProvider){
+        return ValueListenableBuilder(
+          valueListenable: settingsProvider,
+          builder: (context, settings, child) {
+            return _buildDialog(context, settingsProvider);
+          }
+        );
       },
-      child: _buildDialog(context),
     );
   }
 
-  Widget _buildDialog(BuildContext context) {
+  Widget _buildDialog(BuildContext context, ValueNotifier<AppSettings> settings) {
 
     final layout = context.layout;
     final screenCoverPct = layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     final padding = layout.get<EdgeInsets>(DialogLayoutConstants.paddingKey);
     final insetPadding = layout.get<EdgeInsets>(DialogLayoutConstants.insetPaddingKey);
+    final scheme = AppColorSchemes.fromName(settings.value.theme);
 
-    return ValueListenableBuilder<AppColorScheme>(
-      valueListenable: activeColorScheme,
-      builder: (context, scheme, child) {
-        return Dialog(
-          insetPadding: widget.insetPadding ?? insetPadding,
-          surfaceTintColor: scheme.backgroundInputPanel,
-          child: Container(
-            width: widget.width ?? (MediaQuery.of(context).size.width * screenCoverPct.width),
-            height: widget.height ?? (MediaQuery.of(context).size.height * screenCoverPct.height),
-            color: scheme.backgroundPuzzlePanel,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: widget.padding ?? padding,
-                  child: FocusTraversalGroup(
-                    policy: OrderedTraversalPolicy(),
-                    child: _buildContents(context)
-                  ),
-                ),
-                Positioned(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: AlternatingColorSquares(
-                      color1: scheme.backgroundInputPanel,
-                      color2: scheme.backgroundPuzzlePanel,
-                      squareSize: 4,
-                    )
-                  )
-                ),
-                Positioned(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: AlternatingColorSquares(
-                      color1: scheme.backgroundPuzzlePanel,
-                      color2: scheme.backgroundInputPanel,
-                      squareSize: 4,
-                    )
-                  )
-                ),
-              ],
+    return Dialog(
+      insetPadding: widget.insetPadding ?? insetPadding,
+      surfaceTintColor: scheme.backgroundInputPanel,
+      child: Container(
+        width: widget.width ?? (MediaQuery.of(context).size.width * screenCoverPct.width),
+        height: widget.height ?? (MediaQuery.of(context).size.height * screenCoverPct.height),
+        color: scheme.backgroundPuzzlePanel,
+        child: Stack(
+          children: [
+            Padding(
+              padding: widget.padding ?? padding,
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(),
+                child: _buildContents(context, settings)
+              ),
             ),
-          )
-        );
-      },
+            Positioned(
+              child: Align(
+                alignment: AlignmentDirectional.topCenter,
+                child: AlternatingColorSquares(
+                  color1: scheme.backgroundInputPanel,
+                  color2: scheme.backgroundPuzzlePanel,
+                  squareSize: 4,
+                )
+              )
+            ),
+            Positioned(
+              child: Align(
+                alignment: AlignmentDirectional.bottomCenter,
+                child: AlternatingColorSquares(
+                  color1: scheme.backgroundPuzzlePanel,
+                  color2: scheme.backgroundInputPanel,
+                  squareSize: 4,
+                )
+              )
+            ),
+          ],
+        ),
+      )
     );
   }
 
-  Widget _buildContents(BuildContext context) {
+  Widget _buildContents(BuildContext context, ValueNotifier<AppSettings> settingsProvider) {
 
-    final layout = context.layout;
+    final buttons = widget.actions(context, settingsProvider);
 
-    return ValueListenableBuilder<AppColorScheme>(
-      valueListenable: activeColorScheme,
-      builder: (context, scheme, child) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        widget.title(context, settingsProvider),
+        Expanded(
+          child: widget.contents(context, settingsProvider)
+        ),
+        if (buttons.isNotEmpty)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: buttons.toList(),
+          ),
+      ],
+    );
+  }
+}
 
-        final buttons = widget.actions(layout, activeColorScheme);
+class DefaultDialogTitle extends StatelessWidget {
+  const DefaultDialogTitle({
+    super.key,
+    required this.builder,
+  });
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Semantics(
-              header: true,
-              container: true,
-              child: Container(
-                color: scheme.textPuzzleSymbolsFlipped.withOpacity(0.3),
-                padding: const EdgeInsets.only(bottom: 4, top: 10),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text.rich(
-                    textAlign: TextAlign.center,
-                    WidgetSpan(
-                      child: widget.title(layout, activeColorScheme)
-                    ),
-                  ),
-                ),
-              ),
+  final ContentBuilder builder;
+
+  @override
+  Widget build(BuildContext context) => SettingsAwareBuilder(
+      builder: (context, settingsProvider)=> _buildTitle(context, settingsProvider),
+    );
+
+  Widget _buildTitle(BuildContext context, ValueNotifier<AppSettings> settingsProvider) {
+    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+    return Semantics(
+      header: true,
+      container: true,
+      child: Container(
+        color: scheme.textPuzzleSymbolsFlipped.withOpacity(0.3),
+        padding: const EdgeInsets.only(bottom: 4, top: 10),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text.rich(
+            textAlign: TextAlign.center,
+            WidgetSpan(
+              child: builder(context, settingsProvider)
             ),
-
-            Expanded(
-              child: widget.contents(layout, activeColorScheme)
-            ),
-
-            if (buttons.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: buttons.mapIndexed((index, action) {
-
-                  return Padding(
-                    padding: EdgeInsets.only(left: index > 0 ? 10:0),
-                    child: action,
-                  );
-
-                }).toList(),
-              ),
-          ],
-        );
-      },
+          ),
+        ),
+      ),
     );
   }
 }
@@ -177,7 +161,6 @@ class _AppDialogState extends State<AppDialog> {
 class ButtonDialogAction extends DialogAction {
   const ButtonDialogAction({
     super.key,
-    required super.schemeNotifier,
     required super.builder,
     required this.isDefault,
     required this.onAction,
@@ -187,20 +170,26 @@ class ButtonDialogAction extends DialogAction {
   final void Function(CloseWithResult close) onAction;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => SettingsAwareBuilder(
+      builder: (context, settingsProvider)=> _buildButton(context, settingsProvider),
+    );
+
+  Widget _buildButton(BuildContext context, ValueNotifier<AppSettings> settingsProvider) {
 
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final scheme = schemeNotifier.value;
+    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
     final foregroundColor = isDefault ? scheme.textPuzzleSymbolsFlipped : scheme.textPuzzleSymbols;
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
         foregroundColor: foregroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
         ),
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
       ).copyWith(
         overlayColor: StateDependentColor(foregroundColor),
       ),
@@ -212,7 +201,7 @@ class ButtonDialogAction extends DialogAction {
           fontSize: bodyFontSize,
           color: foregroundColor,
         ),
-        child: builder(layout, schemeNotifier),
+        child: builder(context, settingsProvider),
       ),
     );
   }

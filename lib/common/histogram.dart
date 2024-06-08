@@ -9,9 +9,7 @@ class Histogram {
   Iterable<String> get keys => value.keys;
 
   void add(String symbol) {
-    if (!value.containsKey(symbol)) {
-      value[symbol] = 0;
-    }
+    value.putIfAbsent(symbol, () => 0);
     value[symbol] = value[symbol]! + 1;
   }
 

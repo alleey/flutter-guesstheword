@@ -80,7 +80,7 @@ class _SimpleParticleSystemState extends State<SimpleParticleSystem> with Single
 
     return Stack(
       //clipBehavior: Clip.none,
-      alignment: Alignment.center,
+      alignment: AlignmentDirectional.center,
       children: [
         widget.builder(context, fire),
         CustomPaint(

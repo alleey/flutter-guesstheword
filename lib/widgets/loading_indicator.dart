@@ -2,23 +2,36 @@ import 'package:flutter/material.dart';
 
 import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
+import '../models/app_settings.dart';
 import 'common/responsive_layout.dart';
+import 'settings_aware_builder.dart';
 
 class LoadingIndicator extends StatelessWidget {
 
   const LoadingIndicator({
     super.key,
-    required this.colorScheme,
     this.message = "loading . . ."
   });
 
   final String message;
-  final AppColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
+    return  SettingsAwareBuilder(
+      builder: (context, settingsNotifier) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ValueListenableBuilder(
+          valueListenable: settingsNotifier,
+          builder: (context, settings, child) =>  _buildContents(context, settings)
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContents(BuildContext context, AppSettings settings) {
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final scheme = AppColorSchemes.fromName(settings.theme);
 
     return Center(
       child: Column(
@@ -27,7 +40,7 @@ class LoadingIndicator extends StatelessWidget {
           Text(
             message,
             style: TextStyle(
-              color: colorScheme.textPuzzlePanel,
+              color: scheme.textPuzzlePanel,
               fontSize: titleFontSize,
             ),
           ),
@@ -35,8 +48,8 @@ class LoadingIndicator extends StatelessWidget {
           SizedBox(
             width: MediaQuery.of(context).size.width / 3,
             child: LinearProgressIndicator(
-              color: colorScheme.textPuzzlePanel,
-              backgroundColor: colorScheme.backgroundPuzzlePanel,
+              color: scheme.textPuzzlePanel,
+              backgroundColor: scheme.backgroundPuzzlePanel,
             ),
           )
         ],

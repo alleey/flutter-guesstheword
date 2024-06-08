@@ -14,7 +14,7 @@ class ColorSchemePicker extends StatefulWidget {
   final ColorSchemeSelectionCallback onSelect;
   final WrapAlignment alignment;
 
-  const ColorSchemePicker({
+  ColorSchemePicker({
     super.key,
     required this.selectedTheme,
     required this.onSelect,
@@ -28,12 +28,18 @@ class ColorSchemePicker extends StatefulWidget {
 
 class _ColorSchemePickerState extends State<ColorSchemePicker> {
 
-  late String selectedTheme;
+  late ValueNotifier<String> _changeNotifier;
 
   @override
   void initState() {
-    selectedTheme = widget.selectedTheme;
     super.initState();
+    _changeNotifier = ValueNotifier<String>(widget.selectedTheme);
+  }
+
+  @override
+  void dispose() {
+    _changeNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,68 +48,69 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
     final layout = context.layout;
     final itemSize = layout.get<Size>(AppLayoutConstants.colorSchemePickerItemSizeKey);
 
-    return Wrap(
-      alignment: widget.alignment,
-        runSpacing: 2,
-        spacing: 2,
-        children: AppColorSchemes.all.mapIndexed((index, e) =>
-          Semantics(
-            label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
-            button: true,
-            child: InkWell(
-              canRequestFocus: true,
-              onFocusChange: (focus) {
-                if (focus) {
-                  setState(() {
-                    selectedTheme = e.key;
-                    widget.onSelect(selectedTheme);
-                  });
-                }
-              },
-              onTap: () {
-                setState(() {
-                  selectedTheme = e.key;
-                  widget.onSelect(selectedTheme);
-                });
-              },
-              child: Container(
-                height: itemSize.height,
-                width: itemSize.width,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
-                    width: 3
-                  )
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          color: e.value.backgroundTopPanel,
-                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+    return ValueListenableBuilder(
+      valueListenable: _changeNotifier,
+      builder: (context, selectedTheme, child) =>  Wrap(
+        alignment: widget.alignment,
+          runSpacing: 2,
+          spacing: 2,
+          children: AppColorSchemes.all.mapIndexed((index, e) {
+
+            return Semantics(
+              label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
+              button: true,
+              child: InkWell(
+                canRequestFocus: true,
+                onFocusChange: (focus) {
+                  if (focus) {
+                    _changeNotifier.value = e.key;
+                    widget.onSelect(e.key);
+                  }
+                },
+                onTap: () {
+                  _changeNotifier.value = e.key;
+                  widget.onSelect(e.key);
+                },
+                child: Container(
+                  height: itemSize.height,
+                  width: itemSize.width,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
+                      width: 3
+                    )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            color: e.value.backgroundTopPanel,
+                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          color: e.value.backgroundPuzzlePanel,
-                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                        Expanded(
+                          child: Container(
+                            color: e.value.backgroundPuzzlePanel,
+                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          color: e.value.backgroundInputPanel,
-                          child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                        Expanded(
+                          child: Container(
+                            color: e.value.backgroundInputPanel,
+                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                          ),
                         ),
-                      ),
-                    ]
+                      ]
+                    ),
                   ),
                 ),
               ),
-            ),
-          )
-      ).toList()
+            );
+          }
+        ).toList()
+      ),
     );
   }
 }

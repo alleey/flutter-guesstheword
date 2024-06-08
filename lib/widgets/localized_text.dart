@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../localizations/app_localizations.dart';
-import '../localizations/locale_provider.dart';
 
 class LocalizedText extends StatelessWidget {
   const LocalizedText({
@@ -18,11 +16,9 @@ class LocalizedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LocaleProvider>(
-      builder: (context, value, child) => Text(
-        context.localizations.translate(textId, placeholders: placeholders),
-        style: style,
-      ),
+    return Text(
+      context.localizations.translate(textId, placeholders: placeholders),
+      style: style,
     );
   }
 }
