@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/models/player_stats.dart';
 
 import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
@@ -129,17 +130,18 @@ class AlertsService {
     return popupDialog(
       context,
       title: (context, settingsProvider) {
-
-        final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
-        final titleFontSize = context.layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-
-        return Text(
-          title,
-          style: TextStyle(
-            color: scheme.backgroundPuzzleSymbolsFlipped,
-            fontWeight: FontWeight.bold,
-            fontSize: titleFontSize,
-          ),
+        return DefaultDialogTitle(
+          builder: (context, settingsProvider) {
+            final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+            return Text(
+              title,
+              style: TextStyle(
+                color: scheme.backgroundPuzzleSymbolsFlipped,
+                fontWeight: FontWeight.bold,
+                fontSize: context.layout.get<double>(AppLayoutConstants.titleFontSizeKey),
+              ),
+            );
+          },
         );
       },
       contents: (context, settingsProvider) {
@@ -249,10 +251,10 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> statsDialog(BuildContext context) {
+  Future<dynamic> statsDialog(BuildContext context, {PlayerStatistics? statstics}) {
 
     final scoreService = ScoreService();
-    final stats = scoreService.load();
+    final stats = statstics ?? scoreService.load();
 
     return actionDialog(
       context,

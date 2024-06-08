@@ -77,7 +77,7 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
                 _buildHeader(context, scheme, sortOrder),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
@@ -118,8 +118,24 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  context.localizations.translate("dlg_playerstats_score", placeholders: { "value": score.score }),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: bodyFontSize,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               child: Text(
-                context.localizations.translate("dlg_playerstats_score", placeholders: { "value": score.score }),
+                context.localizations.translate("dlg_playerstats_wins", placeholders: { "value": score.total.wins }),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -129,22 +145,15 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
             ),
           ),
           Expanded(
-            child: Text(
-              context.localizations.translate("dlg_playerstats_wins", placeholders: { "value": score.total.wins }),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: bodyFontSize,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              context.localizations.translate("dlg_playerstats_losses", placeholders: { "value": score.total.losses }),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: bodyFontSize,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                context.localizations.translate("dlg_playerstats_losses", placeholders: { "value": score.total.losses }),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: bodyFontSize,
+                ),
               ),
             ),
           ),

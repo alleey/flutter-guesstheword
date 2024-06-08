@@ -80,11 +80,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
         Row(
           children: [
-            Text(
-              "Play sounds?",
-              style: TextStyle(
-                  color: scheme.textPuzzlePanel,
-                fontSize: titleFontSize,
+            Semantics(
+              container: true,
+              child: Text(
+                context.localizations.translate("dlg_settings_sound"),
+                style: TextStyle(
+                    color: scheme.textPuzzlePanel,
+                  fontSize: titleFontSize,
+                ),
               ),
             ),
             const Spacer(),
@@ -92,7 +95,6 @@ class _SettingsPageState extends State<SettingsPage> {
               activeColor: scheme.textPuzzlePanel,
               value: settings.playSounds,
               onChanged: (value) {
-                log("playsounds new value $value");
                 context.settingsBloc.add(WriteSettingsBlocEvent(
                   settings: settings.copyWith(playSounds: value),
                   reload: true

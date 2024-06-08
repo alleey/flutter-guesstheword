@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/services/alerts_service.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../common/app_color_scheme.dart';
@@ -85,7 +86,7 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
                 _buildHeader(context, scheme, sortOrder),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
@@ -202,66 +203,71 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
 
           ...sorted.mapIndexed((i, stats) {
 
-            return Semantics(
-              label: "Item ${i + 1}. Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses.",
-              container: true,
-              excludeSemantics: true,
-              child: Container(
-                color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "${stats.score}-${stats.total.wins}-${stats.total.losses}",
-                          textAlign: TextAlign.start,
-                          style: TextStyle(
-                            fontSize: bodyFontSize,
-                            fontWeight: FontWeight.bold,
+            return InkWell(
+              onDoubleTap: () {
+                AlertsService().statsDialog(context, statstics: stats);
+              },
+              child: Semantics(
+                label: "Item ${i + 1}. Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses.",
+                container: true,
+                excludeSemantics: true,
+                child: Container(
+                  color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "${stats.score}-${stats.total.wins}-${stats.total.losses}",
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                              fontSize: bodyFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: PercentageBar(
-                                      value: stats.total.winRate,
-                                      height: 20,
-                                      foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                      backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: PercentageBar(
+                                        value: stats.total.winRate,
+                                        height: 20,
+                                        foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                        backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: PercentageBar(
-                                      value: stats.total.accuracy,
-                                      height: 20,
-                                      foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                      backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: PercentageBar(
+                                        value: stats.total.accuracy,
+                                        height: 20,
+                                        foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                        backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            Text(
+                              "last played: ${formatDateTime(stats.intervalEnd)}",
+                              textAlign: TextAlign.end,
+                              textScaler: const TextScaler.linear(0.9),
                             ),
-                          Text(
-                            "last played: ${formatDateTime(stats.intervalEnd)}",
-                            textAlign: TextAlign.end,
-                            textScaler: const TextScaler.linear(0.9),
-                          ),
-                        ]),
-                      ),
-                    ],
+                          ]),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

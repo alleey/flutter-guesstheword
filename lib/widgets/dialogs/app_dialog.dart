@@ -85,16 +85,16 @@ class _AppDialogState extends State<AppDialog> {
                 )
               )
             ),
-            Positioned(
-              child: Align(
-                alignment: AlignmentDirectional.bottomCenter,
-                child: AlternatingColorSquares(
-                  color1: scheme.backgroundPuzzlePanel,
-                  color2: scheme.backgroundInputPanel,
-                  squareSize: 4,
-                )
-              )
-            ),
+            // Positioned(
+            //   child: Align(
+            //     alignment: AlignmentDirectional.bottomCenter,
+            //     child: AlternatingColorSquares(
+            //       color1: scheme.backgroundPuzzlePanel,
+            //       color2: scheme.backgroundInputPanel,
+            //       squareSize: 4,
+            //     )
+            //   )
+            // ),
           ],
         ),
       )
@@ -114,9 +114,12 @@ class _AppDialogState extends State<AppDialog> {
           child: widget.contents(context, settingsProvider)
         ),
         if (buttons.isNotEmpty)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: buttons.toList(),
+          IntrinsicHeight(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: buttons.toList(),
+            ),
           ),
       ],
     );
@@ -189,7 +192,6 @@ class ButtonDialogAction extends DialogAction {
           borderRadius: BorderRadius.zero,
         ),
         padding: EdgeInsets.zero,
-        minimumSize: Size.zero,
       ).copyWith(
         overlayColor: StateDependentColor(foregroundColor),
       ),

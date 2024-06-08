@@ -8,7 +8,7 @@ class AudioService {
   bool _muted = false;
 
   void mute(bool value) {
-    _muted = !value;
+    _muted = value;
     log("Audio sounds muted = $_muted");
   }
 

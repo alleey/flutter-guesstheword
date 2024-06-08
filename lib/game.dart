@@ -113,6 +113,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: SettingsAwareBuilder(
         onSettingsAvailable: (settings) {
           _settings = settings;
+          log("play audio  = ${settings.playSounds}");
           _audioService.mute(!settings.playSounds);
         },
         builder: (context, settingsProvider) => ValueListenableBuilder(
