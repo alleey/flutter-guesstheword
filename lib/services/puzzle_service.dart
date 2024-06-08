@@ -47,9 +47,12 @@ class PuzzleService {
   }
 
   Future importAll() async {
+
     for(final puzzleset in Constants.puzzleSets) {
       await importPuzzles("assets/puzzles/$puzzleset.json");
     }
+
+    await AppDataService().putSetting("totalPuzzles", _dataService.puzzleBox.length);
     log("total number of puzzles: ${_dataService.puzzleBox.length}");
   }
 

@@ -16,6 +16,7 @@ import 'services/alerts_service.dart';
 import 'services/app_data_service.dart';
 import 'widgets/common/responsive_layout.dart';
 import 'widgets/loading_indicator.dart';
+import 'widgets/settings_aware_builder.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -29,17 +30,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  late bool _settingInitialized = false;
   late bool _gameInitialized = false;
   late bool _androidTvFixApplied = false;
   late bool _dialogShown = false;
-  late AppColorScheme _colorScheme = AppColorScheme.defaultScheme();
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    context.settingsBloc.add(ReadSettingEvent(name: KnownSettingsNames.settingTheme, defaultValue: AppColorSchemes.defaultSchemeName));
+    context.settingsBloc.add(ReadSettingsBlocEvent());
     context.gameBloc.add(InitializeGameEvent());
   }
 
@@ -55,61 +54,48 @@ class _HomePageState extends State<HomePage> {
     return FocusTraversalGroup(
       policy: const CustomOrderedTraversalPolicy(),
       child: MultiBlocListener(
-          listeners: [
-            BlocListener<SettingsBloc, SettingsBlocState>(
-              listener: (BuildContext context, state) async {
-
-                log("HomePage> listener SettingsBloc: $state");
-                if(state is SettingsReadBlocState) {
-                  if (state.name == KnownSettingsNames.settingTheme) {
-                    setState(() {
-                      _settingInitialized = true;
-                      _colorScheme = AppColorSchemes.fromName(state.value);
-                    });
-                  }
-                }
+        listeners: [
+          BlocListener<GameBloc, GameBlocState>(
+            listener: (BuildContext context, state) async {
+              log("HomePage> listener GameBloc: $state");
+              if (state is InitializeGameCompleteState) {
+                setState(() {
+                  _gameInitialized = true;
+                });
               }
-            ),
-            BlocListener<GameBloc, GameBlocState>(
-              listener: (BuildContext context, state) async {
-                log("HomePage> listener GameBloc: $state");
-                if (state is InitializeGameCompleteState) {
-                  setState(() {
-                    _gameInitialized = true;
-                  });
-                }
-              }
-            ),
-          ],
-          child: Builder(
-            builder: (context) {
+            }
+          ),
+        ],
+        child:  SettingsAwareBuilder(
+          builder: (context, settingsProvider) => ValueListenableBuilder(
+            valueListenable: settingsProvider,
+            builder: (context, settings, child) {
 
               final appBarHeight = context.layout.get<double>(AppLayoutConstants.appbarHeightKey);
+              final scheme = AppColorSchemes.fromName(settings.theme);
 
               return Scaffold(
-                backgroundColor: _colorScheme.backgroundPuzzlePanel,
-
+                backgroundColor: scheme.backgroundPuzzlePanel,
                 appBar: !_dialogShown ? null : PreferredSize(
                   preferredSize: Size.fromHeight(appBarHeight),
-                  child: _buildAppBar(context, _colorScheme, appBarHeight),
+                  child: _buildAppBar(context, scheme, appBarHeight),
                 ),
-
-                body: _buildLayout(context, _colorScheme, appBarHeight),
+                body: _buildLayout(context, appBarHeight),
               );
 
             }
           ),
+        ),
       ),
     );
   }
 
-  Widget _buildLayout(BuildContext context, AppColorScheme colorScheme, double appBarHeight) {
+  Widget _buildLayout(BuildContext context, double appBarHeight) {
 
-    if (!(_settingInitialized && _gameInitialized)) {
+    if (!_gameInitialized) {
       return Padding(
         padding: EdgeInsets.only(top: appBarHeight),
         child: LoadingIndicator(
-          colorScheme: colorScheme,
           message: context.localizations.translate("home_loading")
         ),
       );
@@ -122,7 +108,7 @@ class _HomePageState extends State<HomePage> {
           await setTraditionalFocusHighlightStrategy();
           _androidTvFixApplied = true;
         }
-        await showFirstUsagePrompt(colorScheme);
+        await showFirstUsagePrompt();
         setState(() {
           _dialogShown = true;
         });
@@ -131,7 +117,6 @@ class _HomePageState extends State<HomePage> {
       return Padding(
         padding: EdgeInsets.only(top: appBarHeight),
         child: LoadingIndicator(
-          colorScheme: colorScheme,
           message: context.localizations.translate("home_loading")
         ),
       );
@@ -140,10 +125,10 @@ class _HomePageState extends State<HomePage> {
     return const PuzzlePage();
   }
 
-  AppBar _buildAppBar(BuildContext context, AppColorScheme colorScheme, double appBarHeight) {
+  AppBar _buildAppBar(BuildContext context, AppColorScheme scheme, double appBarHeight) {
     return AppBar(
-      backgroundColor: colorScheme.backgroundTopPanel,
-      foregroundColor: colorScheme.textTopPanel,
+      backgroundColor: scheme.backgroundTopPanel,
+      foregroundColor: scheme.textTopPanel,
       leading:
         FocusTraversalOrder(
           order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
@@ -154,9 +139,9 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               iconSize: appBarHeight - 8,
               icon: const Icon(Icons.description_outlined),
-              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              focusColor: scheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().helpDialog(context, colorScheme);
+                await AlertsService().helpDialog(context);
               },
             ),
           ),
@@ -172,9 +157,9 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               iconSize: appBarHeight - 8,
               icon: const Icon(Icons.bar_chart),
-              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              focusColor: scheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().highScoresDialog(context, colorScheme);
+                await AlertsService().highScoresDialog(context);
               },
             ),
           ),
@@ -184,17 +169,13 @@ class _HomePageState extends State<HomePage> {
           child: Semantics(
             button: true,
             excludeSemantics: true,
-            label: 'Reset game',
+            label: 'Statisitcs',
             child: IconButton(
               iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.refresh),
-              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              icon: const Icon(Icons.trending_up),
+              focusColor: scheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().resetGameDialog(context, colorScheme,
-                  onAccept: () {
-                    context.gameBloc.add(ResetGameEvent());
-                  }
-                );
+                await AlertsService().statsDialog(context);
               },
             ),
           ),
@@ -204,13 +185,33 @@ class _HomePageState extends State<HomePage> {
           child: Semantics(
             button: true,
             excludeSemantics: true,
-            label: 'Change color scheme',
+            label: 'Reset game',
             child: IconButton(
               iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.palette_outlined),
-              focusColor: colorScheme.textTopPanel.withOpacity(0.5),
+              icon: const Icon(Icons.refresh),
+              focusColor: scheme.textTopPanel.withOpacity(0.5),
               onPressed: () async {
-                await AlertsService().settingsDialog(context, colorScheme);
+                await AlertsService().resetGameDialog(context,
+                  onAccept: () {
+                    context.gameBloc.add(ResetGameEvent());
+                  }
+                );
+              },
+            ),
+          ),
+        ),
+        FocusTraversalOrder(
+          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 4),
+          child: Semantics(
+            button: true,
+            excludeSemantics: true,
+            label: 'Settings',
+            child: IconButton(
+              iconSize: appBarHeight - 8,
+              icon: const Icon(Icons.settings),
+              focusColor: scheme.textTopPanel.withOpacity(0.5),
+              onPressed: () async {
+                await AlertsService().settingsDialog(context);
               },
             ),
           ),
@@ -219,14 +220,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future showFirstUsagePrompt(AppColorScheme colorScheme) async {
+  Future showFirstUsagePrompt() async {
 
     final appDataService = AppDataService();
     if (appDataService.getFlag(KnownSettingsNames.firstUse) ?? true)
     {
       await appDataService.putFlag(KnownSettingsNames.firstUse, false);
       if (mounted) {
-        await AlertsService().helpDialog(context, colorScheme);
+        await AlertsService().helpDialog(context);
       }
     }
   }

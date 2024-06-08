@@ -21,20 +21,17 @@ String numberToOrdinal(int number) {
 }
 
 String formatDateTime(DateTime dateTime) {
-  // Define the list of month names
-  List<String> months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
+  // List<String> months = [
+  //   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  //   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  // ];
 
-  // Extract the components of the DateTime
   int day = dateTime.day;
   //String month = months[dateTime.month - 1];
   int year = dateTime.year;
   String hour = dateTime.hour.toString().padLeft(2, '0');
   String minute = dateTime.minute.toString().padLeft(2, '0');
 
-  // Format the string
   return '$day-${dateTime.month}-$year $hour:$minute';
 }
 
@@ -47,10 +44,10 @@ class StateDependentColor extends WidgetStateProperty<Color?> {
   @override
   Color? resolve(Set<WidgetState> states) {
     if (states.contains(WidgetState.pressed)) {
-      return color.withOpacity(0.1);
+      return color.withOpacity(0.3);
     }
     if (states.contains(WidgetState.hovered)) {
-      return color.withOpacity(0.08);
+      return color.withOpacity(0.1);
     }
     if (states.contains(WidgetState.focused)) {
       return color.withOpacity(0.5);

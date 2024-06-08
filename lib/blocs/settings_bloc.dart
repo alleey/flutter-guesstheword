@@ -1,38 +1,39 @@
 
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../models/app_settings.dart';
 import '../services/app_data_service.dart';
 
 ////////////////////////////////////////////
 
 abstract class SettingsBlocEvent {}
 
-class ReadSettingEvent extends SettingsBlocEvent {
-  final String name;
-  dynamic defaultValue;
-  ReadSettingEvent({required this.name, this.defaultValue});
+class ReadSettingsBlocEvent extends SettingsBlocEvent {
+  ReadSettingsBlocEvent();
 }
 
-class WriteSettingEvent extends SettingsBlocEvent {
-  final String name;
-  final dynamic value;
+class WriteSettingsBlocEvent extends SettingsBlocEvent {
+  WriteSettingsBlocEvent({required this.settings, this.reload = false});
+  final AppSettings settings;
   final bool reload;
-  WriteSettingEvent({required this.name, required this.value, this.reload = false});
 }
 
 ////////////////////////////////////////////
 
-abstract class SettingsBlocState {}
-
-class InitialSettingsBlocEvent extends SettingsBlocState {}
+class SettingsBlocState {}
 
 class SettingsReadBlocState extends SettingsBlocState {
-  final String name;
-  final String? value;
-  SettingsReadBlocState({required this.name, required this.value});
+  SettingsReadBlocState({ required this.settings });
+  final AppSettings settings;
+}
+
+class SettingsWrittenBlocState extends SettingsBlocState {
+  SettingsWrittenBlocState({ required this.settings });
+  final AppSettings settings;
 }
 
 ////////////////////////////////////////////
@@ -40,19 +41,50 @@ class SettingsReadBlocState extends SettingsBlocState {
 class SettingsBloc extends Bloc<SettingsBlocEvent, SettingsBlocState>
 {
   final _appDataService = AppDataService();
+  var _settings = AppSettings();
+  var _needReload = true;
 
-  SettingsBloc() : super(InitialSettingsBlocEvent())
+  // Read-only access to the current state
+  AppSettings get currentSettings => _settings;
+
+  SettingsBloc() : super(SettingsBlocState())
   {
-    on<ReadSettingEvent>((event, emit) async {
-      final value = _appDataService.getSetting(event.name, event.defaultValue);
-      log("ReadSettingEvent -> ${event.name} = $value");
-      emit(SettingsReadBlocState(name: event.name, value: value));
+    on<ReadSettingsBlocEvent>((event, emit) async {
+
+      if (!_needReload) {
+        emit(SettingsReadBlocState(settings: currentSettings));
+      }
+
+      try {
+
+        final String jsonString = _appDataService.get("config", "");
+        if (jsonString.isNotEmpty) {
+          _settings = AppSettings.fromJson(jsonDecode(jsonString));
+        } else {
+          log("Settings empty");
+        }
+
+        log("Settings read $_settings");
+      }
+      catch(e) {
+        log("Settings error $e");
+      }
+
+      emit(SettingsReadBlocState(settings: currentSettings));
     });
 
-    on<WriteSettingEvent>((event, emit) async {
-      _appDataService.putSetting(event.name, event.value);
+    on<WriteSettingsBlocEvent>((event, emit) async {
+
+      _settings = event.settings;
+      _appDataService.put("config", jsonEncode(_settings.toJson()));
+
+      emit(SettingsWrittenBlocState(settings: currentSettings));
+
+      log("Settings saved $_settings");
       if (event.reload) {
-        emit(SettingsReadBlocState(name: event.name, value: event.value));
+        emit(SettingsReadBlocState(settings: currentSettings));
+      } else {
+        _needReload = true;
       }
     });
   }

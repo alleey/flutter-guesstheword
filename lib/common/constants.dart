@@ -19,7 +19,7 @@ class Constants
   static const int revealMedium = 2;
   static const int revealHard = 3;
 
-  static const List<String> locales = ['en'];
+  static const List<String> locales = ['en', 'ur'];
 
   static const puzzleSets = [
     "animals", "birds", "cars", "cartoons", "capitals",

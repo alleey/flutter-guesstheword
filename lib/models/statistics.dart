@@ -6,7 +6,7 @@ class Statistics implements Comparable<Statistics> {
   final int mismatchedInputs;
   final int hintsUsed;
 
-  double get accuracy => (correctInputs - hintsUsed) / (correctInputs + mismatchedInputs);
+  double get accuracy => correctInputs / (correctInputs + mismatchedInputs);
   double get winRate => wins / totalPlayed;
   int get totalPlayed => wins + losses;
 

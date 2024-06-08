@@ -1,6 +1,6 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../blocs/settings_bloc.dart';
@@ -8,44 +8,43 @@ import '../../common/app_color_scheme.dart';
 import '../../common/constants.dart';
 import '../../common/layout_constants.dart';
 import '../../localizations/app_localizations.dart';
-import '../../localizations/locale_provider.dart';
-import '../../services/app_data_service.dart';
+import '../../models/app_settings.dart';
 import '../color_scheme_picker.dart';
+import '../settings_aware_builder.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
 
-  SettingsPage({
+  const SettingsPage({
     super.key,
-    required this.colorScheme,
   });
 
-  final AppColorScheme colorScheme;
-  final themeChangeNotifier  = ValueNotifier<String>(AppColorSchemes.defaultSchemeName);
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+
+class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    final layout = context.layout;
-    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-
-    return Consumer<LocaleProvider>(
-      builder: (context, localProvider, child) => BlocListener<SettingsBloc, SettingsBlocState>(
-        listener: (BuildContext context, state) async {
-          if(state is SettingsReadBlocState) {
-            if (state.name == KnownSettingsNames.settingTheme) {
-              themeChangeNotifier.value = state.value!;
-            }
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _buildPage(bodyFontSize, context, localProvider),
+    return  SettingsAwareBuilder(
+      builder: (context, settingsNotifier) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ValueListenableBuilder(
+          valueListenable: settingsNotifier,
+          builder: (context, settings, child) =>  _buildPage(context, settings)
         ),
       ),
     );
   }
 
-  Widget _buildPage(double bodyFontSize, BuildContext context, LocaleProvider localProvider) {
+  Widget _buildPage(BuildContext context, AppSettings settings) {
+
+    final layout = context.layout;
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+    final scheme = AppColorSchemes.fromName(settings.theme);
+
     return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -55,8 +54,8 @@ class SettingsPage extends StatelessWidget {
               textAlign: TextAlign.start,
               TextSpan(
                 style: TextStyle(
-                  color: colorScheme.textPuzzlePanel,
-                  fontSize: bodyFontSize,
+                  color: scheme.textPuzzlePanel,
+                  fontSize: titleFontSize,
                 ),
                 children: [
                   TextSpan(
@@ -67,18 +66,43 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          ValueListenableBuilder(
-            valueListenable: themeChangeNotifier,
-            builder: (context, selectedTheme, child) =>  ColorSchemePicker(
-              alignment: WrapAlignment.start,
-              selectedTheme: selectedTheme,
-              onSelect: (newTheme) {
-                context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingTheme, value: newTheme, reload: true));
-              }
-            ),
+          ColorSchemePicker(
+            alignment: WrapAlignment.start,
+            selectedTheme: settings.theme,
+            onSelect: (newTheme) {
+              context.settingsBloc.add(WriteSettingsBlocEvent(
+                settings: settings.copyWith(theme: newTheme),
+                reload: true
+              ));
+            }
           ),
           const SizedBox(height: 2),
-        if (Constants.locales.length > 1)
+
+        Row(
+          children: [
+            Text(
+              "Play sounds?",
+              style: TextStyle(
+                  color: scheme.textPuzzlePanel,
+                fontSize: titleFontSize,
+              ),
+            ),
+            const Spacer(),
+            Switch(
+              activeColor: scheme.textPuzzlePanel,
+              value: settings.playSounds,
+              onChanged: (value) {
+                log("playsounds new value $value");
+                context.settingsBloc.add(WriteSettingsBlocEvent(
+                  settings: settings.copyWith(playSounds: value),
+                  reload: true
+                ));
+              },
+            ),
+          ]
+        ),
+
+        if (Constants.locales.length > 10)
           ...[
             Semantics(
               container: true,
@@ -86,8 +110,8 @@ class SettingsPage extends StatelessWidget {
                 textAlign: TextAlign.start,
                 TextSpan(
                   style: TextStyle(
-                    color: colorScheme.textPuzzlePanel,
-                    fontSize: bodyFontSize,
+                    color: scheme.textPuzzlePanel,
+                    fontSize: titleFontSize,
                   ),
                   children: [
                     TextSpan(
@@ -101,14 +125,17 @@ class SettingsPage extends StatelessWidget {
             DropdownButton<String>(
               isDense: true,
               style: TextStyle(
-                color: colorScheme.textPuzzlePanel,
+                color: scheme.textPuzzlePanel,
                 fontSize: bodyFontSize,
               ),
-              dropdownColor: colorScheme.backgroundPuzzlePanel,
-              value: localProvider.value.languageCode,
+              dropdownColor: scheme.backgroundPuzzlePanel,
+              value: settings.locale,
               onChanged: (selected) {
-                context.changeLanguage(selected!);
-                context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected));
+                log("locale new value $selected");
+                context.settingsBloc.add(WriteSettingsBlocEvent(
+                  settings: settings.copyWith(locale: selected),
+                  reload: true
+                ));
               },
               items: Constants.locales.map<DropdownMenuItem<String>>((locale) {
                 return DropdownMenuItem<String>(

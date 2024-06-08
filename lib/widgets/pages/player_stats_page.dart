@@ -1,39 +1,56 @@
+import 'dart:developer';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../common/app_color_scheme.dart';
 import '../../common/layout_constants.dart';
 import '../../localizations/app_localizations.dart';
+import '../../models/app_settings.dart';
 import '../../models/player_stats.dart';
 import '../../models/statistics.dart';
 import '../common/percentage_bar.dart';
+import '../settings_aware_builder.dart';
 
 class PlayerStatisticsPage extends StatelessWidget {
 
   PlayerStatisticsPage({
     super.key,
-    required this.colorScheme,
     required this.statistics,
 
   });
 
   final PlayerStatistics statistics;
-  final AppColorScheme colorScheme;
   final sortOrderNotifier = ValueNotifier<(CategoryStatisticsSortOrder, bool)>((CategoryStatisticsSortOrder.name, true));
 
   @override
   Widget build(BuildContext context) {
+    return  SettingsAwareBuilder(
+      builder: (context, settingsNotifier) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ValueListenableBuilder(
+          valueListenable: settingsNotifier,
+          builder: (context, settings, child) =>  _buildContents(context, settings)
+        ),
+      ),
+    );
+  }
 
+  Widget _buildContents(BuildContext context, AppSettings settings) {
+
+    final scheme = AppColorSchemes.fromName(settings.theme);
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+    final totalPuzzles = AppDataService().getSetting("totalPuzzles", 1);
 
     return statistics.isEmpty ?
-      _buildNoStats(context, colorScheme) :
+      _buildNoStats(context, scheme) :
       DefaultTextStyle.merge(
         style: TextStyle(
           fontSize: bodyFontSize,
-          color: colorScheme.textPuzzlePanel,
+          color: scheme.textPuzzlePanel,
         ),
         child: ValueListenableBuilder(
           valueListenable: sortOrderNotifier,
@@ -41,18 +58,20 @@ class PlayerStatisticsPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTotalStats(context, colorScheme, statistics),
+                _buildCompletionIndicator(totalPuzzles, scheme, statistics),
+                _buildScoreInfo(context, scheme, statistics),
+                _buildTotalStats(context, scheme, statistics),
                 const SizedBox(height: 10),
 
-                _buildHeader(context, colorScheme, sortOrder),
+                _buildHeader(context, scheme, sortOrder),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Divider(color: colorScheme.textPuzzlePanel, height: 1),
+                  child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
                 Expanded(
-                  child: _buildStatsList(context, colorScheme, statistics, sortOrder)
+                  child: _buildStatsList(context, scheme, statistics, sortOrder)
                 ),
               ],
             );
@@ -61,6 +80,67 @@ class PlayerStatisticsPage extends StatelessWidget {
       );
   }
 
+  Widget _buildCompletionIndicator(int totalSize, AppColorScheme scheme, PlayerStatistics score) {
+    return PercentageBar(
+      showLabel: false,
+      inverted: true,
+      value: 1 - (score.total.totalPlayed.toDouble() / totalSize.toDouble()),
+      height: 3,
+      foregroundColor: scheme.textPuzzleSymbolsFlipped,
+      backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+    );
+  }
+
+  Widget _buildScoreInfo(BuildContext context, AppColorScheme scheme, PlayerStatistics score) {
+
+    final layout = context.layout;
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.textPuzzlePanel.withOpacity(0.1),
+        //borderRadius: BorderRadius.circular(3),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Text(
+                context.localizations.translate("dlg_playerstats_score", placeholders: { "value": score.score }),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: bodyFontSize,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              context.localizations.translate("dlg_playerstats_wins", placeholders: { "value": score.total.wins }),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: bodyFontSize,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              context.localizations.translate("dlg_playerstats_losses", placeholders: { "value": score.total.losses }),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: bodyFontSize,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTotalStats(BuildContext context, AppColorScheme scheme, PlayerStatistics score) {
 
@@ -73,7 +153,7 @@ class PlayerStatisticsPage extends StatelessWidget {
         child: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: titleFontSize,
-            color: colorScheme.backgroundPuzzlePanel,
+            color: scheme.backgroundPuzzlePanel,
             fontWeight: FontWeight.bold,
           ),
           child: Container(

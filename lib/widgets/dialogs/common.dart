@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
-
-import '../../common/app_color_scheme.dart';
-import '../common/responsive_layout.dart';
+import 'package:guess_the_word/models/app_settings.dart';
 
 typedef CloseWithResult = void Function(dynamic result);
-typedef ContentBuilder = Widget Function(
-  ResponsiveLayout layout,
-  ValueNotifier<AppColorScheme> colorScheme
-);
 
-typedef ActionBuilder = Iterable<Widget> Function(
-  ResponsiveLayout layout,
-  ValueNotifier<AppColorScheme> colorScheme
-);
+typedef ContentBuilder = Widget Function(BuildContext context, ValueNotifier<AppSettings> changeNotifier);
+
+typedef ActionBuilder = Iterable<Widget> Function(BuildContext context, ValueNotifier<AppSettings> changeNotifier);
 
 abstract class DialogAction extends StatelessWidget {
   const DialogAction({
     super.key,
-    required this.schemeNotifier,
     required this.builder,
   });
 
-  final ValueNotifier<AppColorScheme> schemeNotifier;
   final ContentBuilder builder;
 }

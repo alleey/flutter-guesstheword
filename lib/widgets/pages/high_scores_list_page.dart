@@ -7,36 +7,49 @@ import '../../common/constants.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
 import '../../localizations/app_localizations.dart';
+import '../../models/app_settings.dart';
 import '../../models/player_stats.dart';
 import '../common/percentage_bar.dart';
 import '../localized_text.dart';
+import '../settings_aware_builder.dart';
 
 class HighScoresListPage extends StatelessWidget {
 
   HighScoresListPage({
     super.key,
-    required this.colorScheme,
     required this.statisticsList,
 
   });
 
-  final AppColorScheme colorScheme;
   final List<PlayerStatistics> statisticsList;
   final sortOrderNotifier = ValueNotifier<(PlayerStatisticsSortOrder, bool)>((PlayerStatisticsSortOrder.score, false));
 
   @override
   Widget build(BuildContext context) {
+    return  SettingsAwareBuilder(
+      builder: (context, settingsProvider) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ValueListenableBuilder(
+          valueListenable: settingsProvider,
+          builder: (context, settings, child) =>  _buildContents(context, settings)
+        ),
+      ),
+    );
+  }
 
+  Widget _buildContents(BuildContext context, AppSettings settings) {
+
+    final scheme = AppColorSchemes.fromName(settings.theme);
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final scores = statisticsList;
 
     return scores.isEmpty ?
-      _buildNoStats(context, colorScheme) :
+      _buildNoStats(context, scheme) :
       DefaultTextStyle.merge(
         style: TextStyle(
           fontSize: bodyFontSize,
-          color: colorScheme.textPuzzlePanel,
+          color: scheme.textPuzzlePanel,
         ),
         child: ValueListenableBuilder(
           valueListenable: sortOrderNotifier,
@@ -56,14 +69,14 @@ class HighScoresListPage extends StatelessWidget {
                   ),
                 ),
 
-                _buildHeader(context, colorScheme, sortOrder),
+                _buildHeader(context, scheme, sortOrder),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Divider(color: colorScheme.textPuzzlePanel, height: 1),
+                  child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
-                _buildStatsList(context, scores, colorScheme, sortOrder),
+                _buildStatsList(context, scores, scheme, sortOrder),
               ],
             );
           },
@@ -194,7 +207,6 @@ class HighScoresListPage extends StatelessWidget {
                             fontSize: bodyFontSize,
                             fontWeight: FontWeight.bold,
                           ),
-                          textScaler: const TextScaler.linear(0.9),
                         ),
                       ),
                       Expanded(

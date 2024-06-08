@@ -11,10 +11,14 @@ class PercentageBar extends StatelessWidget {
     this.borderColor,
     this.borderWidth = 0.0,
     this.textStyle,
+    this.inverted = false,
+    this.showLabel = true,
   });
 
   final double value;
   final double height;
+  final bool inverted;
+  final bool showLabel;
   final Color backgroundColor;
   final Color foregroundColor;
   final Color? borderColor; // Optional border color
@@ -29,42 +33,50 @@ class PercentageBar extends StatelessWidget {
   Widget _buildRectangularIndicator(BuildContext context, double value, Color color) {
     return Stack(
       children: [
-        FractionallySizedBox(
-          widthFactor: 1,
-          child: Container(
-            height: height,
-            decoration: BoxDecoration(
-              color: backgroundColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(4.0),
-              border: Border.all(color: borderColor ?? Colors.transparent, width: borderWidth),
-            ),
-          ),
-        ),
-        FractionallySizedBox( // Use FractionallySizedBox for the filled container
-          widthFactor: value, // Set the width factor based on the progress value
-          child: Container(
-            height: height,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(4.0),
-              border: Border.all(color: borderColor ?? Colors.transparent, width: borderWidth),
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                "${(value * 100).toStringAsFixed(1)}%",
-                textScaler: const TextScaler.linear(0.9),
-                style: textStyle ?? TextStyle(
-                  color: foregroundColor,
-                ),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: FractionallySizedBox(
+            widthFactor: 1 - value,
+            child: Container(
+              height: height,
+              decoration: BoxDecoration(
+                color: inverted ? backgroundColor:backgroundColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(4.0),
+                border: Border.all(color: borderColor ?? Colors.transparent, width: borderWidth),
               ),
             ),
           ),
         ),
+        if (value > 0)
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: FractionallySizedBox(
+              widthFactor: value,
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                  color: inverted ? backgroundColor.withOpacity(0.3):backgroundColor,
+                  borderRadius: BorderRadius.circular(4.0),
+                  border: Border.all(color: borderColor ?? Colors.transparent, width: borderWidth),
+                ),
+              ),
+            ),
+          ),
+        if (showLabel)
+          Positioned.fill(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "${(value * 100).toStringAsFixed(1)}%",
+                  textScaler: const TextScaler.linear(0.9),
+                  style: textStyle ?? TextStyle(
+                    color: foregroundColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
