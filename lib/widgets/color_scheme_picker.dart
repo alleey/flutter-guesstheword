@@ -8,12 +8,11 @@ import 'common/responsive_layout.dart';
 
 typedef ColorSchemeSelectionCallback = void Function(String schmeName);
 
-class ColorSchemePicker extends StatelessWidget {
+class ColorSchemePicker extends StatefulWidget {
 
   final String selectedTheme;
   final ColorSchemeSelectionCallback onSelect;
   final WrapAlignment alignment;
-  final ValueNotifier<String> _changeNotifier;
 
   ColorSchemePicker({
     super.key,
@@ -21,7 +20,27 @@ class ColorSchemePicker extends StatelessWidget {
     required this.onSelect,
     this.alignment = WrapAlignment.center,
 
-  }) : _changeNotifier = ValueNotifier<String>(selectedTheme);
+  });
+
+  @override
+  State<ColorSchemePicker> createState() => _ColorSchemePickerState();
+}
+
+class _ColorSchemePickerState extends State<ColorSchemePicker> {
+
+  late ValueNotifier<String> _changeNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _changeNotifier = ValueNotifier<String>(widget.selectedTheme);
+  }
+
+  @override
+  void dispose() {
+    _changeNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +51,7 @@ class ColorSchemePicker extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: _changeNotifier,
       builder: (context, selectedTheme, child) =>  Wrap(
-        alignment: alignment,
+        alignment: widget.alignment,
           runSpacing: 2,
           spacing: 2,
           children: AppColorSchemes.all.mapIndexed((index, e) {
@@ -45,12 +64,12 @@ class ColorSchemePicker extends StatelessWidget {
                 onFocusChange: (focus) {
                   if (focus) {
                     _changeNotifier.value = e.key;
-                    onSelect(e.key);
+                    widget.onSelect(e.key);
                   }
                 },
                 onTap: () {
                   _changeNotifier.value = e.key;
-                  onSelect(e.key);
+                  widget.onSelect(e.key);
                 },
                 child: Container(
                   height: itemSize.height,

@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/models/app_settings.dart';
 
 import '../../common/app_color_scheme.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
+import '../../models/app_settings.dart';
 import '../common/alternating_color_squares.dart';
 import '../common/responsive_layout.dart';
 import '../settings_aware_builder.dart';
@@ -113,7 +113,6 @@ class _AppDialogState extends State<AppDialog> {
         Expanded(
           child: widget.contents(context, settingsProvider)
         ),
-
         if (buttons.isNotEmpty)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -186,8 +185,8 @@ class ButtonDialogAction extends DialogAction {
       style: ElevatedButton.styleFrom(
         backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
         foregroundColor: foregroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
         ),
         padding: EdgeInsets.zero,
         minimumSize: Size.zero,

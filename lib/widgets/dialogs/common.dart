@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/models/app_settings.dart';
+
+import '../../models/app_settings.dart';
 
 typedef CloseWithResult = void Function(dynamic result);
 

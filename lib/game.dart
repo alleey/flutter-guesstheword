@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:bit_array/bit_array.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guess_the_word/models/app_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
@@ -13,6 +12,7 @@ import 'common/custom_traversal_policy.dart';
 import 'common/layout_constants.dart';
 import 'common/utils.dart';
 import 'localizations/app_localizations.dart';
+import 'models/app_settings.dart';
 import 'services/alerts_service.dart';
 import 'services/audio_service.dart';
 import 'widgets/common/alternating_color_squares.dart';
@@ -110,13 +110,14 @@ class _PuzzlePageState extends State<PuzzlePage> {
         )
       ],
 
-      child:  SettingsAwareBuilder(
+      child: SettingsAwareBuilder(
+        onSettingsAvailable: (settings) {
+          _settings = settings;
+          _audioService.mute(!settings.playSounds);
+        },
         builder: (context, settingsProvider) => ValueListenableBuilder(
           valueListenable: settingsProvider,
           builder: (context, settings, child) {
-
-          _settings = settings;
-          _audioService.mute(!settings.playSounds);
 
             if (_gameState == null) {
               return LoadingIndicator(

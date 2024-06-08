@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:guess_the_word/models/app_settings.dart';
 
 import 'blocs/game_bloc.dart';
-//import 'device_frame.dart';
 import 'blocs/settings_bloc.dart';
 import 'common/constants.dart';
 import 'common/layout_constants.dart';
 import 'home_page.dart';
 import 'localizations/app_localizations.dart';
+import 'models/app_settings.dart';
 import 'services/data_service.dart';
 import 'widgets/common/responsive_layout.dart';
 

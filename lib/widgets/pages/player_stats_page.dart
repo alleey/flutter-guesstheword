@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/services/app_data_service.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../common/app_color_scheme.dart';
@@ -11,19 +8,33 @@ import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
 import '../../models/player_stats.dart';
 import '../../models/statistics.dart';
+import '../../services/app_data_service.dart';
 import '../common/percentage_bar.dart';
 import '../settings_aware_builder.dart';
 
-class PlayerStatisticsPage extends StatelessWidget {
+class PlayerStatisticsPage extends StatefulWidget {
 
-  PlayerStatisticsPage({
+  const PlayerStatisticsPage({
     super.key,
     required this.statistics,
 
   });
 
   final PlayerStatistics statistics;
-  final sortOrderNotifier = ValueNotifier<(CategoryStatisticsSortOrder, bool)>((CategoryStatisticsSortOrder.name, true));
+
+  @override
+  State<PlayerStatisticsPage> createState() => _PlayerStatisticsPageState();
+}
+
+class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
+
+  final _sortOrderNotifier = ValueNotifier<(CategoryStatisticsSortOrder, bool)>((CategoryStatisticsSortOrder.name, true));
+
+  @override
+  void dispose() {
+    _sortOrderNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +56,7 @@ class PlayerStatisticsPage extends StatelessWidget {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final totalPuzzles = AppDataService().getSetting("totalPuzzles", 1);
 
-    return statistics.isEmpty ?
+    return widget.statistics.isEmpty ?
       _buildNoStats(context, scheme) :
       DefaultTextStyle.merge(
         style: TextStyle(
@@ -53,14 +64,14 @@ class PlayerStatisticsPage extends StatelessWidget {
           color: scheme.textPuzzlePanel,
         ),
         child: ValueListenableBuilder(
-          valueListenable: sortOrderNotifier,
+          valueListenable: _sortOrderNotifier,
           builder: (context, sortOrder, child) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCompletionIndicator(totalPuzzles, scheme, statistics),
-                _buildScoreInfo(context, scheme, statistics),
-                _buildTotalStats(context, scheme, statistics),
+                _buildCompletionIndicator(totalPuzzles, scheme, widget.statistics),
+                _buildScoreInfo(context, scheme, widget.statistics),
+                _buildTotalStats(context, scheme, widget.statistics),
                 const SizedBox(height: 10),
 
                 _buildHeader(context, scheme, sortOrder),
@@ -71,7 +82,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                 ),
 
                 Expanded(
-                  child: _buildStatsList(context, scheme, statistics, sortOrder)
+                  child: _buildStatsList(context, scheme, widget.statistics, sortOrder)
                 ),
               ],
             );
@@ -219,7 +230,7 @@ class PlayerStatisticsPage extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, sortOrder.$2),
+                  onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, sortOrder.$2),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: AlignmentDirectional.centerStart,
@@ -232,7 +243,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                 ),
                 if (sortOrder.$1 == CategoryStatisticsSortOrder.name)
                   InkWell(
-                    onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, !sortOrder.$2),
+                    onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, !sortOrder.$2),
                     child: Icon(
                       sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
                       color: scheme.textPuzzlePanel, // Customize the color of the icon
@@ -250,7 +261,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, sortOrder.$2),
+                        onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, sortOrder.$2),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
@@ -262,7 +273,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                       ),
                       if (sortOrder.$1 == CategoryStatisticsSortOrder.winrate)
                         InkWell(
-                          onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, !sortOrder.$2),
+                          onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, !sortOrder.$2),
                           child: Icon(
                             sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
                             color: scheme.textPuzzlePanel,
@@ -276,7 +287,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, sortOrder.$2),
+                        onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, sortOrder.$2),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
@@ -288,7 +299,7 @@ class PlayerStatisticsPage extends StatelessWidget {
                       ),
                       if (sortOrder.$1 == CategoryStatisticsSortOrder.accuracy)
                         InkWell(
-                          onTap: () => sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, !sortOrder.$2),
+                          onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, !sortOrder.$2),
                           child: Icon(
                             sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
                             color: scheme.textPuzzlePanel, // Customize the color of the icon

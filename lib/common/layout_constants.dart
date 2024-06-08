@@ -14,9 +14,9 @@ class DialogLayoutConstants
 
   static const String paddingKey = "dlg.padding";
   static final padding = ResponsiveValue.from(
-    small: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-    medium: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-    large: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+    small: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+    medium: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+    large: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
   );
 
   static const String insetPaddingKey = "dlg.insetPadding";
