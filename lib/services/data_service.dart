@@ -24,6 +24,7 @@ class DataService {
   late Box<Puzzle> puzzleBox;
   late Box<dynamic> appDataBox;
   late String version;
+  late String donationsLink;
   late int instanceId;
 
   Future initialize() async {
@@ -41,8 +42,9 @@ class DataService {
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<dynamic>('appdata-v${Constants.appDataVersion}');
 
-    version = await getLinkDonate();
-    instanceId = await ensureInstanceId();
+    final metadata = await _loadMeta();
+    version = metadata['version'] ?? "";
+    donationsLink = metadata['link_donate'] ?? "";
   }
 
   Future<int> ensureInstanceId() async {
@@ -55,16 +57,10 @@ class DataService {
     return appDataBox.get("instanceId");
   }
 
-  Future<String> getVersion() async {
-    final jsonString = await rootBundle.loadString('assets/version.json');
-    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-    return jsonMap['version'];
-  }
-
-  Future<String> getLinkDonate() async {
-    final jsonString = await rootBundle.loadString('assets/version.json');
-    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-    return jsonMap['link_donate'];
+  Future<Map<String, String>> _loadMeta() async {
+    final jsonString = await rootBundle.loadString('assets/metadata.json');
+    Map<String, String> jsonMap = jsonDecode(jsonString);
+    return jsonMap;
   }
 
   Future<void> _cleanUpOldVersionFolders() async {

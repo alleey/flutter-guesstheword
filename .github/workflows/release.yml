@@ -60,14 +60,19 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
-    - name: Write version to file
+    - name: Read link data
+      id: link_donate
+      run: echo "::set-output name=link::${{ secrets.LINK_DONATE }}"
+
+    - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json`);
+          const link_donate = '${{ steps.link_donate.outputs.link }}';
+          fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate }));
+          console.log(`${version} written to assets/metadata.json`);
 
     - name: Decode and save keystore
       run: |
@@ -177,14 +182,19 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
-    - name: Write version to file
+    - name: Read link data
+      id: link_donate
+      run: echo "::set-output name=link::${{ secrets.LINK_DONATE }}"
+
+    - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json`);
+          const link_donate = '${{ steps.link_donate.outputs.link }}';
+          fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate }));
+          console.log(`${version} written to assets/metadata.json`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -238,14 +248,19 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
-    - name: Write version to file
+    - name: Read link data
+      id: link_donate
+      run: echo "::set-output name=link::${{ secrets.LINK_DONATE }}"
+
+    - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json`);
+          const link_donate = '${{ steps.link_donate.outputs.link }}';
+          fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate }));
+          console.log(`${version} written to assets/metadata.json`);
 
     - name: Build
       uses: subosito/flutter-action@v2
@@ -299,14 +314,19 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
-    - name: Write version to file
+    - name: Read link data
+      id: link_donate
+      run: echo "::set-output name=link::${{ secrets.LINK_DONATE }}"
+
+    - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
-          console.log(`${version} written to assets/version.json`);
+          const link_donate = '${{ steps.link_donate.outputs.link }}';
+          fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate }));
+          console.log(`${version} written to assets/metadata.json`);
 
     - name: Build
       uses: subosito/flutter-action@v2
