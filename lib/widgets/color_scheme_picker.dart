@@ -28,16 +28,35 @@ class ColorSchemePicker extends StatefulWidget {
 
 class _ColorSchemePickerState extends State<ColorSchemePicker> {
 
-  late ValueNotifier<String> _changeNotifier;
+  late ValueNotifier<(int, String)> _changeNotifier;
+  final List<FocusNode> _focusNodes = List.generate(AppColorSchemes.all.length, (index) => FocusNode());
 
   @override
   void initState() {
     super.initState();
-    _changeNotifier = ValueNotifier<String>(widget.selectedTheme);
+
+    int selectedThemeIndex = AppColorSchemes.all
+      .mapIndexed((i,e) => (i, e.key))
+      .where((e) => e.$2 == widget.selectedTheme)
+      .map((e) => e.$1)
+      .firstOrNull ?? -1;
+
+    _changeNotifier = ValueNotifier<(int, String)>((selectedThemeIndex, widget.selectedTheme));
+
+    // if (selectedThemeIndex >= 0) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     if (mounted) {
+    //       _focusNodes[selectedThemeIndex].requestFocus();
+    //     }
+    //   });
+    // }
   }
 
   @override
   void dispose() {
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
     _changeNotifier.dispose();
     super.dispose();
   }
@@ -50,67 +69,74 @@ class _ColorSchemePickerState extends State<ColorSchemePicker> {
 
     return ValueListenableBuilder(
       valueListenable: _changeNotifier,
-      builder: (context, selectedTheme, child) =>  Wrap(
-        alignment: widget.alignment,
-          runSpacing: 2,
-          spacing: 2,
-          children: AppColorSchemes.all.mapIndexed((index, e) {
+      builder: (context, value, child) {
 
-            return Semantics(
-              label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
-              button: true,
-              child: InkWell(
-                canRequestFocus: true,
-                onFocusChange: (focus) {
-                  if (focus) {
-                    _changeNotifier.value = e.key;
+        final (selectedIndex, selectedTheme) = value;
+        _focusNodes[selectedIndex].requestFocus();
+
+        return Wrap(
+          alignment: widget.alignment,
+            runSpacing: 2,
+            spacing: 2,
+            children: AppColorSchemes.all.mapIndexed((index, e) {
+
+              return Semantics(
+                label: selectedTheme == e.key ? "Theme ${index + 1} is active!" : "Apply theme ${index + 1}.",
+                button: true,
+                child: InkWell(
+                  focusNode: _focusNodes[index],
+                  canRequestFocus: true,
+                  onFocusChange: (focus) {
+                    if (focus) {
+                      _changeNotifier.value = (index, e.key);
+                      widget.onSelect(e.key);
+                    }
+                  },
+                  onTap: () {
+                    _changeNotifier.value = (index, e.key);
                     widget.onSelect(e.key);
-                  }
-                },
-                onTap: () {
-                  _changeNotifier.value = e.key;
-                  widget.onSelect(e.key);
-                },
-                child: Container(
-                  height: itemSize.height,
-                  width: itemSize.width,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
-                      width: 3
-                    )
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            color: e.value.backgroundTopPanel,
-                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                  },
+                  child: Container(
+                    height: itemSize.height,
+                    width: itemSize.width,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: (e.key == selectedTheme) ? e.value.textPuzzlePanel : Colors.transparent,
+                        width: 3
+                      )
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              color: e.value.backgroundTopPanel,
+                              child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            color: e.value.backgroundPuzzlePanel,
-                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                          Expanded(
+                            child: Container(
+                              color: e.value.backgroundPuzzlePanel,
+                              child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            color: e.value.backgroundInputPanel,
-                            child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                          Expanded(
+                            child: Container(
+                              color: e.value.backgroundInputPanel,
+                              child: SizedBox(height: itemSize.height, width: itemSize.width,),
+                            ),
                           ),
-                        ),
-                      ]
+                        ]
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }
-        ).toList()
-      ),
+              );
+            }
+          ).toList()
+        );
+      },
     );
   }
 }

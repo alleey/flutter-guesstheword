@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/common/custom_traversal_policy.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
@@ -40,24 +41,27 @@ class AboutPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          Align(
-            alignment: AlignmentDirectional.center,
-            child: Semantics(
-              label: "Game version is ${metadata.version}",
-              container: true,
-              excludeSemantics: true,
-              child: Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: context.localizations.translate("dlg_about_version", placeholders: {"version": metadata.version}),
-                      style: TextStyle(
-                        color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
-                        fontSize: bodyFontSize,
-                      )
-                    ),
-                  ],
+          FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 1),
+            child: Align(
+              alignment: AlignmentDirectional.center,
+              child: Semantics(
+                label: "Game version is ${metadata.version}",
+                container: true,
+                excludeSemantics: true,
+                child: Text.rich(
+                  textAlign: TextAlign.center,
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: context.localizations.translate("dlg_about_version", placeholders: {"version": metadata.version}),
+                        style: TextStyle(
+                          color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
+                          fontSize: bodyFontSize,
+                        )
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -103,29 +107,32 @@ class AboutPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-          Semantics(
-            label: "Give Feedback",
-            button: true,
-            excludeSemantics: true,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: FractionallySizedBox(
-                widthFactor: 0.4,
-                child: ButtonDialogAction(
-                  isDefault: true,
-                  onAction: (close) async {
-                    final link = Uri.tryParse(metadata.linkFeedback);
-                    if (link != null) {
-                      await launchUrl(link, mode: LaunchMode.inAppBrowserView);
-                    }
-                  },
-                  builder: (_,__) => const  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.rate_review),
-                      SizedBox(width: 5),
-                      LocalizedText(textId: "dlg_about_feedback"),
-                    ],
+          FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 2),
+            child: Semantics(
+              label: "Give Feedback",
+              button: true,
+              excludeSemantics: true,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: FractionallySizedBox(
+                  widthFactor: 0.4,
+                  child: ButtonDialogAction(
+                    isDefault: true,
+                    onAction: (close) async {
+                      final link = Uri.tryParse(metadata.linkFeedback);
+                      if (link != null) {
+                        await launchUrl(link, mode: LaunchMode.inAppBrowserView);
+                      }
+                    },
+                    builder: (_,__) => const  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.rate_review),
+                        SizedBox(width: 5),
+                        LocalizedText(textId: "dlg_about_feedback"),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -152,28 +159,31 @@ class AboutPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-          Semantics(
-            label: "Donate",
-            button: true,
-            excludeSemantics: true,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: FractionallySizedBox(
-                widthFactor: 0.4,
-                child: ButtonDialogAction(
-                  onAction: (close) async {
-                    final link = Uri.tryParse(metadata.linkDonation);
-                    if (link != null) {
-                      await launchUrl(link, mode: LaunchMode.inAppBrowserView);
-                    }
-                  },
-                  builder: (_,__) => const  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.free_breakfast),
-                      SizedBox(width: 5),
-                      LocalizedText(textId: "dlg_about_donate"),
-                    ],
+          FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 3),
+            child: Semantics(
+              label: "Donate",
+              button: true,
+              excludeSemantics: true,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: FractionallySizedBox(
+                  widthFactor: 0.4,
+                  child: ButtonDialogAction(
+                    onAction: (close) async {
+                      final link = Uri.tryParse(metadata.linkDonation);
+                      if (link != null) {
+                        await launchUrl(link, mode: LaunchMode.inAppBrowserView);
+                      }
+                    },
+                    builder: (_,__) => const  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.free_breakfast),
+                        SizedBox(width: 5),
+                        LocalizedText(textId: "dlg_about_donate"),
+                      ],
+                    ),
                   ),
                 ),
               ),

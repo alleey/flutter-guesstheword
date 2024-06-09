@@ -11,6 +11,7 @@ class GroupFocusOrder extends FocusOrder {
   static const int groupAppCommands = 1;
   static const int groupGameCommands = 2;
   static const int groupKeys = 3;
+  static const int groupDialog = 4;
 
   final int groupId;
   final int order;

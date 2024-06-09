@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/common/custom_traversal_policy.dart';
 
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
@@ -173,26 +174,30 @@ class ButtonDialogAction extends DialogAction {
     final scheme = settingsProvider.value.currentScheme;
     final foregroundColor = isDefault ? scheme.textPuzzleSymbolsFlipped : scheme.textPuzzleSymbols;
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
-        foregroundColor: foregroundColor,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
+    return FocusTraversalOrder(
+      order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 100, 1),
+      child: ElevatedButton(
+        autofocus: isDefault,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
+          foregroundColor: foregroundColor,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          padding: EdgeInsets.zero,
+        ).copyWith(
+          overlayColor: StateDependentColor(foregroundColor),
         ),
-        padding: EdgeInsets.zero,
-      ).copyWith(
-        overlayColor: StateDependentColor(foregroundColor),
-      ),
-      onPressed: () {
-        onAction((result) => Navigator.of(context, rootNavigator: true).pop(result));
-      },
-      child: DefaultTextStyle.merge(
-        style: TextStyle(
-          fontSize: bodyFontSize,
-          color: foregroundColor,
+        onPressed: () {
+          onAction((result) => Navigator.of(context, rootNavigator: true).pop(result));
+        },
+        child: DefaultTextStyle.merge(
+          style: TextStyle(
+            fontSize: bodyFontSize,
+            color: foregroundColor,
+          ),
+          child: builder(context, settingsProvider),
         ),
-        child: builder(context, settingsProvider),
       ),
     );
   }

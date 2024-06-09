@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:guess_the_word/common/custom_traversal_policy.dart';
+import 'package:guess_the_word/common/utils.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../blocs/settings_bloc.dart';
@@ -43,9 +45,17 @@ class _SettingsPageState extends State<SettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
 
-        _buildColorSchemeSettings(context, settings),
-          const SizedBox(height: 2),
-        _buildAudioSettings(context, settings),
+        FocusTraversalOrder(
+          order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 1, 1),
+          child: _buildColorSchemeSettings(context, settings)
+        ),
+
+        const SizedBox(height: 2),
+
+        FocusTraversalOrder(
+          order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 2, 2),
+          child: _buildAudioSettings(context, settings)
+        ),
 
         if (Constants.locales.length > 1)
           ...[
@@ -128,6 +138,8 @@ class _SettingsPageState extends State<SettingsPage> {
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             )
+          ).copyWith(
+            overlayColor: StateDependentColor(scheme.textPuzzlePanel, selectedColor: scheme.backgroundPuzzlePanel)
           ),
           segments: [
             ButtonSegment<bool>(

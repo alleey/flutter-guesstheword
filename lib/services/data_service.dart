@@ -81,7 +81,8 @@ class DataService {
 
   Future<int> ensureInstanceId() async {
 
-    if (appDataBox.isEmpty) {
+    int? instance = appDataBox.get("instanceId");
+    if (instance == null) {
       await appDataBox.put("instanceId", DateTime.now().microsecondsSinceEpoch);
       await appDataBox.flush();
     }
