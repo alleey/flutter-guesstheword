@@ -154,8 +154,8 @@ class ButtonDialogAction extends DialogAction {
   const ButtonDialogAction({
     super.key,
     required super.builder,
-    required this.isDefault,
     required this.onAction,
+    this.isDefault = false,
   }) : super();
 
   final bool isDefault;

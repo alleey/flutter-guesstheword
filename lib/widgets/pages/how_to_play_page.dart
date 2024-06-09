@@ -5,7 +5,6 @@ import '../../common/constants.dart';
 import '../../common/layout_constants.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
-import '../../services/data_service.dart';
 import '../settings_aware_builder.dart';
 
 class HowToPlayPage extends StatelessWidget {
@@ -28,7 +27,6 @@ class HowToPlayPage extends StatelessWidget {
 
   Widget _buildContents(BuildContext context, AppSettings settings) {
 
-    final dataService = DataService();
     final scheme = settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
@@ -38,29 +36,6 @@ class HowToPlayPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          Align(
-            alignment: AlignmentDirectional.center,
-            child: Semantics(
-              label: "Game version is ${dataService.version}",
-              container: true,
-              excludeSemantics: true,
-              child: Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: context.localizations.translate("dlg_help_version", placeholders: {"version": dataService.version}),
-                      style: TextStyle(
-                        color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
-                        fontSize: bodyFontSize,
-                      )
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
 
           Semantics(
             container: true,

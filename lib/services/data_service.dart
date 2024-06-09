@@ -10,6 +10,39 @@ import 'package:path_provider/path_provider.dart';
 import '../common/constants.dart';
 import '../models/puzzle.dart';
 
+class AppMetaData {
+  late String version;
+  late String linkDonation;
+  late String linkFeedback;
+
+  AppMetaData({
+    required this.version,
+    required this.linkDonation,
+    required this.linkFeedback,
+  });
+
+  AppMetaData copyWith({
+    String? version,
+    String? linkDonation,
+    String? linkFeedback,
+  }) {
+    return AppMetaData(
+      version: version ?? this.version,
+      linkDonation: linkDonation ?? this.linkDonation,
+      linkFeedback: linkFeedback ?? this.linkFeedback,
+    );
+  }
+
+  factory AppMetaData.fromJson(Map<String, dynamic> json) {
+    return AppMetaData(
+      version: json['version'] ?? "",
+      linkDonation: json['link_donate'] ?? "",
+      linkFeedback: json['link_feedback'] ?? "",
+    );
+  }
+}
+
+
 class DataService {
 
   static final DataService _instance = DataService._();
@@ -23,9 +56,8 @@ class DataService {
   late Box<String> scoreBox;
   late Box<Puzzle> puzzleBox;
   late Box<dynamic> appDataBox;
-  late String version;
-  late String donationsLink;
   late int instanceId;
+  late AppMetaData metaData;
 
   Future initialize() async {
 
@@ -42,9 +74,9 @@ class DataService {
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<dynamic>('appdata-v${Constants.appDataVersion}');
 
-    final metadata = await _loadMeta();
-    version = metadata['version'] ?? "";
-    donationsLink = metadata['link_donate'] ?? "";
+    await ensureInstanceId();
+
+    metaData = await _loadMeta();
   }
 
   Future<int> ensureInstanceId() async {
@@ -54,13 +86,14 @@ class DataService {
       await appDataBox.flush();
     }
 
-    return appDataBox.get("instanceId");
+    instanceId = appDataBox.get("instanceId");
+    return instanceId;
   }
 
-  Future<Map<String, String>> _loadMeta() async {
+  Future<AppMetaData> _loadMeta() async {
     final jsonString = await rootBundle.loadString('assets/metadata.json');
-    Map<String, String> jsonMap = jsonDecode(jsonString);
-    return jsonMap;
+    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    return AppMetaData.fromJson(jsonMap);
   }
 
   Future<void> _cleanUpOldVersionFolders() async {

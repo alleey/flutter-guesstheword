@@ -389,7 +389,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         ),
         const SizedBox(width: 20,),
         FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
+          order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 1),
           child: Semantics(
             button: true,
             label: "Try the next puzzle",
@@ -427,7 +427,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return FocusTraversalOrder(
-      order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+      order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 2),
       child: Semantics(
         label: "Use a hint",
         button: true,
@@ -658,7 +658,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           // Google button
           if (state.isGameOver)
             FocusTraversalOrder(
-              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 3),
+              order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 3),
               child: ElevatedButton(
                 autofocus: true,
                 style: ElevatedButton.styleFrom(

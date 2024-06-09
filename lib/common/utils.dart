@@ -44,13 +44,13 @@ class StateDependentColor extends WidgetStateProperty<Color?> {
   @override
   Color? resolve(Set<WidgetState> states) {
     if (states.contains(WidgetState.pressed)) {
-      return color.withOpacity(0.3);
+      return color.withOpacity(0.2);
     }
     if (states.contains(WidgetState.hovered)) {
       return color.withOpacity(0.1);
     }
     if (states.contains(WidgetState.focused)) {
-      return color.withOpacity(0.5);
+      return color.withOpacity(0.3);
     }
     return null;
   }

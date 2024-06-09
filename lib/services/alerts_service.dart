@@ -9,6 +9,7 @@ import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/dialogs/common.dart';
 import '../widgets/loading_indicator.dart';
 import '../widgets/localized_text.dart';
+import '../widgets/pages/about_page.dart';
 import '../widgets/pages/game_finshed_page.dart';
 import '../widgets/pages/high_scores_list_page.dart';
 import '../widgets/pages/how_to_play_page.dart';
@@ -60,7 +61,6 @@ class AlertsService {
       actions: (_,__) => [
         Expanded(
           child: ButtonDialogAction(
-            isDefault: false,
             onAction: (close) {
               close(null);
               onAccept?.call();
@@ -158,6 +158,7 @@ class AlertsService {
     );
   }
 
+
   Future<dynamic> resetGameDialog(BuildContext context, {required VoidCallback onAccept}) {
     return yesNoDialog(
       context,
@@ -201,6 +202,23 @@ class AlertsService {
         );
       },
       onAccept:onAccept
+    );
+  }
+
+  Future<dynamic> aboutDialog(BuildContext context) {
+    return actionDialog(
+      context,
+      title: (_, schemeNotifier) => _localizedTextTitle("dlg_about_title"),
+      contents: (_,__) => const AboutPage(),
+      actions: (_,__) => [
+        Expanded(
+          child: ButtonDialogAction(
+            isDefault: true,
+            onAction: (close) => close(null),
+            builder: (_,__) => const LocalizedText(textId: "dlg_about_ok")
+          ),
+        )
+      ],
     );
   }
 

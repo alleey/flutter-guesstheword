@@ -77,11 +77,14 @@ class _HomePageState extends State<HomePage> {
 
               return Scaffold(
                 backgroundColor: scheme.backgroundPuzzlePanel,
-                appBar: !_dialogShown ? null : PreferredSize(
-                  preferredSize: Size.fromHeight(appBarHeight),
-                  child: _buildAppBar(context, scheme, appBarHeight),
-                ),
-                body: _buildLayout(context, appBarHeight),
+                appBar: null,
+
+                // appBar: !_dialogShown ? null : PreferredSize(
+                //   preferredSize: Size.fromHeight(appBarHeight),
+                //   child: _buildAppBar(context, scheme, appBarHeight),
+                // ),
+
+                body: _buildLayout(context, scheme, appBarHeight),
               );
 
             }
@@ -91,7 +94,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildLayout(BuildContext context, double appBarHeight) {
+  Widget _buildLayout(BuildContext context, AppColorScheme scheme, double appBarHeight) {
 
     if (!_gameInitialized) {
       return Padding(
@@ -123,101 +126,132 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return const PuzzlePage();
+    return Column(
+      children: [
+        PreferredSize(
+          preferredSize: Size.fromHeight(appBarHeight),
+          child: _buildAppBar(context, scheme, appBarHeight),
+        ),
+        const Expanded(child: PuzzlePage()),
+      ],
+    );
   }
 
-  AppBar _buildAppBar(BuildContext context, AppColorScheme scheme, double appBarHeight) {
-    return AppBar(
-      backgroundColor: scheme.backgroundTopPanel,
-      foregroundColor: scheme.textTopPanel,
-      leading:
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label: 'About the game',
-            child: IconButton(
-              iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.description_outlined),
-              focusColor: scheme.textTopPanel.withOpacity(0.5),
-              onPressed: () async {
-                await AlertsService().helpDialog(context);
-              },
-            ),
-          ),
-        ),
+  Widget _buildAppBar(BuildContext context, AppColorScheme scheme, double appBarHeight) {
 
-      actions: [
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 1),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label: 'Open high scores',
-            child: IconButton(
-              iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.bar_chart),
-              focusColor: scheme.textTopPanel.withOpacity(0.5),
-              onPressed: () async {
-                await AlertsService().highScoresDialog(context);
-              },
+    return Container(
+      color: scheme.backgroundTopPanel,
+      child: Row(
+          children: [
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 0),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'About Game',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.library_books_outlined),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().aboutDialog(context);
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 2),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label: 'Statisitcs',
-            child: IconButton(
-              iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.trending_up),
-              focusColor: scheme.textTopPanel.withOpacity(0.5),
-              onPressed: () async {
-                await AlertsService().statsDialog(context);
-              },
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 1),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'How to play',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.live_help_outlined),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().helpDialog(context);
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 3),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label: 'Reset game',
-            child: IconButton(
-              iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.refresh),
-              focusColor: scheme.textTopPanel.withOpacity(0.5),
-              onPressed: () async {
-                await AlertsService().resetGameDialog(context,
-                  onAccept: () {
-                    context.gameBloc.add(ResetGameEvent());
-                  }
-                );
-              },
+            const Spacer(),
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 2),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'Open high scores',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.bar_chart),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().highScoresDialog(context);
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 4),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label: 'Settings',
-            child: IconButton(
-              iconSize: appBarHeight - 8,
-              icon: const Icon(Icons.settings),
-              focusColor: scheme.textTopPanel.withOpacity(0.5),
-              onPressed: () async {
-                await AlertsService().settingsDialog(context);
-              },
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 3),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'Statisitcs',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.trending_up),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().statsDialog(context);
+                  },
+                ),
+              ),
             ),
-          ),
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 4),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'Reset game',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.refresh),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().resetGameDialog(context,
+                      onAccept: () {
+                        context.gameBloc.add(ResetGameEvent());
+                      }
+                    );
+                  },
+                ),
+              ),
+            ),
+            FocusTraversalOrder(
+              order: const GroupFocusOrder(GroupFocusOrder.groupAppCommands, 5),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true,
+                label: 'Settings',
+                child: IconButton(
+                  iconSize: appBarHeight - 8,
+                  icon: const Icon(Icons.settings),
+                  color: scheme.textTopPanel,
+                  focusColor: scheme.textTopPanel.withOpacity(0.5),
+                  onPressed: () async {
+                    await AlertsService().settingsDialog(context);
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
     );
   }
 

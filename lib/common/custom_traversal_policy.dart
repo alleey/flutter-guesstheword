@@ -9,7 +9,7 @@ import 'collection_utils.dart';
 class GroupFocusOrder extends FocusOrder {
 
   static const int groupAppCommands = 1;
-  static const int groupButtons = 2;
+  static const int groupGameCommands = 2;
   static const int groupKeys = 3;
 
   final int groupId;
