@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
-import '../../common/app_color_scheme.dart';
 import '../../common/constants.dart';
 import '../../common/layout_constants.dart';
 import '../../localizations/app_localizations.dart';
@@ -30,7 +29,7 @@ class HowToPlayPage extends StatelessWidget {
   Widget _buildContents(BuildContext context, AppSettings settings) {
 
     final dataService = DataService();
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);

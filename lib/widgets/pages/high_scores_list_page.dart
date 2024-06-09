@@ -53,7 +53,7 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
 
   Widget _buildContents(BuildContext context, AppSettings settings) {
 
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final scores = widget.statisticsList;

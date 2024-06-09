@@ -14,7 +14,7 @@ class ColorSchemePicker extends StatefulWidget {
   final ColorSchemeSelectionCallback onSelect;
   final WrapAlignment alignment;
 
-  ColorSchemePicker({
+  const ColorSchemePicker({
     super.key,
     required this.selectedTheme,
     required this.onSelect,

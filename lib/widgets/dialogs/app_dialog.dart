@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../common/app_color_scheme.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
 import '../../models/app_settings.dart';
@@ -57,7 +56,7 @@ class _AppDialogState extends State<AppDialog> {
     final screenCoverPct = layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     final padding = layout.get<EdgeInsets>(DialogLayoutConstants.paddingKey);
     final insetPadding = layout.get<EdgeInsets>(DialogLayoutConstants.insetPaddingKey);
-    final scheme = AppColorSchemes.fromName(settings.value.theme);
+    final scheme = settings.value.currentScheme;
 
     return Dialog(
       insetPadding: widget.insetPadding ?? insetPadding,
@@ -85,16 +84,6 @@ class _AppDialogState extends State<AppDialog> {
                 )
               )
             ),
-            // Positioned(
-            //   child: Align(
-            //     alignment: AlignmentDirectional.bottomCenter,
-            //     child: AlternatingColorSquares(
-            //       color1: scheme.backgroundPuzzlePanel,
-            //       color2: scheme.backgroundInputPanel,
-            //       squareSize: 4,
-            //     )
-            //   )
-            // ),
           ],
         ),
       )
@@ -140,7 +129,7 @@ class DefaultDialogTitle extends StatelessWidget {
     );
 
   Widget _buildTitle(BuildContext context, ValueNotifier<AppSettings> settingsProvider) {
-    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+    final scheme = settingsProvider.value.currentScheme;
     return Semantics(
       header: true,
       container: true,
@@ -181,7 +170,7 @@ class ButtonDialogAction extends DialogAction {
 
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+    final scheme = settingsProvider.value.currentScheme;
     final foregroundColor = isDefault ? scheme.textPuzzleSymbolsFlipped : scheme.textPuzzleSymbols;
 
     return ElevatedButton(

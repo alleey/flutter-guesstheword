@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/models/player_stats.dart';
 
-import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
 import '../localizations/app_localizations.dart';
+import '../models/app_settings.dart';
+import '../models/player_stats.dart';
+import '../widgets/common/responsive_layout.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/dialogs/common.dart';
 import '../widgets/loading_indicator.dart';
 import '../widgets/localized_text.dart';
-import '../widgets/pages/how_to_play_page.dart';
+import '../widgets/pages/game_finshed_page.dart';
 import '../widgets/pages/high_scores_list_page.dart';
+import '../widgets/pages/how_to_play_page.dart';
 import '../widgets/pages/player_stats_page.dart';
 import '../widgets/pages/settings_page.dart';
 import 'score_service.dart';
-import '../widgets/common/responsive_layout.dart';
 
 class AlertsService {
 
@@ -86,7 +87,7 @@ class AlertsService {
   Future<dynamic> okDialog(BuildContext context, {
     required ContentBuilder title,
     required ContentBuilder contents,
-    String okLabel = "Continue",
+    required ContentBuilder okLabel,
     VoidCallback? callback
   }) {
     return actionDialog(
@@ -101,7 +102,7 @@ class AlertsService {
               close(null);
               callback?.call();
             },
-            builder: (_,__) => Text(okLabel, textAlign: TextAlign.center)
+            builder: okLabel
           ),
         )
       ],
@@ -132,7 +133,7 @@ class AlertsService {
       title: (context, settingsProvider) {
         return DefaultDialogTitle(
           builder: (context, settingsProvider) {
-            final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+            final scheme = settingsProvider.value.currentScheme;
             return Text(
               title,
               style: TextStyle(
@@ -168,7 +169,7 @@ class AlertsService {
         final layout = context.layout;
         final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
         final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-        final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+        final scheme = settingsProvider.value.currentScheme;
 
         return Semantics(
           container: true,
@@ -214,12 +215,7 @@ class AlertsService {
           child: ButtonDialogAction(
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) {
-              return Text(
-                context.localizations.translate("dlg_help_ok"),
-                textAlign: TextAlign.center
-              );
-            }
+            builder: (_,__) => const LocalizedText(textId: "dlg_help_ok")
           ),
         )
       ],
@@ -239,12 +235,7 @@ class AlertsService {
           child: ButtonDialogAction(
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) {
-              return Text(
-                context.localizations.translate("dlg_scores_ok"),
-                textAlign: TextAlign.center
-              );
-            }
+            builder: (_,__) => const LocalizedText(textId: "dlg_scores_ok")
           ),
         )
       ],
@@ -266,12 +257,7 @@ class AlertsService {
           child: ButtonDialogAction(
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) {
-              return Text(
-                context.localizations.translate("dlg_playerstats_ok"),
-                textAlign: TextAlign.center
-              );
-            }
+            builder: (_,__) => const LocalizedText(textId: "dlg_playerstats_ok")
           ),
         )
       ],
@@ -289,12 +275,7 @@ class AlertsService {
           child: ButtonDialogAction(
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) {
-              return Text(
-                context.localizations.translate("dlg_settings_ok"),
-                textAlign: TextAlign.center
-              );
-            }
+            builder: (_,__) => const LocalizedText(textId: "dlg_settings_ok")
           ),
         )
       ],
@@ -302,14 +283,13 @@ class AlertsService {
     );
   }
 
-  Future<dynamic> gameNeedsResetDialog(BuildContext context, {
-    required VoidCallback callback
-  }) {
+  Future<dynamic> gameNeedsResetDialog(BuildContext context, { required VoidCallback callback }) {
+
     return okDialog(
       context,
       title: (_,__) => _localizedTextTitle("dlg_needreset_title"),
-      okLabel: context.localizations.translate("dlg_needreset_ok"),
-      contents: (layout, scheme) => Text(context.localizations.translate("dlg_needreset_message")),
+      okLabel: (_,__) => const LocalizedText(textId: "dlg_needreset_ok"),
+      contents: (context, settingsProvider) => const GameFinshedPage(),
       callback: callback,
     );
   }
@@ -317,7 +297,7 @@ class AlertsService {
   Widget _localizedTextTitle(String textId) {
     return DefaultDialogTitle(
       builder: (context, settingsProvider) {
-        final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+        final scheme = settingsProvider.value.currentScheme;
         return LocalizedText(
           textId: textId,
           style: TextStyle(

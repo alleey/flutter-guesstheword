@@ -11,6 +11,7 @@ import '../../models/statistics.dart';
 import '../../services/app_data_service.dart';
 import '../common/percentage_bar.dart';
 import '../settings_aware_builder.dart';
+import '../win_accuracy_stats.dart';
 
 class PlayerStatisticsPage extends StatefulWidget {
 
@@ -51,7 +52,7 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
 
   Widget _buildContents(BuildContext context, AppSettings settings) {
 
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final totalPuzzles = AppDataService().getSetting("totalPuzzles", 1);
@@ -72,7 +73,6 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
                 _buildCompletionIndicator(totalPuzzles, scheme, widget.statistics),
                 _buildScoreInfo(context, scheme, widget.statistics),
                 _buildTotalStats(context, scheme, widget.statistics),
-                const SizedBox(height: 10),
 
                 _buildHeader(context, scheme, sortOrder),
 
@@ -110,7 +110,6 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.textPuzzlePanel.withOpacity(0.1),
-        //borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -163,68 +162,7 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
   }
 
   Widget _buildTotalStats(BuildContext context, AppColorScheme scheme, PlayerStatistics score) {
-
-    final layout = context.layout;
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-
-    return Center(
-      child: Semantics(
-        container: true,
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            fontSize: titleFontSize,
-            color: scheme.backgroundPuzzlePanel,
-            fontWeight: FontWeight.bold,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: scheme.textPuzzlePanel,
-              //borderRadius: BorderRadius.circular(3),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                 child: Column(
-                   children: [
-                     FittedBox(
-                       fit: BoxFit.scaleDown,
-                       child: Text(
-                         context.localizations.translate("dlg_playerstats_winrate"),
-                         textAlign: TextAlign.center,
-                       ),
-                     ),
-                     Text(
-                       "${(score.total.winRate * 100).toStringAsFixed(1)}%",
-                       textAlign: TextAlign.center,
-                     ),
-                   ],
-                 ),
-                ),
-                Container(color: Colors.black, width: 1, height: 60),
-                Expanded(
-                  child: Column(
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          context.localizations.translate("dlg_playerstats_accuracy"),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Text(
-                        "${(score.total.accuracy * 100).toStringAsFixed(1)}%",
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return WinAccuracyStats(statistics: score);
   }
 
   Widget _buildHeader(BuildContext context, AppColorScheme scheme, (CategoryStatisticsSortOrder, bool) sortOrder) {

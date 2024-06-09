@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../models/app_settings.dart';
 import 'blocs/game_bloc.dart';
 import 'blocs/settings_bloc.dart';
 import 'common/app_color_scheme.dart';
@@ -72,7 +73,7 @@ class _HomePageState extends State<HomePage> {
             builder: (context, settings, child) {
 
               final appBarHeight = context.layout.get<double>(AppLayoutConstants.appbarHeightKey);
-              final scheme = AppColorSchemes.fromName(settings.theme);
+              final scheme = settings.currentScheme;
 
               return Scaffold(
                 backgroundColor: scheme.backgroundPuzzlePanel,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../common/app_color_scheme.dart';
 import '../common/layout_constants.dart';
 import '../models/app_settings.dart';
 import 'common/responsive_layout.dart';
@@ -31,7 +30,7 @@ class LoadingIndicator extends StatelessWidget {
   Widget _buildContents(BuildContext context, AppSettings settings) {
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
 
     return Center(
       child: Column(
