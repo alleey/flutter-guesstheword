@@ -43,9 +43,12 @@ jobs:
       with:
         fetch-depth: 0  # Fetch all history for tags
 
-    - name: Extract latest tag version
-      id: extract_version
+    - name: Read meta data
+      id: metadata
       uses: actions/github-script@v6
+      env:
+        LINK_DONATE: ${{ secrets.LINK_DONATE }}
+        LINK_FEEDBACK: ${{ secrets.LINK_FEEDBACK }}
       with:
         script: |
           const { execSync } = require('child_process');
@@ -57,21 +60,18 @@ jobs:
             latestTag = 'v0.0.1';
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          const { LINK_DONATE, LINK_FEEDBACK } = process.env
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
-
-    - name: Read meta data
-      id: metadata
-      run: |
-        echo "::set-output name=link_donate::${{ secrets.LINK_DONATE }}"
-        echo "::set-output name=link_feedback::${{ secrets.LINK_FEEDBACK }}"
+          core.setOutput('link_donate', LINK_DONATE)
+          core.setOutput('link_feedback', LINK_FEEDBACK)
 
     - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ steps.extract_version.outputs.value }}';
+          const version = '${{ steps.metadata.outputs.value }}';
           const link_donate = '${{ steps.metadata.outputs.link_donate }}';
           const link_feedback = '${{ steps.metadata.outputs.link_feedback }}';
           fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate, link_feedback }));
@@ -168,9 +168,12 @@ jobs:
     - name: Install app dependencies
       run: sudo apt-get install -y -f libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev
 
-    - name: Extract latest tag version
-      id: extract_version
+    - name: Read meta data
+      id: metadata
       uses: actions/github-script@v6
+      env:
+        LINK_DONATE: ${{ secrets.LINK_DONATE }}
+        LINK_FEEDBACK: ${{ secrets.LINK_FEEDBACK }}
       with:
         script: |
           const { execSync } = require('child_process');
@@ -182,21 +185,18 @@ jobs:
             latestTag = 'v0.0.1';
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          const { LINK_DONATE, LINK_FEEDBACK } = process.env
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
-
-    - name: Read meta data
-      id: metadata
-      run: |
-        echo "::set-output name=link_donate::${{ secrets.LINK_DONATE }}"
-        echo "::set-output name=link_feedback::${{ secrets.LINK_FEEDBACK }}"
+          core.setOutput('link_donate', LINK_DONATE)
+          core.setOutput('link_feedback', LINK_FEEDBACK)
 
     - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ steps.extract_version.outputs.value }}';
+          const version = '${{ steps.metadata.outputs.value }}';
           const link_donate = '${{ steps.metadata.outputs.link_donate }}';
           const link_feedback = '${{ steps.metadata.outputs.link_feedback }}';
           fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate, link_feedback }));
@@ -237,9 +237,12 @@ jobs:
       with:
         fetch-depth: 0  # Fetch all history for tags
 
-    - name: Extract latest tag version
-      id: extract_version
+    - name: Read meta data
+      id: metadata
       uses: actions/github-script@v6
+      env:
+        LINK_DONATE: ${{ secrets.LINK_DONATE }}
+        LINK_FEEDBACK: ${{ secrets.LINK_FEEDBACK }}
       with:
         script: |
           const { execSync } = require('child_process');
@@ -251,21 +254,18 @@ jobs:
             latestTag = 'v0.0.1';
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          const { LINK_DONATE, LINK_FEEDBACK } = process.env
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
-
-    - name: Read meta data
-      id: metadata
-      run: |
-        echo "::set-output name=link_donate::${{ secrets.LINK_DONATE }}"
-        echo "::set-output name=link_feedback::${{ secrets.LINK_FEEDBACK }}"
+          core.setOutput('link_donate', LINK_DONATE)
+          core.setOutput('link_feedback', LINK_FEEDBACK)
 
     - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ steps.extract_version.outputs.value }}';
+          const version = '${{ steps.metadata.outputs.value }}';
           const link_donate = '${{ steps.metadata.outputs.link_donate }}';
           const link_feedback = '${{ steps.metadata.outputs.link_feedback }}';
           fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate, link_feedback }));
@@ -306,9 +306,12 @@ jobs:
       with:
         fetch-depth: 0  # Fetch all history for tags
 
-    - name: Extract latest tag version
-      id: extract_version
+    - name: Read meta data
+      id: metadata
       uses: actions/github-script@v6
+      env:
+        LINK_DONATE: ${{ secrets.LINK_DONATE }}
+        LINK_FEEDBACK: ${{ secrets.LINK_FEEDBACK }}
       with:
         script: |
           const { execSync } = require('child_process');
@@ -320,21 +323,18 @@ jobs:
             latestTag = 'v0.0.1';
           }
           const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+          const { LINK_DONATE, LINK_FEEDBACK } = process.env
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
-
-    - name: Read meta data
-      id: metadata
-      run: |
-        echo "::set-output name=link_donate::${{ secrets.LINK_DONATE }}"
-        echo "::set-output name=link_feedback::${{ secrets.LINK_FEEDBACK }}"
+          core.setOutput('link_donate', LINK_DONATE)
+          core.setOutput('link_feedback', LINK_FEEDBACK)
 
     - name: Write metadata to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
-          const version = '${{ steps.extract_version.outputs.value }}';
+          const version = '${{ steps.metadata.outputs.value }}';
           const link_donate = '${{ steps.metadata.outputs.link_donate }}';
           const link_feedback = '${{ steps.metadata.outputs.link_feedback }}';
           fs.writeFileSync('assets/metadata.json', JSON.stringify({ version, link_donate, link_feedback }));
