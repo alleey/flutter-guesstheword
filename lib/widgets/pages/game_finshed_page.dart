@@ -37,8 +37,7 @@ class GameFinshedPage extends StatelessWidget {
 
     final scoreService = ScoreService();
     final score = scoreService.load();
-    final highest = scoreService.highest(0);
-    final isHighScore = score.instance == highest.instance;
+    final isHighScore = scoreService.isTopScore(score);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

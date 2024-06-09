@@ -47,13 +47,18 @@ jobs:
           console.log(`Tag:${latestTag} -> Version:${version}`);
           core.setOutput('value', version)
 
+    - name: Read Donate Link
+      id: link_donate
+      run: echo "::set-output name=link::${{ secrets.LINK_DONATE }}"
+
     - name: Write version to file
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const version = '${{ steps.extract_version.outputs.value }}';
-          fs.writeFileSync('assets/version.json', JSON.stringify({ version }));
+          const link_donate = '${{ steps.link_donate.outputs.link }}';
+          fs.writeFileSync('assets/version.json', JSON.stringify({ version, link_donate }));
           console.log(`${version} written to assets/version.json`);
 
     - name: Decode and save keystore

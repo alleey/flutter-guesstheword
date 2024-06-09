@@ -29,7 +29,7 @@ class DataService {
   Future initialize() async {
 
     if (!kIsWeb) {
-      await cleanUpOldVersionFolders();
+      await _cleanUpOldVersionFolders();
     }
 
     await Hive.initFlutter("guesstheword-v${Constants.appDataVersion}");
@@ -41,7 +41,7 @@ class DataService {
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<dynamic>('appdata-v${Constants.appDataVersion}');
 
-    version = await getVersion();
+    version = await getLinkDonate();
     instanceId = await ensureInstanceId();
   }
 
@@ -55,8 +55,19 @@ class DataService {
     return appDataBox.get("instanceId");
   }
 
+  Future<String> getVersion() async {
+    final jsonString = await rootBundle.loadString('assets/version.json');
+    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    return jsonMap['version'];
+  }
 
-  Future<void> cleanUpOldVersionFolders() async {
+  Future<String> getLinkDonate() async {
+    final jsonString = await rootBundle.loadString('assets/version.json');
+    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    return jsonMap['link_donate'];
+  }
+
+  Future<void> _cleanUpOldVersionFolders() async {
 
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
@@ -75,11 +86,5 @@ class DataService {
         }
       }
     }
-  }
-
-  Future<String> getVersion() async {
-    final jsonString = await rootBundle.loadString('assets/version.json');
-    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-    return jsonMap['version'];
   }
 }
