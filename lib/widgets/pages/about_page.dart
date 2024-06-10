@@ -49,13 +49,13 @@ class AboutPage extends StatelessWidget {
               container: true,
               excludeSemantics: true,
               child: FocusHighlight(
-                autofocus: true,
                 canRequestFocus: true,
-                focusColor: scheme.textPuzzlePanel,
+                focusColor: scheme.backgroundPuzzlePanel,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text.rich(
                     textAlign: TextAlign.center,
+                    textScaler: const TextScaler.linear(0.9),
                     TextSpan(
                       children: [
                         TextSpan(
@@ -73,7 +73,7 @@ class AboutPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
 
           Semantics(
             container: true,
@@ -93,7 +93,7 @@ class AboutPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           Semantics(
             container: true,
             child: Text.rich(
@@ -112,7 +112,7 @@ class AboutPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           FocusTraversalOrder(
             order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 2),
             child: Semantics(
@@ -121,31 +121,28 @@ class AboutPage extends StatelessWidget {
               excludeSemantics: true,
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
-                child: FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: ButtonDialogAction(
-                    isDefault: true,
-                    onAction: (close) async {
-                      final link = Uri.tryParse(metadata.linkFeedback);
-                      if (link != null) {
-                        await launchUrl(link, mode: LaunchMode.inAppBrowserView);
-                      }
-                    },
-                    builder: (_,__) => const  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.rate_review),
-                        SizedBox(width: 5),
-                        LocalizedText(textId: "dlg_about_feedback"),
-                      ],
-                    ),
+                child: ButtonDialogAction(
+                  isDefault: true,
+                  onAction: (close) async {
+                    final link = Uri.tryParse(metadata.linkFeedback);
+                    if (link != null) {
+                      await launchUrl(link, mode: LaunchMode.inAppBrowserView);
+                    }
+                  },
+                  builder: (_,__) => const  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.rate_review),
+                      SizedBox(width: 5),
+                      LocalizedText(textId: "dlg_about_feedback"),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           Semantics(
             container: true,
             child: Text.rich(
@@ -164,7 +161,7 @@ class AboutPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           FocusTraversalOrder(
             order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 3),
             child: Semantics(
@@ -173,23 +170,20 @@ class AboutPage extends StatelessWidget {
               excludeSemantics: true,
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
-                child: FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: ButtonDialogAction(
-                    onAction: (close) async {
-                      final link = Uri.tryParse(metadata.linkDonation);
-                      if (link != null) {
-                        await launchUrl(link, mode: LaunchMode.inAppBrowserView);
-                      }
-                    },
-                    builder: (_,__) => const  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.free_breakfast),
-                        SizedBox(width: 5),
-                        LocalizedText(textId: "dlg_about_donate"),
-                      ],
-                    ),
+                child: ButtonDialogAction(
+                  onAction: (close) async {
+                    final link = Uri.tryParse(metadata.linkDonation);
+                    if (link != null) {
+                      await launchUrl(link, mode: LaunchMode.inAppBrowserView);
+                    }
+                  },
+                  builder: (_,__) => const  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.free_breakfast),
+                      SizedBox(width: 5),
+                      LocalizedText(textId: "dlg_about_donate"),
+                    ],
                   ),
                 ),
               ),

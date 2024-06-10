@@ -27,7 +27,7 @@ class AlertsService {
   }) {
     return showGeneralDialog<T>(
         context: context,
-        barrierColor: Colors.black.withOpacity(0.8),
+        barrierColor: Colors.black.withOpacity(0.6),
         barrierDismissible: false,
         transitionDuration: const Duration(milliseconds: 250),
         transitionBuilder: (context, animation, secondaryAnimation, child) {

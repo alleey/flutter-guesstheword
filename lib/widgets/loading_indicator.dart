@@ -37,6 +37,7 @@ class LoadingIndicator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
+            textAlign: TextAlign.center,
             message,
             style: TextStyle(
               color: scheme.textPuzzlePanel,
