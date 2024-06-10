@@ -3,14 +3,17 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class PartyPopperEffect extends StatefulWidget {
+
   const PartyPopperEffect({
     super.key,
     this.duration = const Duration(milliseconds: 1500),
     this.maxRibbons = 100,
+    this.autostart = true,
   });
 
   final Duration duration;
   final int maxRibbons;
+  final bool autostart;
 
   @override
   _PartyPopperEffectState createState() => _PartyPopperEffectState();
@@ -21,10 +24,12 @@ class _PartyPopperEffectState extends State<PartyPopperEffect> with SingleTicker
   List<_Ribbon> _ribbons = [];
   late Size _size;
   late bool _showOver = false;
+  late bool _autostart;
 
   @override
   void initState() {
     super.initState();
+    _autostart = widget.autostart;
     _controller = AnimationController(
       duration: widget.duration,
       vsync: this,
@@ -47,6 +52,34 @@ class _PartyPopperEffectState extends State<PartyPopperEffect> with SingleTicker
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return _showOver ? const SizedBox() : LayoutBuilder(
+      builder: (context, constraints) {
+        _size = Size(constraints.maxWidth, constraints.maxHeight);
+
+        if (_autostart) {
+          _autostart = false;
+          WidgetsBinding.instance.addPostFrameCallback((d) {
+            fire();
+          });
+        }
+
+        return CustomPaint(
+          painter: _RibbonPainter(_ribbons, _controller.value),
+          size: Size.infinite,
+        );
+      },
+    );
+  }
+
+  void fire() {
+    if (_ribbons.isEmpty) {
+      _initializeRibbons();
+    }
+    _controller.forward(from: 0);
+  }
+
   void _initializeRibbons() {
     final random = math.Random();
     _ribbons = List.generate(widget.maxRibbons, (index) => _Ribbon(
@@ -63,25 +96,6 @@ class _PartyPopperEffectState extends State<PartyPopperEffect> with SingleTicker
       width: random.nextDouble() * 10 + 2,
       height: random.nextDouble() * 20 + 10,
     ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _showOver ? const SizedBox() : LayoutBuilder(
-      builder: (context, constraints) {
-        _size = Size(constraints.maxWidth, constraints.maxHeight);
-
-        if (_ribbons.isEmpty) {
-          _initializeRibbons();
-          _controller.forward();
-        }
-
-        return CustomPaint(
-          painter: _RibbonPainter(_ribbons, _controller.value),
-          size: Size.infinite,
-        );
-      },
-    );
   }
 }
 

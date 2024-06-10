@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/services/alerts_service.dart';
+import 'package:flutter/services.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../common/app_color_scheme.dart';
@@ -10,6 +10,8 @@ import '../../common/utils.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
 import '../../models/player_stats.dart';
+import '../../services/alerts_service.dart';
+import '../common/focus_highlight.dart';
 import '../common/percentage_bar.dart';
 import '../localized_text.dart';
 import '../settings_aware_builder.dart';
@@ -90,7 +92,7 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
                   child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
-                _buildStatsList(context, scores, scheme, sortOrder),
+                Expanded(child: _buildStatsList(context, scores, scheme, sortOrder)),
               ],
             );
           },
@@ -99,6 +101,15 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
   }
 
   Widget _buildHeader(BuildContext context, AppColorScheme scheme, (PlayerStatisticsSortOrder, bool) sortOrder) {
+
+    void toggleSort(PlayerStatisticsSortOrder order) {
+      if (_sortOrderNotifier.value.$1 == order) {
+        _sortOrderNotifier.value = (order, !_sortOrderNotifier.value.$2);
+      } else {
+        _sortOrderNotifier.value = (order, true);
+      }
+    }
+
     return Semantics(
       label: "Below is the list of top scores, games won and lost",
       excludeSemantics: true,
@@ -106,77 +117,84 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
       child: Row(
         children: [
           Expanded(
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.score, sortOrder.$2),
-                  child: Text(
-                    context.localizations.translate("dlg_scores_score"),
-                    textAlign: TextAlign.start,
-                    textScaler: const TextScaler.linear(0.9),
-                  ),
-                ),
-                if (sortOrder.$1 == PlayerStatisticsSortOrder.score)
-                  InkWell(
-                    onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.score, !sortOrder.$2),
-                    child: Icon(
-                      sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: scheme.textPuzzlePanel, // Customize the color of the icon
+            child: FocusHighlight(
+              focusColor: scheme.textPuzzlePanel,
+              child: InkWell(
+                onTap: () => toggleSort(PlayerStatisticsSortOrder.score),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        context.localizations.translate("dlg_scores_score"),
+                        textAlign: TextAlign.start,
+                        textScaler: const TextScaler.linear(0.9),
+                      ),
                     ),
-                  ),
-              ],
+                    if (sortOrder.$1 == PlayerStatisticsSortOrder.score)
+                      Icon(
+                        sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                        color: scheme.textPuzzlePanel, // Customize the color of the icon
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.winrate, sortOrder.$2),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      context.localizations.translate("dlg_scores_winrate"),
-                      textAlign: TextAlign.start,
-                      textScaler: const TextScaler.linear(0.9),
+            child: FocusHighlight(
+              focusColor: scheme.textPuzzlePanel,
+              child: InkWell(
+                onTap: () => toggleSort(PlayerStatisticsSortOrder.winrate),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        context.localizations.translate("dlg_scores_winrate"),
+                        textAlign: TextAlign.start,
+                        textScaler: const TextScaler.linear(0.9),
+                      ),
                     ),
-                  ),
+                    if (sortOrder.$1 == PlayerStatisticsSortOrder.winrate)
+                      Icon(
+                        sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                        color: scheme.textPuzzlePanel, // Customize the color of the icon
+                      ),
+                  ],
                 ),
-                if (sortOrder.$1 == PlayerStatisticsSortOrder.winrate)
-                  InkWell(
-                    onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.winrate, !sortOrder.$2),
-                    child: Icon(
-                      sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: scheme.textPuzzlePanel, // Customize the color of the icon
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.accuracy, sortOrder.$2),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      context.localizations.translate("dlg_scores_accuracy"),
-                      textAlign: TextAlign.start,
-                      textScaler: const TextScaler.linear(0.9),
+            child: FocusHighlight(
+              focusColor: scheme.textPuzzlePanel,
+              child: InkWell(
+                onTap: () => toggleSort(PlayerStatisticsSortOrder.accuracy),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        context.localizations.translate("dlg_scores_accuracy"),
+                        textAlign: TextAlign.start,
+                        textScaler: const TextScaler.linear(0.9),
+                      ),
                     ),
-                  ),
+                    if (sortOrder.$1 == PlayerStatisticsSortOrder.accuracy)
+                      Icon(
+                        sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                        color: scheme.textPuzzlePanel, // Customize the color of the icon
+                      ),
+                  ],
                 ),
-                if (sortOrder.$1 == PlayerStatisticsSortOrder.accuracy)
-                  InkWell(
-                    onTap: () => _sortOrderNotifier.value = (PlayerStatisticsSortOrder.accuracy, !sortOrder.$2),
-                    child: Icon(
-                      sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: scheme.textPuzzlePanel, // Customize the color of the icon
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
         ],
@@ -196,6 +214,7 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
     final sorted = PlayerStatisticsSorter.sort(scores, order: sortOrder. $1,ascending: sortOrder.$2);
 
     return SingleChildScrollView(
+      //focusColor: scheme.backgroundPuzzlePanel,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,70 +222,77 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
 
           ...sorted.mapIndexed((i, stats) {
 
-            return InkWell(
-              onDoubleTap: () {
-                AlertsService().statsDialog(context, statstics: stats);
-              },
-              child: Semantics(
-                label: "Item ${i + 1}. Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses.",
-                container: true,
-                excludeSemantics: true,
-                child: Container(
-                  color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "${stats.score}-${stats.total.wins}-${stats.total.losses}",
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              fontSize: bodyFontSize,
-                              fontWeight: FontWeight.bold,
+            return FocusHighlight(
+              focusColor: scheme.textPuzzlePanel,
+              child: InkWell(
+                //canRequestFocus: false,
+                onDoubleTap: () {
+                  AlertsService().statsDialog(context, statstics: stats);
+                },
+                onLongPress: () {
+                  AlertsService().statsDialog(context, statstics: stats);
+                },
+                child: Semantics(
+                  label: "Item ${i + 1}. Score is ${stats.score}, ${stats.total.wins} wins and ${stats.total.losses} losses.",
+                  container: true,
+                  excludeSemantics: true,
+                  child: Container(
+                    color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${stats.score}-${stats.total.wins}-${stats.total.losses}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: bodyFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: PercentageBar(
-                                        value: stats.total.winRate,
-                                        height: 20,
-                                        foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                        backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: PercentageBar(
+                                          value: stats.total.winRate,
+                                          height: 20,
+                                          foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                          backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: PercentageBar(
-                                        value: stats.total.accuracy,
-                                        height: 20,
-                                        foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                        backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: PercentageBar(
+                                          value: stats.total.accuracy,
+                                          height: 20,
+                                          foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                          backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                              Text(
+                                "last played: ${formatDateTime(stats.intervalEnd)}",
+                                textAlign: TextAlign.end,
+                                textScaler: const TextScaler.linear(0.9),
                               ),
-                            Text(
-                              "last played: ${formatDateTime(stats.intervalEnd)}",
-                              textAlign: TextAlign.end,
-                              textScaler: const TextScaler.linear(0.9),
-                            ),
-                          ]),
-                        ),
-                      ],
+                            ]),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

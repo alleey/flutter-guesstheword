@@ -34,6 +34,8 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
 
+    log("Node sortDescendants: $currentNode");
+
     final sortedNodes = _sortNodes(currentNode.enclosingScope!);
     _debugDecoratDescendants(sortedNodes);
     return sortedNodes.map<FocusNode>((info) => info.node);
@@ -43,6 +45,8 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
 
   @override
   FocusNode? findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction) {
+
+    log("Node findFirstFocusInDirection: $currentNode");
 
     final sortedNodes = _sortNodes(currentNode.enclosingScope!);
     final groupedNodes = _groupNodes(sortedNodes);
@@ -65,6 +69,8 @@ class CustomOrderedTraversalPolicy extends FocusTraversalPolicy {
 
   @override
   bool inDirection(FocusNode currentNode, TraversalDirection direction) {
+
+    log("Node inDirection: $currentNode");
 
     final nextNode = findFirstFocusInDirection(currentNode, direction);
     if (nextNode == null) {
@@ -196,7 +202,7 @@ class _GroupFocusOrderNodeInfo extends GroupFocusOrder {
 
 class DebugCustomOrderedTraversalPolicy extends CustomOrderedTraversalPolicy with _TraversalDiagnosticsMixin {
 
-  DebugCustomOrderedTraversalPolicy({super.requestFocusCallback, this.fullDetails = false});
+  const DebugCustomOrderedTraversalPolicy({super.requestFocusCallback, this.fullDetails = false});
 
   final bool fullDetails;
 

@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/common/custom_traversal_policy.dart';
 
+import '../../common/custom_traversal_policy.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
 import '../../models/app_settings.dart';
@@ -44,7 +44,9 @@ class _AppDialogState extends State<AppDialog> {
         return ValueListenableBuilder(
           valueListenable: settingsProvider,
           builder: (context, settings, child) {
-            return _buildDialog(context, settingsProvider);
+            return FocusScope(
+              child: _buildDialog(context, settingsProvider)
+            );
           }
         );
       },
@@ -157,9 +159,11 @@ class ButtonDialogAction extends DialogAction {
     required super.builder,
     required this.onAction,
     this.isDefault = false,
+    this.autofocus = false,
   }) : super();
 
   final bool isDefault;
+  final bool autofocus;
   final void Function(CloseWithResult close) onAction;
 
   @override
@@ -177,7 +181,7 @@ class ButtonDialogAction extends DialogAction {
     return FocusTraversalOrder(
       order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 100, 1),
       child: ElevatedButton(
-        autofocus: isDefault,
+        autofocus: autofocus,
         style: ElevatedButton.styleFrom(
           backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
           foregroundColor: foregroundColor,

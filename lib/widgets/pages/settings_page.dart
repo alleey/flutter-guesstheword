@@ -1,16 +1,17 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/common/custom_traversal_policy.dart';
-import 'package:guess_the_word/common/utils.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../blocs/settings_bloc.dart';
 import '../../common/constants.dart';
+import '../../common/custom_traversal_policy.dart';
 import '../../common/layout_constants.dart';
+import '../../common/utils.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
 import '../color_scheme_picker.dart';
+import '../common/focus_highlight.dart';
 import '../settings_aware_builder.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -45,17 +46,11 @@ class _SettingsPageState extends State<SettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
 
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 1, 1),
-          child: _buildColorSchemeSettings(context, settings)
-        ),
+        _buildAudioSettings(context, settings),
 
         const SizedBox(height: 2),
 
-        FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 2, 2),
-          child: _buildAudioSettings(context, settings)
-        ),
+        _buildColorSchemeSettings(context, settings),
 
         if (Constants.locales.length > 1)
           ...[
@@ -115,61 +110,67 @@ class _SettingsPageState extends State<SettingsPage> {
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final scheme = settings.currentScheme;
 
-    return Row(
-      children: [
-        Semantics(
-          container: true,
-          child: Text(
-            context.localizations.translate("dlg_settings_sound"),
-            style: TextStyle(
-                color: scheme.textPuzzlePanel,
-              fontSize: titleFontSize,
+    return FocusHighlight(
+      focusColor: scheme.textPuzzlePanel,
+      child: Row(
+        children: [
+          Semantics(
+            container: true,
+            child: Text(
+              context.localizations.translate("dlg_settings_sound"),
+              style: TextStyle(
+                  color: scheme.textPuzzlePanel,
+                fontSize: titleFontSize,
+              ),
             ),
           ),
-        ),
-        const Spacer(),
-        SegmentedButton(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            foregroundColor: scheme.textPuzzlePanel,
-            backgroundColor: scheme.backgroundPuzzlePanel,
-            selectedForegroundColor: scheme.backgroundPuzzlePanel,
-            selectedBackgroundColor: scheme.textPuzzlePanel,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            )
-          ).copyWith(
-            overlayColor: StateDependentColor(scheme.textPuzzlePanel, selectedColor: scheme.backgroundPuzzlePanel)
-          ),
-          segments: [
-            ButtonSegment<bool>(
-              label: Text(
-                context.localizations.translate("dlg_settings_sound_enable"),
-                style: TextStyle(
-                  fontSize: bodyFontSize,
-                ),
+          const Spacer(),
+          FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 2, 2),
+            child: SegmentedButton(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                foregroundColor: scheme.textPuzzlePanel,
+                backgroundColor: scheme.backgroundPuzzlePanel,
+                selectedForegroundColor: scheme.backgroundPuzzlePanel,
+                selectedBackgroundColor: scheme.textPuzzlePanel,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                )
+              ).copyWith(
+                overlayColor: StateDependentColor(scheme.textPuzzlePanel, selectedColor: scheme.backgroundPuzzlePanel)
               ),
-              value: true
+              segments: [
+                ButtonSegment<bool>(
+                  label: Text(
+                    context.localizations.translate("dlg_settings_sound_enable"),
+                    style: TextStyle(
+                      fontSize: bodyFontSize,
+                    ),
+                  ),
+                  value: true
+                ),
+                ButtonSegment<bool>(
+                  label: Text(
+                    context.localizations.translate("dlg_settings_sound_disable"),
+                    style: TextStyle(
+                      fontSize: bodyFontSize,
+                    ),
+                  ),
+                  value: false
+                )
+              ],
+              selected: <bool>{settings.playSounds},
+              onSelectionChanged: (selected) {
+                context.settingsBloc.add(WriteSettingsBlocEvent(
+                  settings: settings.copyWith(playSounds: selected.first),
+                  reload: true
+                ));
+              },
             ),
-            ButtonSegment<bool>(
-              label: Text(
-                context.localizations.translate("dlg_settings_sound_disable"),
-                style: TextStyle(
-                  fontSize: bodyFontSize,
-                ),
-              ),
-              value: false
-            )
-          ],
-          selected: <bool>{settings.playSounds},
-          onSelectionChanged: (selected) {
-            context.settingsBloc.add(WriteSettingsBlocEvent(
-              settings: settings.copyWith(playSounds: selected.first),
-              reload: true
-            ));
-          },
-        ),
-      ]
+          ),
+        ]
+      ),
     );
   }
 

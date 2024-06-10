@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:guess_the_word/common/custom_traversal_policy.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
+import '../../common/custom_traversal_policy.dart';
 import '../../common/layout_constants.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
 import '../../services/data_service.dart';
+import '../common/focus_highlight.dart';
 import '../dialogs/app_dialog.dart';
 import '../localized_text.dart';
 import '../settings_aware_builder.dart';
@@ -41,26 +42,31 @@ class AboutPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          FocusTraversalOrder(
-            order: const GroupFocusOrder(GroupFocusOrder.groupDialog, 1),
-            child: Align(
-              alignment: AlignmentDirectional.center,
-              child: Semantics(
-                label: "Game version is ${metadata.version}",
-                container: true,
-                excludeSemantics: true,
-                child: Text.rich(
-                  textAlign: TextAlign.center,
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: context.localizations.translate("dlg_about_version", placeholders: {"version": metadata.version}),
-                        style: TextStyle(
-                          color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
-                          fontSize: bodyFontSize,
-                        )
-                      ),
-                    ],
+          Align(
+            alignment: AlignmentDirectional.center,
+            child: Semantics(
+              label: "Game version is ${metadata.version}",
+              container: true,
+              excludeSemantics: true,
+              child: FocusHighlight(
+                autofocus: true,
+                canRequestFocus: true,
+                focusColor: scheme.textPuzzlePanel,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text.rich(
+                    textAlign: TextAlign.center,
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: context.localizations.translate("dlg_about_version", placeholders: {"version": metadata.version}),
+                          style: TextStyle(
+                            color: scheme.backgroundPuzzleSymbolsFlipped.withOpacity(0.7),
+                            fontSize: bodyFontSize,
+                          )
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

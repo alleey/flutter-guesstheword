@@ -72,6 +72,7 @@ class AlertsService {
         ),
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) {
               close(null);
@@ -213,6 +214,7 @@ class AlertsService {
       actions: (_,__) => [
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
             builder: (_,__) => const LocalizedText(textId: "dlg_about_ok")
@@ -231,6 +233,7 @@ class AlertsService {
 
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
             builder: (_,__) => const LocalizedText(textId: "dlg_help_ok")
@@ -251,6 +254,7 @@ class AlertsService {
 
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
             builder: (_,__) => const LocalizedText(textId: "dlg_scores_ok")
@@ -273,6 +277,7 @@ class AlertsService {
 
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
             builder: (_,__) => const LocalizedText(textId: "dlg_playerstats_ok")
@@ -291,6 +296,7 @@ class AlertsService {
 
         Expanded(
           child: ButtonDialogAction(
+            autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
             builder: (_,__) => const LocalizedText(textId: "dlg_settings_ok")

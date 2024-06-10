@@ -1,5 +1,6 @@
 
-import 'package:guess_the_word/common/app_color_scheme.dart';
+
+import '../common/app_color_scheme.dart';
 
 class AppSettings {
   final String theme;
