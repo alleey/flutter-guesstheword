@@ -8,40 +8,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../common/constants.dart';
+import '../models/app_meta_data.dart';
 import '../models/puzzle.dart';
-
-class AppMetaData {
-  late String version;
-  late String linkDonation;
-  late String linkFeedback;
-
-  AppMetaData({
-    required this.version,
-    required this.linkDonation,
-    required this.linkFeedback,
-  });
-
-  AppMetaData copyWith({
-    String? version,
-    String? linkDonation,
-    String? linkFeedback,
-  }) {
-    return AppMetaData(
-      version: version ?? this.version,
-      linkDonation: linkDonation ?? this.linkDonation,
-      linkFeedback: linkFeedback ?? this.linkFeedback,
-    );
-  }
-
-  factory AppMetaData.fromJson(Map<String, dynamic> json) {
-    return AppMetaData(
-      version: json['version'] ?? "",
-      linkDonation: json['link_donate'] ?? "",
-      linkFeedback: json['link_feedback'] ?? "",
-    );
-  }
-}
-
 
 class DataService {
 
@@ -53,10 +21,10 @@ class DataService {
     return _instance;
   }
 
+  late int instanceId;
   late Box<String> scoreBox;
   late Box<Puzzle> puzzleBox;
   late Box<dynamic> appDataBox;
-  late int instanceId;
   late AppMetaData metaData;
 
   Future initialize() async {
@@ -104,7 +72,7 @@ class DataService {
     final directories = Directory(appDocPath).listSync();
 
     const currentHiveFolderName = "guesstheword-v${Constants.appDataVersion}";
-    for (FileSystemEntity entity in directories) {
+    for (final entity in directories) {
 
       if (entity is Directory) {
         if (entity.path.contains("guesstheword-v") && !entity.path.endsWith(currentHiveFolderName)) {
