@@ -1,4 +1,7 @@
 
+
+import '../common/app_color_scheme.dart';
+
 class AppSettings {
   final String theme;
   final String locale;
@@ -21,7 +24,7 @@ class AppSettings {
   {
      return AppSettings(
       theme: theme ?? this.theme,
-      locale: theme ?? this.locale,
+      locale: locale ?? this.locale,
       font: font ?? this.font,
       playSounds: playSounds ?? this.playSounds,
      );
@@ -51,3 +54,8 @@ class AppSettings {
     return 'AppSettings(playSounds: $playSounds, locale: $locale, font: $font, theme: $theme)';
   }
 }
+
+extension AppSettingsExtensions on AppSettings {
+  AppColorScheme get currentScheme => AppColorSchemes.fromName(theme);
+}
+

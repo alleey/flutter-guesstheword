@@ -1,5 +1,7 @@
 
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,20 +39,26 @@ String formatDateTime(DateTime dateTime) {
 
 @immutable
 class StateDependentColor extends WidgetStateProperty<Color?> {
-  StateDependentColor(this.color);
+  StateDependentColor(
+    this.color,
+    { this.selectedColor }
+  );
 
   final Color color;
+  final Color? selectedColor;
 
   @override
   Color? resolve(Set<WidgetState> states) {
+    log("$states");
+    final c = states.contains(WidgetState.selected) ? (selectedColor ?? color) : color;
     if (states.contains(WidgetState.pressed)) {
-      return color.withOpacity(0.3);
+      return c.withOpacity(0.2);
     }
     if (states.contains(WidgetState.hovered)) {
-      return color.withOpacity(0.1);
+      return c.withOpacity(0.1);
     }
     if (states.contains(WidgetState.focused)) {
-      return color.withOpacity(0.5);
+      return c.withOpacity(0.3);
     }
     return null;
   }

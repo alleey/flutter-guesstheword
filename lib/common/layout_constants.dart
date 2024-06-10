@@ -8,8 +8,8 @@ class DialogLayoutConstants
   static const String screenCoverPctKey = "dlg.screenCoverPct";
   static final screenCoverPct = ResponsiveValue.from(
     small: const Size(1, 0.9),
-    medium: const Size(0.8, 0.8),
-    large: const Size(0.7, 0.7),
+    medium: const Size(0.8, 0.9),
+    large: const Size(0.7, 0.9),
   );
 
   static const String paddingKey = "dlg.padding";
@@ -38,8 +38,8 @@ class AppLayoutConstants
   static const String appbarHeightKey = "app.appbarHeight";
   static final appbarHeight = ResponsiveValue<double>.from(
     small: 34,
-    medium: 46,
-    large: 60,
+    medium: 42,
+    large: 50,
   );
 
   static const String titleFontSizeKey = "app.titleFontSize";

@@ -9,8 +9,10 @@ import '../../models/app_settings.dart';
 import '../../models/player_stats.dart';
 import '../../models/statistics.dart';
 import '../../services/app_data_service.dart';
+import '../common/focus_highlight.dart';
 import '../common/percentage_bar.dart';
 import '../settings_aware_builder.dart';
+import '../win_accuracy_stats.dart';
 
 class PlayerStatisticsPage extends StatefulWidget {
 
@@ -25,6 +27,7 @@ class PlayerStatisticsPage extends StatefulWidget {
   @override
   State<PlayerStatisticsPage> createState() => _PlayerStatisticsPageState();
 }
+
 
 class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
 
@@ -51,7 +54,7 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
 
   Widget _buildContents(BuildContext context, AppSettings settings) {
 
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
     final totalPuzzles = AppDataService().getSetting("totalPuzzles", 1);
@@ -72,12 +75,11 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
                 _buildCompletionIndicator(totalPuzzles, scheme, widget.statistics),
                 _buildScoreInfo(context, scheme, widget.statistics),
                 _buildTotalStats(context, scheme, widget.statistics),
-                const SizedBox(height: 10),
 
                 _buildHeader(context, scheme, sortOrder),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Divider(color: scheme.textPuzzlePanel, height: 1),
                 ),
 
@@ -110,7 +112,6 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.textPuzzlePanel.withOpacity(0.1),
-        //borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -118,8 +119,24 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  context.localizations.translate("dlg_playerstats_score", placeholders: { "value": score.score }),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: bodyFontSize,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               child: Text(
-                context.localizations.translate("dlg_playerstats_score", placeholders: { "value": score.score }),
+                context.localizations.translate("dlg_playerstats_wins", placeholders: { "value": score.total.wins }),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -129,22 +146,15 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
             ),
           ),
           Expanded(
-            child: Text(
-              context.localizations.translate("dlg_playerstats_wins", placeholders: { "value": score.total.wins }),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: bodyFontSize,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              context.localizations.translate("dlg_playerstats_losses", placeholders: { "value": score.total.losses }),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: bodyFontSize,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                context.localizations.translate("dlg_playerstats_losses", placeholders: { "value": score.total.losses }),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: bodyFontSize,
+                ),
               ),
             ),
           ),
@@ -154,71 +164,19 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
   }
 
   Widget _buildTotalStats(BuildContext context, AppColorScheme scheme, PlayerStatistics score) {
-
-    final layout = context.layout;
-    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
-
-    return Center(
-      child: Semantics(
-        container: true,
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            fontSize: titleFontSize,
-            color: scheme.backgroundPuzzlePanel,
-            fontWeight: FontWeight.bold,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: scheme.textPuzzlePanel,
-              //borderRadius: BorderRadius.circular(3),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                 child: Column(
-                   children: [
-                     FittedBox(
-                       fit: BoxFit.scaleDown,
-                       child: Text(
-                         context.localizations.translate("dlg_playerstats_winrate"),
-                         textAlign: TextAlign.center,
-                       ),
-                     ),
-                     Text(
-                       "${(score.total.winRate * 100).toStringAsFixed(1)}%",
-                       textAlign: TextAlign.center,
-                     ),
-                   ],
-                 ),
-                ),
-                Container(color: Colors.black, width: 1, height: 60),
-                Expanded(
-                  child: Column(
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          context.localizations.translate("dlg_playerstats_accuracy"),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Text(
-                        "${(score.total.accuracy * 100).toStringAsFixed(1)}%",
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return WinAccuracyStats(statistics: score);
   }
 
   Widget _buildHeader(BuildContext context, AppColorScheme scheme, (CategoryStatisticsSortOrder, bool) sortOrder) {
+
+    void toggleSort(CategoryStatisticsSortOrder order) {
+      if (_sortOrderNotifier.value.$1 == order) {
+        _sortOrderNotifier.value = (order, !_sortOrderNotifier.value.$2);
+      } else {
+        _sortOrderNotifier.value = (order, true);
+      }
+    }
+
     return Semantics(
       label: "Below is the list of top scores, win rates and accuracies",
       excludeSemantics: true,
@@ -227,29 +185,33 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
         children: [
           Expanded(
             flex: 1,
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, sortOrder.$2),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      context.localizations.translate("dlg_playerstats_category"),
-                      textAlign: TextAlign.start,
-                      textScaler: const TextScaler.linear(0.9),
-                    ),
-                  ),
-                ),
-                if (sortOrder.$1 == CategoryStatisticsSortOrder.name)
+            child: FocusHighlight(
+              focusColor: scheme.textPuzzlePanel,
+              child: Row(
+                children: [
                   InkWell(
-                    onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.name, !sortOrder.$2),
-                    child: Icon(
-                      sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: scheme.textPuzzlePanel, // Customize the color of the icon
+                    onTap: () => toggleSort(CategoryStatisticsSortOrder.name),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Row(
+                        children: [
+                          Text(
+                            context.localizations.translate("dlg_playerstats_category"),
+                            textAlign: TextAlign.start,
+                            textScaler: const TextScaler.linear(0.9),
+                          ),
+                          if (sortOrder.$1 == CategoryStatisticsSortOrder.name)
+                            Icon(
+                              sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                              color: scheme.textPuzzlePanel, // Customize the color of the icon
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -257,55 +219,63 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, sortOrder.$2),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            context.localizations.translate("dlg_playerstats_winrate"),
-                            textAlign: TextAlign.start,
-                            textScaler: const TextScaler.linear(0.9),
-                          ),
-                        ),
-                      ),
-                      if (sortOrder.$1 == CategoryStatisticsSortOrder.winrate)
+                  child: FocusHighlight(
+                    focusColor: scheme.textPuzzlePanel,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                         InkWell(
-                          onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.winrate, !sortOrder.$2),
-                          child: Icon(
-                            sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: scheme.textPuzzlePanel,
+                          onTap: () => toggleSort(CategoryStatisticsSortOrder.winrate),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              children: [
+                                Text(
+                                  context.localizations.translate("dlg_playerstats_winrate"),
+                                  textAlign: TextAlign.start,
+                                  textScaler: const TextScaler.linear(0.9),
+                                ),
+                                if (sortOrder.$1 == CategoryStatisticsSortOrder.winrate)
+                                  Icon(
+                                    sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                                    color: scheme.textPuzzlePanel,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, sortOrder.$2),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            context.localizations.translate("dlg_playerstats_accuracy"),
-                            textAlign: TextAlign.start,
-                            textScaler: const TextScaler.linear(0.9),
-                          ),
-                        ),
-                      ),
-                      if (sortOrder.$1 == CategoryStatisticsSortOrder.accuracy)
+                  child: FocusHighlight(
+                    focusColor: scheme.textPuzzlePanel,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                         InkWell(
-                          onTap: () => _sortOrderNotifier.value = (CategoryStatisticsSortOrder.accuracy, !sortOrder.$2),
-                          child: Icon(
-                            sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: scheme.textPuzzlePanel, // Customize the color of the icon
+                          onTap: () => toggleSort(CategoryStatisticsSortOrder.accuracy),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              children: [
+                                Text(
+                                  context.localizations.translate("dlg_playerstats_accuracy"),
+                                  textAlign: TextAlign.start,
+                                  textScaler: const TextScaler.linear(0.9),
+                                ),
+                                if (sortOrder.$1 == CategoryStatisticsSortOrder.accuracy)
+                                  Icon(
+                                    sortOrder.$2 ? Icons.arrow_upward : Icons.arrow_downward,
+                                    color: scheme.textPuzzlePanel,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -328,62 +298,68 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...sorted.mapIndexed((i, stats) {
-            return Semantics(
-              label: "Category ${stats.key}",
-              container: true,
-              excludeSemantics: true,
-              child: Container(
-                color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            stats.key,
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              fontSize: bodyFontSize,
-                              fontWeight: FontWeight.bold,
+
+            return FocusHighlight(
+              canRequestFocus: true,
+              focusColor: scheme.textPuzzlePanel,
+
+              child: Semantics(
+                label: "Category ${stats.key}",
+                container: true,
+                excludeSemantics: true,
+                child: Container(
+                  color: i % 2 == 0 ? Colors.transparent : scheme.textPuzzlePanel.withOpacity(0.1),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              stats.key,
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: bodyFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textScaler: const TextScaler.linear(0.9),
                             ),
-                            textScaler: const TextScaler.linear(0.9),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: PercentageBar(
-                                  value: stats.value.winRate,
-                                  height: 20,
-                                  foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                  backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                        Expanded(
+                          flex: 1,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: PercentageBar(
+                                    value: stats.value.winRate,
+                                    height: 20,
+                                    foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                    backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: PercentageBar(
-                                  value: stats.value.accuracy,
-                                  height: 20,
-                                  foregroundColor: scheme.textPuzzleSymbolsFlipped,
-                                  backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: PercentageBar(
+                                    value: stats.value.accuracy,
+                                    height: 20,
+                                    foregroundColor: scheme.textPuzzleSymbolsFlipped,
+                                    backgroundColor: scheme.backgroundPuzzleSymbolsFlipped,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

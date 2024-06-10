@@ -6,8 +6,6 @@ class Constants
   static const int maxScoreHistory = 10;
   static const int scoreBumpForHintBonus = 100;
 
-  static const double defaultFontSize = 16;
-
   static const String symbolSet = "abcdefghijklmnopqrstuvwxyz&";
 
   static const bool enableInitialReveal = true;
@@ -19,7 +17,7 @@ class Constants
   static const int revealMedium = 2;
   static const int revealHard = 3;
 
-  static const List<String> locales = ['en', 'ur'];
+  static const List<String> locales = ['en'];
 
   static const puzzleSets = [
     "animals", "birds", "cars", "cartoons", "capitals",

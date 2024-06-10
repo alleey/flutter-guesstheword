@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/game_bloc.dart';
-import 'common/app_color_scheme.dart';
 import 'common/constants.dart';
 import 'common/custom_traversal_policy.dart';
 import 'common/layout_constants.dart';
@@ -113,6 +112,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
       child: SettingsAwareBuilder(
         onSettingsAvailable: (settings) {
           _settings = settings;
+          log("play audio  = ${settings.playSounds}");
           _audioService.mute(!settings.playSounds);
         },
         builder: (context, settingsProvider) => ValueListenableBuilder(
@@ -136,7 +136,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildLayout(BuildContext context, GameState state) {
     var squareSize = 6.0;
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -194,16 +194,6 @@ class _PuzzlePageState extends State<PuzzlePage> {
                       squareSize: squareSize,
                     )
                   ),
-                  Positioned(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: AlternatingColorSquares(
-                        color1: scheme.backgroundPuzzlePanel,
-                        color2: scheme.backgroundInputPanel,
-                        squareSize: squareSize,
-                      ),
-                    )
-                  )
                 ]
               ),
             ),
@@ -256,7 +246,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildScorePanel(BuildContext context, GameState state) {
 
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final stats = state.playerStats;
@@ -305,7 +295,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
   }
 
   Widget _buildStatusPanel(BuildContext context, GameState state) {
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     return Semantics(
       label: "${Constants.maxErrors - state.errorCount} attempts left",
       child: Row(
@@ -336,7 +326,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildGameOverPanel(BuildContext context, GameState state) {
 
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
 
@@ -399,7 +389,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
         ),
         const SizedBox(width: 20,),
         FocusTraversalOrder(
-          order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 1),
+          order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 1),
           child: Semantics(
             button: true,
             label: "Try the next puzzle",
@@ -432,12 +422,12 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildHintsOption(BuildContext context, GameState state) {
 
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
 
     return FocusTraversalOrder(
-      order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 2),
+      order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 2),
       child: Semantics(
         label: "Use a hint",
         button: true,
@@ -479,7 +469,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildPuzzlePanel(BuildContext context, GameState state) {
 
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final buttonSize = layout.get<Size>(AppLayoutConstants.symbolButtonSizeKey);
@@ -552,7 +542,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
 
   Widget _buildInputPanel(BuildContext context, GameState state) {
 
-    final scheme = AppColorSchemes.fromName(_settings.theme);
+    final scheme = _settings.currentScheme;
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
@@ -668,7 +658,7 @@ class _PuzzlePageState extends State<PuzzlePage> {
           // Google button
           if (state.isGameOver)
             FocusTraversalOrder(
-              order: const GroupFocusOrder(GroupFocusOrder.groupButtons, 3),
+              order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 3),
               child: ElevatedButton(
                 autofocus: true,
                 style: ElevatedButton.styleFrom(

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class BlinkEffect extends StatefulWidget {
   final Widget child;
+  final Duration duration;
 
   const BlinkEffect({
     super.key,
     required this.child,
+    this.duration = const Duration(milliseconds: 2000),
   });
 
   @override
@@ -15,7 +17,7 @@ class BlinkEffect extends StatefulWidget {
 class _BlinkEffectState extends State<BlinkEffect> with SingleTickerProviderStateMixin {
 
   late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 2000),
+    duration: widget.duration,
     lowerBound: 0.6,
     vsync: this,
   )..repeat(reverse: true);

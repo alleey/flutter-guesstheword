@@ -13,7 +13,7 @@ class BumpEffect extends StatelessWidget {
   final ParticleSystemBuilder builder;
   final int numberOfParticles;
   final VoidCallback? onComplete;
-  late bool _autostart;
+  bool _autostart;
 
   BumpEffect({
     super.key,

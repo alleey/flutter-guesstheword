@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../common/app_color_scheme.dart';
+import '../../common/custom_traversal_policy.dart';
 import '../../common/layout_constants.dart';
 import '../../common/utils.dart';
 import '../../models/app_settings.dart';
@@ -44,7 +44,9 @@ class _AppDialogState extends State<AppDialog> {
         return ValueListenableBuilder(
           valueListenable: settingsProvider,
           builder: (context, settings, child) {
-            return _buildDialog(context, settingsProvider);
+            return FocusScope(
+              child: _buildDialog(context, settingsProvider)
+            );
           }
         );
       },
@@ -57,7 +59,7 @@ class _AppDialogState extends State<AppDialog> {
     final screenCoverPct = layout.get<Size>(DialogLayoutConstants.screenCoverPctKey);
     final padding = layout.get<EdgeInsets>(DialogLayoutConstants.paddingKey);
     final insetPadding = layout.get<EdgeInsets>(DialogLayoutConstants.insetPaddingKey);
-    final scheme = AppColorSchemes.fromName(settings.value.theme);
+    final scheme = settings.value.currentScheme;
 
     return Dialog(
       insetPadding: widget.insetPadding ?? insetPadding,
@@ -85,16 +87,6 @@ class _AppDialogState extends State<AppDialog> {
                 )
               )
             ),
-            Positioned(
-              child: Align(
-                alignment: AlignmentDirectional.bottomCenter,
-                child: AlternatingColorSquares(
-                  color1: scheme.backgroundPuzzlePanel,
-                  color2: scheme.backgroundInputPanel,
-                  squareSize: 4,
-                )
-              )
-            ),
           ],
         ),
       )
@@ -114,9 +106,12 @@ class _AppDialogState extends State<AppDialog> {
           child: widget.contents(context, settingsProvider)
         ),
         if (buttons.isNotEmpty)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: buttons.toList(),
+          IntrinsicHeight(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: buttons.toList(),
+            ),
           ),
       ],
     );
@@ -137,7 +132,7 @@ class DefaultDialogTitle extends StatelessWidget {
     );
 
   Widget _buildTitle(BuildContext context, ValueNotifier<AppSettings> settingsProvider) {
-    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+    final scheme = settingsProvider.value.currentScheme;
     return Semantics(
       header: true,
       container: true,
@@ -162,11 +157,13 @@ class ButtonDialogAction extends DialogAction {
   const ButtonDialogAction({
     super.key,
     required super.builder,
-    required this.isDefault,
     required this.onAction,
+    this.isDefault = false,
+    this.autofocus = false,
   }) : super();
 
   final bool isDefault;
+  final bool autofocus;
   final void Function(CloseWithResult close) onAction;
 
   @override
@@ -178,30 +175,33 @@ class ButtonDialogAction extends DialogAction {
 
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final scheme = AppColorSchemes.fromName(settingsProvider.value.theme);
+    final scheme = settingsProvider.value.currentScheme;
     final foregroundColor = isDefault ? scheme.textPuzzleSymbolsFlipped : scheme.textPuzzleSymbols;
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
-        foregroundColor: foregroundColor,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
+    return FocusTraversalOrder(
+      order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 100, 1),
+      child: ElevatedButton(
+        autofocus: autofocus,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isDefault ? scheme.backgroundPuzzleSymbolsFlipped : scheme.backgroundPuzzleSymbols,
+          foregroundColor: foregroundColor,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          padding: EdgeInsets.zero,
+        ).copyWith(
+          overlayColor: StateDependentColor(foregroundColor),
         ),
-        padding: EdgeInsets.zero,
-        minimumSize: Size.zero,
-      ).copyWith(
-        overlayColor: StateDependentColor(foregroundColor),
-      ),
-      onPressed: () {
-        onAction((result) => Navigator.of(context, rootNavigator: true).pop(result));
-      },
-      child: DefaultTextStyle.merge(
-        style: TextStyle(
-          fontSize: bodyFontSize,
-          color: foregroundColor,
+        onPressed: () {
+          onAction((result) => Navigator.of(context, rootNavigator: true).pop(result));
+        },
+        child: DefaultTextStyle.merge(
+          style: TextStyle(
+            fontSize: bodyFontSize,
+            color: foregroundColor,
+          ),
+          child: builder(context, settingsProvider),
         ),
-        child: builder(context, settingsProvider),
       ),
     );
   }

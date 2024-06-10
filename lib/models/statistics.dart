@@ -6,9 +6,11 @@ class Statistics implements Comparable<Statistics> {
   final int mismatchedInputs;
   final int hintsUsed;
 
-  double get accuracy => correctInputs / (correctInputs + mismatchedInputs);
-  double get winRate => wins / totalPlayed;
+  double get accuracy => totalInputs == 0 ? 0 : correctInputs / totalInputs;
+  double get winRate => totalPlayed == 0 ? 0 : wins / totalPlayed;
+
   int get totalPlayed => wins + losses;
+  int get totalInputs => correctInputs + mismatchedInputs;
 
   Statistics({
     this.wins = 0,

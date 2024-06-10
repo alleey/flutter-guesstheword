@@ -10,6 +10,39 @@ import 'package:path_provider/path_provider.dart';
 import '../common/constants.dart';
 import '../models/puzzle.dart';
 
+class AppMetaData {
+  late String version;
+  late String linkDonation;
+  late String linkFeedback;
+
+  AppMetaData({
+    required this.version,
+    required this.linkDonation,
+    required this.linkFeedback,
+  });
+
+  AppMetaData copyWith({
+    String? version,
+    String? linkDonation,
+    String? linkFeedback,
+  }) {
+    return AppMetaData(
+      version: version ?? this.version,
+      linkDonation: linkDonation ?? this.linkDonation,
+      linkFeedback: linkFeedback ?? this.linkFeedback,
+    );
+  }
+
+  factory AppMetaData.fromJson(Map<String, dynamic> json) {
+    return AppMetaData(
+      version: json['version'] ?? "",
+      linkDonation: json['link_donate'] ?? "",
+      linkFeedback: json['link_feedback'] ?? "",
+    );
+  }
+}
+
+
 class DataService {
 
   static final DataService _instance = DataService._();
@@ -23,13 +56,13 @@ class DataService {
   late Box<String> scoreBox;
   late Box<Puzzle> puzzleBox;
   late Box<dynamic> appDataBox;
-  late String version;
   late int instanceId;
+  late AppMetaData metaData;
 
   Future initialize() async {
 
     if (!kIsWeb) {
-      await cleanUpOldVersionFolders();
+      await _cleanUpOldVersionFolders();
     }
 
     await Hive.initFlutter("guesstheword-v${Constants.appDataVersion}");
@@ -41,22 +74,30 @@ class DataService {
     puzzleBox = await Hive.openBox<Puzzle>("puzzles-v${Constants.appDataVersion}");
     appDataBox = await Hive.openBox<dynamic>('appdata-v${Constants.appDataVersion}');
 
-    version = await getVersion();
-    instanceId = await ensureInstanceId();
+    await ensureInstanceId();
+
+    metaData = await _loadMeta();
   }
 
   Future<int> ensureInstanceId() async {
 
-    if (appDataBox.isEmpty) {
+    int? instance = appDataBox.get("instanceId");
+    if (instance == null) {
       await appDataBox.put("instanceId", DateTime.now().microsecondsSinceEpoch);
       await appDataBox.flush();
     }
 
-    return appDataBox.get("instanceId");
+    instanceId = appDataBox.get("instanceId");
+    return instanceId;
   }
 
+  Future<AppMetaData> _loadMeta() async {
+    final jsonString = await rootBundle.loadString('assets/metadata.json');
+    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    return AppMetaData.fromJson(jsonMap);
+  }
 
-  Future<void> cleanUpOldVersionFolders() async {
+  Future<void> _cleanUpOldVersionFolders() async {
 
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
@@ -75,11 +116,5 @@ class DataService {
         }
       }
     }
-  }
-
-  Future<String> getVersion() async {
-    final jsonString = await rootBundle.loadString('assets/version.json');
-    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-    return jsonMap['version'];
   }
 }

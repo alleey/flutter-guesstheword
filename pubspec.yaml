@@ -52,9 +52,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/metadata.json
     - assets/audio/
     - assets/puzzles/
-    - assets/version.json
     - assets/l10n/
   fonts:
     - family: BraahOne

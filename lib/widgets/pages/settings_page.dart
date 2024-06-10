@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../../../widgets/common/responsive_layout.dart';
 import '../../blocs/settings_bloc.dart';
-import '../../common/app_color_scheme.dart';
 import '../../common/constants.dart';
+import '../../common/custom_traversal_policy.dart';
 import '../../common/layout_constants.dart';
+import '../../common/utils.dart';
 import '../../localizations/app_localizations.dart';
 import '../../models/app_settings.dart';
 import '../color_scheme_picker.dart';
+import '../common/focus_highlight.dart';
 import '../settings_aware_builder.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -40,148 +42,192 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildPage(BuildContext context, AppSettings settings) {
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+
+        _buildAudioSettings(context, settings),
+
+        const SizedBox(height: 2),
+
+        _buildColorSchemeSettings(context, settings),
+
+        if (Constants.locales.length > 1)
+          ...[
+            const SizedBox(height: 2),
+            _buildLocaleSettings(context, settings)
+          ],
+
+      ],
+    );
+  }
+
+  Widget _buildColorSchemeSettings(BuildContext context, AppSettings settings) {
+
+    final layout = context.layout;
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final scheme = settings.currentScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          container: true,
+          child: Text.rich(
+            textAlign: TextAlign.start,
+            TextSpan(
+              style: TextStyle(
+                color: scheme.textPuzzlePanel,
+                fontSize: titleFontSize,
+              ),
+              children: [
+                TextSpan(
+                  text: context.localizations.translate("dlg_settings_selecttheme"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        ColorSchemePicker(
+          alignment: WrapAlignment.start,
+          selectedTheme: settings.theme,
+          onSelect: (newTheme) {
+            context.settingsBloc.add(WriteSettingsBlocEvent(
+              settings: settings.copyWith(theme: newTheme),
+              reload: true
+            ));
+          }
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAudioSettings(BuildContext context, AppSettings settings) {
+
     final layout = context.layout;
     final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final scheme = AppColorSchemes.fromName(settings.theme);
+    final scheme = settings.currentScheme;
 
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return FocusHighlight(
+      focusColor: scheme.textPuzzlePanel,
+      child: Row(
         children: [
           Semantics(
             container: true,
-            child: Text.rich(
-              textAlign: TextAlign.start,
-              TextSpan(
-                style: TextStyle(
-                  color: scheme.textPuzzlePanel,
-                  fontSize: titleFontSize,
-                ),
-                children: [
-                  TextSpan(
-                    text: context.localizations.translate("dlg_settings_selecttheme"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 2),
-          ColorSchemePicker(
-            alignment: WrapAlignment.start,
-            selectedTheme: settings.theme,
-            onSelect: (newTheme) {
-              context.settingsBloc.add(WriteSettingsBlocEvent(
-                settings: settings.copyWith(theme: newTheme),
-                reload: true
-              ));
-            }
-          ),
-          const SizedBox(height: 2),
-
-        Row(
-          children: [
-            Text(
-              "Play sounds?",
+            child: Text(
+              context.localizations.translate("dlg_settings_sound"),
               style: TextStyle(
                   color: scheme.textPuzzlePanel,
                 fontSize: titleFontSize,
               ),
             ),
-            const Spacer(),
-            Switch(
-              activeColor: scheme.textPuzzlePanel,
-              value: settings.playSounds,
-              onChanged: (value) {
-                log("playsounds new value $value");
-                context.settingsBloc.add(WriteSettingsBlocEvent(
-                  settings: settings.copyWith(playSounds: value),
-                  reload: true
-                ));
-              },
-            ),
-          ]
-        ),
-
-        if (Constants.locales.length > 10)
-          ...[
-            Semantics(
-              container: true,
-              child: Text.rich(
-                textAlign: TextAlign.start,
-                TextSpan(
-                  style: TextStyle(
-                    color: scheme.textPuzzlePanel,
-                    fontSize: titleFontSize,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: context.localizations.translate("dlg_settings_chooselanguage"),
-                    ),
-                  ],
-                ),
+          ),
+          const Spacer(),
+          FocusTraversalOrder(
+            order: const GroupFocusOrder(GroupFocusOrder.groupDialog + 2, 2),
+            child: SegmentedButton(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                foregroundColor: scheme.textPuzzlePanel,
+                backgroundColor: scheme.backgroundPuzzlePanel,
+                selectedForegroundColor: scheme.backgroundPuzzlePanel,
+                selectedBackgroundColor: scheme.textPuzzlePanel,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                )
+              ).copyWith(
+                overlayColor: StateDependentColor(scheme.textPuzzlePanel, selectedColor: scheme.backgroundPuzzlePanel)
               ),
-            ),
-            const SizedBox(height: 2),
-            DropdownButton<String>(
-              isDense: true,
-              style: TextStyle(
-                color: scheme.textPuzzlePanel,
-                fontSize: bodyFontSize,
-              ),
-              dropdownColor: scheme.backgroundPuzzlePanel,
-              value: settings.locale,
-              onChanged: (selected) {
-                log("locale new value $selected");
-                context.settingsBloc.add(WriteSettingsBlocEvent(
-                  settings: settings.copyWith(locale: selected),
-                  reload: true
-                ));
-              },
-              items: Constants.locales.map<DropdownMenuItem<String>>((locale) {
-                return DropdownMenuItem<String>(
-                  value: locale,
-                  child: Text(
-                    context.localizations.translate("app_lang_$locale"),
+              segments: [
+                ButtonSegment<bool>(
+                  label: Text(
+                    context.localizations.translate("dlg_settings_sound_enable"),
                     style: TextStyle(
                       fontSize: bodyFontSize,
                     ),
                   ),
-                );
-              }).toList(),
+                  value: true
+                ),
+                ButtonSegment<bool>(
+                  label: Text(
+                    context.localizations.translate("dlg_settings_sound_disable"),
+                    style: TextStyle(
+                      fontSize: bodyFontSize,
+                    ),
+                  ),
+                  value: false
+                )
+              ],
+              selected: <bool>{settings.playSounds},
+              onSelectionChanged: (selected) {
+                context.settingsBloc.add(WriteSettingsBlocEvent(
+                  settings: settings.copyWith(playSounds: selected.first),
+                  reload: true
+                ));
+              },
             ),
-          ]
+          ),
+        ]
+      ),
+    );
+  }
 
-          // Directionality(
-          //   textDirection: TextDirection.ltr,
-          //   child: SegmentedButton(
-          //     style: SegmentedButton.styleFrom(
-          //       foregroundColor: scheme.textPuzzlePanel,
-          //       backgroundColor: scheme.backgroundPuzzlePanel,
-          //       selectedForegroundColor: scheme.backgroundPuzzlePanel,
-          //       selectedBackgroundColor: scheme.textPuzzlePanel,
-          //     ),
-          //     showSelectedIcon: false,
-          //     segments: Constants.locales.map((locale) {
-          //       return ButtonSegment<String>(
-          //         label: Text(
-          //           context.localizations.translate("app_lang_$locale"),
-          //           style: TextStyle(
-          //             fontSize: bodyFontSize,
-          //           ),
-          //         ),
-          //         value: locale
-          //       );
+  Widget _buildLocaleSettings(BuildContext context, AppSettings settings) {
 
-          //     }).toList(),
-          //     selected: <String>{localProvider.value.languageCode},
-          //     onSelectionChanged: (selected) {
+    final layout = context.layout;
+    final titleFontSize = layout.get<double>(AppLayoutConstants.titleFontSizeKey);
+    final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
+    final scheme = settings.currentScheme;
 
-          //       context.changeLanguage(selected.first);
-          //       context.settingsBloc.add(WriteSettingEvent(name: KnownSettingsNames.settingLocale, value: selected.first));
-          //     },
-          //   ),
-          // )
-        ],
-      );
+    return Row(
+      children: [
+        Semantics(
+          container: true,
+          child: Text.rich(
+            textAlign: TextAlign.start,
+            TextSpan(
+              style: TextStyle(
+                color: scheme.textPuzzlePanel,
+                fontSize: titleFontSize,
+              ),
+              children: [
+                TextSpan(
+                  text: context.localizations.translate("dlg_settings_chooselanguage"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Spacer(),
+        DropdownButton<String>(
+          style: TextStyle(
+            color: scheme.textPuzzlePanel,
+            fontSize: bodyFontSize,
+          ),
+          dropdownColor: scheme.backgroundPuzzlePanel,
+          value: settings.locale,
+          onChanged: (selected) {
+            log("locale new value $selected");
+            context.settingsBloc.add(WriteSettingsBlocEvent(
+              settings: settings.copyWith(locale: selected),
+              reload: true
+            ));
+          },
+          items: Constants.locales.map<DropdownMenuItem<String>>((locale) {
+            return DropdownMenuItem<String>(
+              value: locale,
+              child: Text(
+                context.localizations.translate("app_lang_$locale"),
+                style: TextStyle(
+                  fontSize: bodyFontSize,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 }

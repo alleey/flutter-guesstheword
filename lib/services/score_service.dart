@@ -26,6 +26,11 @@ class ScoreService {
         .toList();
   }
 
+  bool isTopScore(PlayerStatistics? score) {
+    final high = highest(0);
+    return (score ?? load()).instance == high.instance;
+  }
+
   Future save(PlayerStatistics value) async {
 
     log("save score: $value");
