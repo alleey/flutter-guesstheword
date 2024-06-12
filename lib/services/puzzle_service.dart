@@ -52,7 +52,7 @@ class PuzzleService {
       await importPuzzles("assets/puzzles/$puzzleset.json");
     }
 
-    await AppDataService().putSetting("totalPuzzles", _dataService.puzzleBox.length);
+    AppDataService().totalPuzzles = _dataService.puzzleBox.length;
     log("total number of puzzles: ${_dataService.puzzleBox.length}");
   }
 
@@ -80,3 +80,4 @@ class PuzzleService {
     await appDataService.putFlag(key, true);
   }
 }
+

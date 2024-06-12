@@ -3,8 +3,6 @@ import 'data_service.dart';
 class KnownSettingsNames
 {
   static const String firstUse = "firstUse";
-  static const String settingTheme = "theme";
-  static const String settingLocale = "locale";
 }
 
 class AppDataService {
@@ -47,4 +45,10 @@ class AppDataService {
     await _dataService.appDataBox.put(key, value);
     await _dataService.appDataBox.flush();
   }
+}
+
+extension AppDataServiceExtensions on AppDataService {
+
+  int get totalPuzzles => getSetting("totalPuzzles", 1); // 1 saves divide by zero
+  set totalPuzzles(int value) => putSetting("totalPuzzles", value);
 }

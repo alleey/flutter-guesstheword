@@ -65,9 +65,14 @@ class AlertsService {
               close(null);
               onAccept?.call();
             },
-            builder: (_,__) {
-              return Text(yesLabel, textAlign: TextAlign.center);
-            }
+            builder: (_,__) => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle),
+                const SizedBox(width: 5),
+                Text(yesLabel, textAlign: TextAlign.center),
+              ],
+            ),
           ),
         ),
         Expanded(
@@ -78,7 +83,14 @@ class AlertsService {
               close(null);
               onReject?.call();
             },
-            builder: (_,__) => Text(noLabel, textAlign: TextAlign.center)
+            builder: (_,__) => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.cancel),
+                const SizedBox(width: 5),
+                Text(noLabel, textAlign: TextAlign.center),
+              ],
+            ),
           ),
         )
       ],
@@ -217,7 +229,14 @@ class AlertsService {
             autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) => const LocalizedText(textId: "dlg_about_ok")
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_about_ok"),
+              ],
+            ),
           ),
         )
       ],
@@ -236,7 +255,14 @@ class AlertsService {
             autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) => const LocalizedText(textId: "dlg_help_ok")
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_help_ok"),
+              ],
+            ),
           ),
         )
       ],
@@ -257,7 +283,14 @@ class AlertsService {
             autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) => const LocalizedText(textId: "dlg_scores_ok")
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_scores_ok"),
+              ],
+            ),
           ),
         )
       ],
@@ -280,7 +313,14 @@ class AlertsService {
             autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) => const LocalizedText(textId: "dlg_playerstats_ok")
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_playerstats_ok"),
+              ],
+            ),
           ),
         )
       ],
@@ -299,7 +339,14 @@ class AlertsService {
             autofocus: true,
             isDefault: true,
             onAction: (close) => close(null),
-            builder: (_,__) => const LocalizedText(textId: "dlg_settings_ok")
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_settings_ok"),
+              ],
+            ),
           ),
         )
       ],
@@ -309,12 +356,28 @@ class AlertsService {
 
   Future<dynamic> gameNeedsResetDialog(BuildContext context, { required VoidCallback callback }) {
 
-    return okDialog(
+    return actionDialog(
       context,
       title: (_,__) => _localizedTextTitle("dlg_needreset_title"),
-      okLabel: (_,__) => const LocalizedText(textId: "dlg_needreset_ok"),
-      contents: (context, settingsProvider) => const GameFinshedPage(),
-      callback: callback,
+      actions: (_,__) => [
+
+        Expanded(
+          child: ButtonDialogAction(
+            autofocus: true,
+            isDefault: true,
+            onAction: (close) => close(null),
+            builder: (_,__) => const  Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close_fullscreen),
+                SizedBox(width: 5),
+                LocalizedText(textId: "dlg_needreset_ok"),
+              ],
+            ),
+          ),
+        )
+      ],
+      contents: (_,__) => const GameFinshedPage()
     );
   }
 
