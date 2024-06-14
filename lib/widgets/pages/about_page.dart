@@ -120,7 +120,7 @@ class AboutPage extends StatelessWidget {
               button: true,
               excludeSemantics: true,
               child: Align(
-                alignment: AlignmentDirectional.centerEnd,
+                alignment: AlignmentDirectional.center,
                 child: ButtonDialogAction(
                   isDefault: true,
                   onAction: (close) async {
@@ -169,7 +169,7 @@ class AboutPage extends StatelessWidget {
               button: true,
               excludeSemantics: true,
               child: Align(
-                alignment: AlignmentDirectional.centerEnd,
+                alignment: AlignmentDirectional.center,
                 child: ButtonDialogAction(
                   onAction: (close) async {
                     final link = Uri.tryParse(metadata.linkDonation);

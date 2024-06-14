@@ -200,7 +200,10 @@ class ButtonDialogAction extends DialogAction {
             fontSize: bodyFontSize,
             color: foregroundColor,
           ),
-          child: builder(context, settingsProvider),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: builder(context, settingsProvider),
+          ),
         ),
       ),
     );

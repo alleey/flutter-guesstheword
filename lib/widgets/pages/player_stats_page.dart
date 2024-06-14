@@ -57,7 +57,7 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
     final scheme = settings.currentScheme;
     final layout = context.layout;
     final bodyFontSize = layout.get<double>(AppLayoutConstants.bodyFontSizeKey);
-    final totalPuzzles = AppDataService().getSetting("totalPuzzles", 1);
+    final totalPuzzles = AppDataService().totalPuzzles;
 
     return widget.statistics.isEmpty ?
       _buildNoStats(context, scheme) :

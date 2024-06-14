@@ -285,7 +285,7 @@ class _HighScoresListPageState extends State<HighScoresListPage> {
                                   ],
                                 ),
                               Text(
-                                "last played: ${formatDateTime(stats.intervalEnd)}",
+                                "last played: ${formatDateTime(stats.intervalEnd.toLocal())}",
                                 textAlign: TextAlign.end,
                                 textScaler: const TextScaler.linear(0.9),
                               ),
