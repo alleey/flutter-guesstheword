@@ -49,7 +49,6 @@ class StateDependentColor extends WidgetStateProperty<Color?> {
 
   @override
   Color? resolve(Set<WidgetState> states) {
-    log("$states");
     final c = states.contains(WidgetState.selected) ? (selectedColor ?? color) : color;
     if (states.contains(WidgetState.pressed)) {
       return c.withOpacity(0.2);
