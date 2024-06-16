@@ -21,8 +21,9 @@ class Constants
 
   static const puzzleSets = [
     "animals", "birds", "cars", "cartoons", "capitals",
-    "countries", "desserts",
-    "elements", "emotions", "flowers", "fruits", "martialarts", "moons",
+    "countries", "currencies", "desserts",
+    "elements", "emotions", "flowers", "fruits",
+    "languages", "martialarts", "moons",
     "olympics", "scientists", "sea-creatures", "superheroes",
     "vegetables",
   ];

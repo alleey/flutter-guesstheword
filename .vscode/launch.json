@@ -8,8 +8,7 @@
             "name": "guess_the_word chrome",
             "request": "launch",
             "type": "dart",
-            "args": ["--web-port", "5555"],
-            "deviceId": "chrome"
+            "args": ["--web-port", "5555"]
         },
         {
             "name": "guess_the_word",
