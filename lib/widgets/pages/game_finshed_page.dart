@@ -8,6 +8,7 @@ import '../../widgets/common/blink_effect.dart';
 import '../../widgets/common/responsive_layout.dart';
 import '../../widgets/settings_aware_builder.dart';
 import '../../widgets/win_accuracy_stats.dart';
+import '../common/pulse_bounce_effect.dart';
 
 class GameFinshedPage extends StatelessWidget {
 
@@ -49,10 +50,12 @@ class GameFinshedPage extends StatelessWidget {
               return SizedBox(
                 height: constraints.maxHeight,
                 width: constraints.maxWidth,
-                child: Icon(
-                  Icons.celebration_outlined,
-                  size: constraints.maxHeight,
-                  color: scheme.textPuzzlePanel,
+                child: PulseBounceEffect(
+                  child: Icon(
+                    Icons.celebration_outlined,
+                    size: constraints.maxHeight,
+                    color: scheme.textPuzzlePanel,
+                  ),
                 ),
               );
             },

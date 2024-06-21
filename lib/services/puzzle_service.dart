@@ -52,11 +52,10 @@ class PuzzleService {
       await importPuzzles("assets/puzzles/$puzzleset.json");
     }
 
-    AppDataService().totalPuzzles = _dataService.puzzleBox.length;
     log("total number of puzzles: ${_dataService.puzzleBox.length}");
   }
 
-  Future<void> importPuzzles(String fileName) async {
+  Future importPuzzles(String fileName) async {
 
     final appDataService = AppDataService();
     final key = "$fileName.imported";
@@ -78,6 +77,7 @@ class PuzzleService {
 
     await _dataService.puzzleBox.flush();
     await appDataService.putFlag(key, true);
+    await appDataService.setTotalPuzzles(appDataService.totalPuzzles + values.length);
   }
 }
 

@@ -21,7 +21,7 @@ class AppDataService {
     return get<bool?>("flags.$key", null);
   }
 
-  Future putFlag(String key, bool value) async {
+  Future<void> putFlag(String key, bool value) async {
     await put("flags.$key", value);
   }
 
@@ -29,7 +29,7 @@ class AppDataService {
     return get<T>("settings.$key", defaultValue);
   }
 
-  Future putSetting<T>(String key, T value) async {
+  Future<void> putSetting<T>(String key, T value) async {
     await put("settings.$key", value);
   }
 
@@ -41,7 +41,7 @@ class AppDataService {
     return value as T;
   }
 
-  Future put<T>(String key, T value) async {
+  Future<void> put<T>(String key, T value) async {
     await _dataService.appDataBox.put(key, value);
     await _dataService.appDataBox.flush();
   }
@@ -49,6 +49,6 @@ class AppDataService {
 
 extension AppDataServiceExtensions on AppDataService {
 
-  int get totalPuzzles => getSetting("totalPuzzles", 1); // 1 saves divide by zero
-  set totalPuzzles(int value) => putSetting("totalPuzzles", value);
+  int get totalPuzzles => getSetting("totalPuzzles", 0);
+  Future<void> setTotalPuzzles(int value) => putSetting("totalPuzzles", value);
 }
