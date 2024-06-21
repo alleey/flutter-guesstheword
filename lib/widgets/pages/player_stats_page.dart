@@ -94,6 +94,10 @@ class _PlayerStatisticsPageState extends State<PlayerStatisticsPage> {
   }
 
   Widget _buildCompletionIndicator(int totalSize, AppColorScheme scheme, PlayerStatistics score) {
+    if (totalSize == 0) {
+      // prevent divide by zero
+      totalSize = 1;
+    }
     return PercentageBar(
       showLabel: false,
       inverted: true,

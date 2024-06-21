@@ -19,6 +19,8 @@ import 'widgets/common/blink_effect.dart';
 import 'widgets/common/bump_effect.dart';
 import 'widgets/common/flip_card.dart';
 import 'widgets/common/party_popper_effect.dart';
+import 'widgets/common/pulse_bounce_effect.dart';
+import 'widgets/common/pulse_squash_effect.dart';
 import 'widgets/common/responsive_layout.dart';
 import 'widgets/loading_indicator.dart';
 import 'widgets/settings_aware_builder.dart';
@@ -394,25 +396,28 @@ class _PuzzlePageState extends State<PuzzlePage> {
             button: true,
             label: "Try the next puzzle",
             excludeSemantics: true,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: scheme.backgroundTopButton,
-                side: BorderSide(width: 2, color: scheme.textTopPanel),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-              ).copyWith(
-                overlayColor: StateDependentColor(scheme.textTopButton),
-              ),
-              onPressed: () {
-                context.gameBloc.add(StartPuzzleEvent());
-              },
-              child: Text(
-                context.localizations.translate("game_top_gonext"),
-                style: TextStyle(
-                  color: scheme.textTopButton,
-                  fontSize: titleFontSize,
+            child: PulseBounceEffect(
+              bounceHeight: 5,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: scheme.backgroundTopButton,
+                  side: BorderSide(width: 2, color: scheme.textTopPanel),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                ).copyWith(
+                  overlayColor: StateDependentColor(scheme.textTopButton),
+                ),
+                onPressed: () {
+                  context.gameBloc.add(StartPuzzleEvent());
+                },
+                child: Text(
+                  context.localizations.translate("game_top_gonext"),
+                  style: TextStyle(
+                    color: scheme.textTopButton,
+                    fontSize: titleFontSize,
+                  )
                 )
-              )
+              ),
             ),
           ),
         )
@@ -432,30 +437,32 @@ class _PuzzlePageState extends State<PuzzlePage> {
         label: "Use a hint",
         button: true,
         excludeSemantics: true,
-        child: BlinkEffect(
-          child: ElevatedButton (
-            style: ElevatedButton.styleFrom(
-              backgroundColor: scheme.backgroundHintButton,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              padding: EdgeInsets.zero,
-              alignment: AlignmentDirectional.center,
-            ).copyWith(
-              overlayColor: StateDependentColor(scheme.textHintButton),
-            ),
-            onPressed: () {
-              context.gameBloc.add(UseHintTokenEvent());
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    context.localizations.translate("game_puzzle_usehint"),
-                    style: TextStyle(
-                      color: scheme.textHintButton,
-                      fontSize: bodyFontSize
+        child: PulseSquashEffect(
+          child: BlinkEffect(
+            child: ElevatedButton (
+              style: ElevatedButton.styleFrom(
+                backgroundColor: scheme.backgroundHintButton,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: EdgeInsets.zero,
+                alignment: AlignmentDirectional.center,
+              ).copyWith(
+                overlayColor: StateDependentColor(scheme.textHintButton),
+              ),
+              onPressed: () {
+                context.gameBloc.add(UseHintTokenEvent());
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      context.localizations.translate("game_puzzle_usehint"),
+                      style: TextStyle(
+                        color: scheme.textHintButton,
+                        fontSize: bodyFontSize
+                      ),
                     ),
                   ),
                 ),
@@ -564,19 +571,22 @@ class _PuzzlePageState extends State<PuzzlePage> {
             Semantics(
               label: "Pick your letters wisely",
               excludeSemantics: true,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 5),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    "${context.localizations.translate('game_input_title')} \u{2193}",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.textInputPanel,
+              child: PulseBounceEffect(
+                bounceHeight: 5.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      "${context.localizations.translate('game_input_title')} \u{2193}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: scheme.textInputPanel,
+                        ),
                       ),
-                    ),
+                  ),
                 ),
               ),
             ),
@@ -659,25 +669,28 @@ class _PuzzlePageState extends State<PuzzlePage> {
           if (state.isGameOver)
             FocusTraversalOrder(
               order: const GroupFocusOrder(GroupFocusOrder.groupGameCommands, 3),
-              child: ElevatedButton(
-                autofocus: true,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: scheme.backgroundInputButton,
-                  side: BorderSide(width: 2, color: scheme.textInputPanel),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-                ).copyWith(
-                  overlayColor: StateDependentColor(scheme.textInputPanel),
-                ),
-                onPressed: () async {
-                  final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
-                  await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
-                },
-                child: Text(
-                  'Google',
-                  style: TextStyle(
-                    fontSize: bodyFontSize,
-                    color: scheme.textInputButton,
+              child: PulseBounceEffect(
+                bounceHeight: 10,
+                child: ElevatedButton(
+                  autofocus: true,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: scheme.backgroundInputButton,
+                    side: BorderSide(width: 2, color: scheme.textInputPanel),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                  ).copyWith(
+                    overlayColor: StateDependentColor(scheme.textInputPanel),
+                  ),
+                  onPressed: () async {
+                    final url = Uri.encodeFull("https://www.google.com/search?q=${state.hint} ${state.puzzle}");
+                    await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+                  },
+                  child: Text(
+                    'Google',
+                    style: TextStyle(
+                      fontSize: bodyFontSize,
+                      color: scheme.textInputButton,
+                    ),
                   ),
                 ),
               ),
