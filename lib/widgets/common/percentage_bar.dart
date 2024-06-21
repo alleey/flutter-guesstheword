@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class PercentageBar extends StatelessWidget {
@@ -36,7 +38,7 @@ class PercentageBar extends StatelessWidget {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: FractionallySizedBox(
-            widthFactor: 1 - value,
+            widthFactor: (1 - value).clamp(0, 1.0),
             child: Container(
               height: height,
               decoration: BoxDecoration(
@@ -51,7 +53,7 @@ class PercentageBar extends StatelessWidget {
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: FractionallySizedBox(
-              widthFactor: value,
+              widthFactor: value.clamp(0, 1.0),
               child: Container(
                 height: height,
                 decoration: BoxDecoration(

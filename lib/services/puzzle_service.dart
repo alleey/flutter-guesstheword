@@ -1,7 +1,8 @@
 
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 
@@ -43,7 +44,7 @@ class PuzzleService {
     }
     await _dataService.puzzleBox.deleteAt(index);
     await _dataService.puzzleBox.flush();
-    log("deleted puzzle#: $index");
+    dev.log("deleted puzzle#: $index");
   }
 
   Future importAll() async {
@@ -52,17 +53,20 @@ class PuzzleService {
       await importPuzzles("assets/puzzles/$puzzleset.json");
     }
 
-    log("total number of puzzles: ${_dataService.puzzleBox.length}");
+    await applyTotalPuzzlesCountFix();
+
+    dev.log("current number of puzzles: ${_dataService.puzzleBox.length}");
+    dev.log("total number of puzzles: ${AppDataService().totalPuzzles}");
   }
 
   Future importPuzzles(String fileName) async {
 
     final appDataService = AppDataService();
     final key = "$fileName.imported";
-    final alreadyImported = appDataService.getFlag(key);
+    final alreadyImported = appDataService.getFlag(key) ?? false;
 
-    if (alreadyImported ?? false) {
-      log("$fileName already imported");
+    if (alreadyImported) {
+      dev.log("$fileName already imported");
       return;
     }
     //log("$fileName imported");
@@ -78,6 +82,28 @@ class PuzzleService {
     await _dataService.puzzleBox.flush();
     await appDataService.putFlag(key, true);
     await appDataService.setTotalPuzzles(appDataService.totalPuzzles + values.length);
+  }
+
+
+  // Apply fix for previous broken versions.
+  Future applyTotalPuzzlesCountFix() async {
+
+    int totalPuzzles = 0;
+    int currentPuzzles = _dataService.puzzleBox.length;
+
+    for(final puzzleset in Constants.puzzleSets) {
+      final data = jsonDecode(await rootBundle.loadString("assets/puzzles/$puzzleset.json"));
+      final List<String> values = List<String>.from(data["values"]);
+      totalPuzzles += values.length;
+    }
+
+    // The currentPuzzles could be greater than totalPuzzles when some puzzles are deleted in a newer version
+    // of app.
+
+    final appDataService = AppDataService();
+    await appDataService.setTotalPuzzles(max(currentPuzzles, totalPuzzles));
+
+    dev.log("applyTotalPuzzlesCountFix: ${appDataService.totalPuzzles}");
   }
 }
 
