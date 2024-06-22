@@ -365,8 +365,11 @@ class AlertsService {
           child: ButtonDialogAction(
             autofocus: true,
             isDefault: true,
-            onAction: (close) => close(null),
-            builder: (_,__) => const  Row(
+            onAction: (close) {
+              close(null);
+              callback();
+            },
+            builder: (_,__) => const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.close_fullscreen),
