@@ -34,7 +34,7 @@
             android:name="com.example.android.TvActivity"
             android:exported="true"
             android:label="Guess The Word"
-            android:theme="@style/Theme.Leanback">
+            android:theme="@style/LaunchTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
