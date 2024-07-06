@@ -32,6 +32,7 @@
 
         <activity
             android:name="com.example.android.TvActivity"
+            android:exported="true"
             android:label="Guess The Word"
             android:theme="@style/Theme.Leanback">
 
