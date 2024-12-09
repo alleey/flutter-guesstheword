@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0.0
+Name=guesstheword
+Comment=Another take on classic hangman guess the word game.
+Exec=guesstheword
+Icon=${SNAP}/meta/snap/gui/guesstheword.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;
