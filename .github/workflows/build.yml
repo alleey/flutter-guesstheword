@@ -100,7 +100,7 @@ jobs:
           build/app/outputs/bundle/release/app-release.aab $KEY_ALIAS
 
     - name: Attach Website
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Web-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/web
@@ -112,7 +112,7 @@ jobs:
     #     path: build/app/outputs/flutter-apk/app-release.apk
 
     - name: Attach AppBundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AppBundle-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/app/outputs/bundle/release/app-release.aab
@@ -176,7 +176,7 @@ jobs:
     - run: flutter build linux --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Linux Bundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Linux-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/linux/x64/release/bundle
@@ -234,7 +234,7 @@ jobs:
     - run: flutter build windows --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Windows Bundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Win-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/windows/x64/runner/Release
@@ -292,7 +292,7 @@ jobs:
     - run: flutter build macos --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
 
     - name: Attach Windows Bundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Mac-guesstheword-${{ github.ref_name }}-${{ github.sha }}
         path: build/macos/Build/Products/Release
