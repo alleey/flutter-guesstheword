@@ -78,8 +78,9 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version-file: pubspec.yaml
+        flutter-version: '3.24.0'
         architecture: x64
+    - run: flutter pub upgrade
     - run: flutter pub get
     - run: flutter build web --base-href /flutter-guesstheword/ --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
     - run: flutter build appbundle --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }} --dart-define=MIN_SDK_VERSION=24
@@ -169,8 +170,9 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version-file: pubspec.yaml
+        flutter-version: '3.24.0'
         architecture: x64
+    - run: flutter pub upgrade
     - run: flutter pub get
     - run: flutter config --enable-linux-desktop
     - run: flutter build linux --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
@@ -229,6 +231,7 @@ jobs:
         channel: 'stable'
         flutter-version: '3.24.0'
         architecture: x64
+    - run: flutter pub upgrade
     - run: flutter pub get
     - run: flutter config --enable-windows-desktop
     - run: flutter build windows --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}
@@ -285,8 +288,9 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version-file: pubspec.yaml
+        flutter-version: '3.24.0'
         architecture: x64
+    - run: flutter pub upgrade
     - run: flutter pub get
     - run: flutter config --enable-macos-desktop
     - run: flutter build macos --release --build-name=${{ steps.metadata.outputs.value }} --build-number=${{ github.run_number }}

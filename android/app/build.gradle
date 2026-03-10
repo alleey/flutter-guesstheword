@@ -28,7 +28,7 @@ def minSdkVersion = project.hasProperty('minSdkVersion') ? project.minSdkVersion
 android {
     namespace = "io.alleey.development.guess_the_word"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "26.1.10909125"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
